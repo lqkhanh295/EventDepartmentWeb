@@ -18,6 +18,7 @@ import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 
 const DRAWER_WIDTH = 240;
 
@@ -33,6 +34,12 @@ const menuItems = [
     label: 'Vendor',
     icon: <StorefrontOutlinedIcon />,
     path: '/vendors'
+  },
+  {
+    id: 'members',
+    label: 'Members',
+    icon: <PeopleOutlinedIcon />,
+    path: '/members'
   },
   {
     id: 'event-guide',
