@@ -5,5 +5,6 @@ export { default as TaxLookupPage } from './TaxLookupPage';
 export { default as PaperworkPage } from './PaperworkPage';
 export { default as MembersPage } from './MembersPage';
 export { default as MemberScorePage } from './MemberScorePage';
+export { default as ImportMembersPage } from './ImportMembersPage';
 export { default as LoginPage } from './LoginPage';
 

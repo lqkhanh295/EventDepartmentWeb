@@ -135,3 +135,41 @@ export const deleteMember = async (memberId) => {
     throw error;
   }
 };
+
+// Xóa tất cả projects của 1 semester
+export const deleteAllProjects = async (semester) => {
+  try {
+    const collectionName = getProjectsCollection(semester);
+    const projectsRef = collection(db, collectionName);
+    const snapshot = await getDocs(projectsRef);
+    
+    const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+    
+    return snapshot.docs.length;
+  } catch (error) {
+    console.error('Error deleting all projects:', error);
+    throw error;
+  }
+};
+
+// Xóa điểm của semester cho tất cả members
+export const clearAllScores = async (semester) => {
+  try {
+    const membersRef = collection(db, MEMBERS_COLLECTION);
+    const snapshot = await getDocs(membersRef);
+    
+    const updatePromises = snapshot.docs.map(docSnap => {
+      const data = docSnap.data();
+      const newScores = { ...data.scores };
+      delete newScores[semester];
+      return updateDoc(docSnap.ref, { scores: newScores });
+    });
+    
+    await Promise.all(updatePromises);
+    return snapshot.docs.length;
+  } catch (error) {
+    console.error('Error clearing scores:', error);
+    throw error;
+  }
+};

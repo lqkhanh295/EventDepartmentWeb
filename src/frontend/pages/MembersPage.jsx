@@ -5,12 +5,15 @@ import {
   Box,
   Typography,
   Grid,
-  Paper
+  Paper,
+  Button
 } from '@mui/material';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import FilterDramaIcon from '@mui/icons-material/FilterDrama';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { PageHeader } from '../components';
+import { useAuth } from '../contexts/AuthContext';
 
 const semesters = [
   {

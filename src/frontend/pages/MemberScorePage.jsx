@@ -40,7 +40,8 @@ import {
 const semesterInfo = {
   spring: { name: 'Spring', nameVi: 'Xuân', color: '#4CAF50' },
   summer: { name: 'Summer', nameVi: 'Hè', color: '#FF9800' },
-  fall: { name: 'Fall', nameVi: 'Thu', color: '#2196F3' }
+  fall: { name: 'Fall', nameVi: 'Thu', color: '#2196F3' },
+  year: { name: 'Cả năm', nameVi: 'Tổng hợp', color: '#FFD700' }
 };
 
 const MemberScorePage = () => {
@@ -67,6 +68,8 @@ const MemberScorePage = () => {
   const [projectForm, setProjectForm] = useState({ Name: '', key: '', order: 1 });
   
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
+  const [sortMode, setSortMode] = useState('default'); // 'default' | 'rank'
 
   useEffect(() => {
     loadData();
@@ -75,12 +78,31 @@ const MemberScorePage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [membersData, projectsData] = await Promise.all([
-        getAllMembers(),
-        getAllProjects(semester)
-      ]);
-      setMembers(membersData);
-      setProjects(projectsData);
+      
+      if (semester === 'year') {
+        // Load tất cả projects từ 3 kỳ
+        const [membersData, springProjects, summerProjects, fallProjects] = await Promise.all([
+          getAllMembers(),
+          getAllProjects('spring'),
+          getAllProjects('summer'),
+          getAllProjects('fall')
+        ]);
+        setMembers(membersData);
+        // Gộp tất cả projects với prefix kỳ
+        const allProjects = [
+          ...springProjects.map(p => ({ ...p, semester: 'spring', displayName: `[Xuân] ${p.Name || p.key}` })),
+          ...summerProjects.map(p => ({ ...p, semester: 'summer', displayName: `[Hè] ${p.Name || p.key}` })),
+          ...fallProjects.map(p => ({ ...p, semester: 'fall', displayName: `[Thu] ${p.Name || p.key}` }))
+        ];
+        setProjects(allProjects);
+      } else {
+        const [membersData, projectsData] = await Promise.all([
+          getAllMembers(),
+          getAllProjects(semester)
+        ]);
+        setMembers(membersData);
+        setProjects(projectsData);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       showSnackbar('Lỗi khi tải dữ liệu', 'error');
@@ -90,34 +112,41 @@ const MemberScorePage = () => {
   };
 
   // Lấy điểm của member theo semester hiện tại
-  const getScoresBySemester = (member) => {
-    return member.scores?.[semester] || {};
+  const getScoresBySemester = (member, sem = semester) => {
+    return member.scores?.[sem] || {};
   };
 
-  // Tính số project tham gia (có điểm > 0) trong semester
+  // Lấy điểm của project (hỗ trợ cả năm)
+  const getProjectScore = (member, project) => {
+    if (semester === 'year') {
+      const scores = getScoresBySemester(member, project.semester);
+      return scores[project.key] || 0;
+    }
+    const scores = getScoresBySemester(member);
+    return scores[project.key] || 0;
+  };
+
+  // Tính số project tham gia (có điểm > 0)
   const countProjects = (member) => {
-    const scores = getScoresBySemester(member);
-    return Object.values(scores).filter(s => s > 0).length;
+    return projects.filter(p => getProjectScore(member, p) > 0).length;
   };
 
-  // Tính điểm trung bình trong semester
+  // Tính điểm trung bình
   const calculateAverage = (member) => {
-    const scores = getScoresBySemester(member);
-    const validScores = Object.values(scores).filter(s => s > 0);
+    const validScores = projects.map(p => getProjectScore(member, p)).filter(s => s > 0);
     if (validScores.length === 0) return 0;
     return Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length);
   };
 
-  // Tính tổng điểm trong semester
+  // Tính tổng điểm
   const calculateTotal = (member) => {
-    const scores = getScoresBySemester(member);
-    return Object.values(scores).reduce((a, b) => a + b, 0);
+    return projects.reduce((sum, p) => sum + getProjectScore(member, p), 0);
   };
 
   // Handle edit score
-  const handleEditScore = (memberId, projectKey, currentValue) => {
+  const handleEditScore = (memberId, projectKey, currentValue, projectSemester = semester) => {
     if (!isAdmin) return;
-    setEditingCell({ memberId, projectKey });
+    setEditingCell({ memberId, projectKey, projectSemester });
     setEditValue(currentValue?.toString() || '0');
   };
 
@@ -126,7 +155,8 @@ const MemberScorePage = () => {
     
     try {
       const score = parseInt(editValue) || 0;
-      await updateMemberScore(editingCell.memberId, editingCell.projectKey, score, semester);
+      const targetSemester = editingCell.projectSemester || semester;
+      await updateMemberScore(editingCell.memberId, editingCell.projectKey, score, targetSemester);
       
       setMembers(prev => prev.map(m => {
         if (m.id === editingCell.memberId) {
@@ -134,8 +164,8 @@ const MemberScorePage = () => {
             ...m,
             scores: {
               ...m.scores,
-              [semester]: {
-                ...(m.scores?.[semester] || {}),
+              [targetSemester]: {
+                ...(m.scores?.[targetSemester] || {}),
                 [editingCell.projectKey]: score
               }
             }
@@ -231,7 +261,9 @@ const MemberScorePage = () => {
       width: 60,
       fixed: 'left',
       render: (_, __, index) => (
-        <Typography sx={{ color: '#FFD700', fontWeight: 600 }}>{index + 1}</Typography>
+        <Typography sx={{ color: '#FFD700', fontWeight: 600 }}>
+          {(pagination.current - 1) * pagination.pageSize + index + 1}
+        </Typography>
       )
     },
     {
@@ -269,6 +301,8 @@ const MemberScorePage = () => {
       key: 'soProject',
       width: 90,
       align: 'center',
+      sorter: (a, b) => countProjects(b) - countProjects(a),
+      defaultSortOrder: 'ascend',
       render: (_, record) => (
         <Typography sx={{ color: '#4ECDC4', fontWeight: 600 }}>
           {countProjects(record)}
@@ -280,6 +314,7 @@ const MemberScorePage = () => {
       key: 'average',
       width: 90,
       align: 'center',
+      sorter: (a, b) => calculateAverage(a) - calculateAverage(b),
       render: (_, record) => (
         <Typography sx={{ color: '#FF6B6B', fontWeight: 600 }}>
           {calculateAverage(record)}
@@ -290,8 +325,8 @@ const MemberScorePage = () => {
     ...projects.map(project => ({
       title: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <span>{project.Name || project.key}</span>
-          {isAdmin && (
+          <span>{project.displayName || project.Name || project.key}</span>
+          {isAdmin && semester !== 'year' && (
             <IconButton 
               size="small" 
               onClick={() => setDeleteDialog({ open: true, type: 'project', item: project })}
@@ -302,13 +337,12 @@ const MemberScorePage = () => {
           )}
         </Box>
       ),
-      key: project.key,
-      width: 100,
+      key: `${project.semester || semester}_${project.key}`,
+      width: 120,
       align: 'center',
       render: (_, record) => {
-        const scores = getScoresBySemester(record);
-        const score = scores[project.key] || 0;
-        const isEditing = editingCell?.memberId === record.id && editingCell?.projectKey === project.key;
+        const score = getProjectScore(record, project);
+        const isEditing = editingCell?.memberId === record.id && editingCell?.projectKey === project.key && editingCell?.projectSemester === (project.semester || semester);
         
         if (isEditing) {
           return (
@@ -334,7 +368,7 @@ const MemberScorePage = () => {
 
         return (
           <Box
-            onClick={() => handleEditScore(record.id, project.key, score)}
+            onClick={() => handleEditScore(record.id, project.key, score, project.semester || semester)}
             sx={{
               cursor: isAdmin ? 'pointer' : 'default',
               p: 0.5,
@@ -412,11 +446,11 @@ const MemberScorePage = () => {
       />
 
       {/* Semester Tabs */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 1 }}>
+      <Box sx={{ mb: 3, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
         {Object.entries(semesterInfo).map(([key, info]) => (
           <Chip
             key={key}
-            label={`${info.name} - ${info.nameVi}`}
+            label={key === 'year' ? `🏆 ${info.name}` : `${info.name} - ${info.nameVi}`}
             onClick={() => navigate(`/members/${key}`)}
             sx={{
               background: semester === key ? `${info.color}30` : 'transparent',
@@ -435,23 +469,52 @@ const MemberScorePage = () => {
         ))}
       </Box>
 
-      {/* Admin Actions */}
-      {isAdmin && (
-        <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => setProjectDialog({ open: true })}
-            sx={{
-              borderColor: 'rgba(78, 205, 196, 0.5)',
-              color: '#4ECDC4',
-              '&:hover': { borderColor: '#4ECDC4', background: 'rgba(78, 205, 196, 0.1)' }
-            }}
-          >
-            Thêm Project
-          </Button>
-        </Box>
-      )}
+{/* Admin Actions */}
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Button
+          variant={sortMode === 'rank' ? 'contained' : 'outlined'}
+          onClick={() => setSortMode(sortMode === 'rank' ? 'default' : 'rank')}
+          sx={{
+            borderColor: 'rgba(255, 107, 107, 0.5)',
+            color: sortMode === 'rank' ? '#1a1a1a' : '#FF6B6B',
+            background: sortMode === 'rank' ? '#FF6B6B' : 'transparent',
+            '&:hover': { 
+              borderColor: '#FF6B6B', 
+              background: sortMode === 'rank' ? '#FF6B6B' : 'rgba(255, 107, 107, 0.1)' 
+            }
+          }}
+        >
+          Xếp hạng
+        </Button>
+        
+        {isAdmin && semester !== 'year' && (
+          <>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => setProjectDialog({ open: true })}
+              sx={{
+                borderColor: 'rgba(78, 205, 196, 0.5)',
+                color: '#4ECDC4',
+                '&:hover': { borderColor: '#4ECDC4', background: 'rgba(78, 205, 196, 0.1)' }
+              }}
+            >
+              Thêm Project
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`/members/import?semester=${semester}`)}
+              sx={{
+                borderColor: 'rgba(255, 215, 0, 0.5)',
+                color: '#FFD700',
+                '&:hover': { borderColor: '#FFD700', background: 'rgba(255, 215, 0, 0.1)' }
+              }}
+            >
+              Import Excel
+            </Button>
+          </>
+        )}
+      </Box>
 
       {/* Table */}
       {loading ? (
@@ -466,13 +529,30 @@ const MemberScorePage = () => {
         />
       ) : (
         <Paper sx={{ background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.1)', borderRadius: 3, overflow: 'hidden' }}>
-          <Table
-            columns={columns}
-            dataSource={members.map((m, idx) => ({ ...m, key: m.id || idx }))}
-            pagination={{ pageSize: 20, showSizeChanger: true, pageSizeOptions: ['10', '20', '50', '100'] }}
-            scroll={{ x: 'max-content' }}
-            size="small"
-          />
+<Table
+             columns={columns}
+             dataSource={
+               sortMode === 'rank'
+                 ? [...members]
+                     .sort((a, b) => {
+                       // Sort by số project (cao -> thấp), sau đó theo điểm TB (cao -> thấp)
+                       const projectDiff = countProjects(b) - countProjects(a);
+                       if (projectDiff !== 0) return projectDiff;
+                       return calculateAverage(b) - calculateAverage(a);
+                     })
+                     .map((m, idx) => ({ ...m, key: m.id || idx }))
+                 : members.map((m, idx) => ({ ...m, key: m.id || idx }))
+             }
+             pagination={{ 
+                 current: pagination.current,
+                 pageSize: pagination.pageSize, 
+                 showSizeChanger: true, 
+                 pageSizeOptions: ['10', '20', '50', '100'],
+                 onChange: (page, pageSize) => setPagination({ current: page, pageSize })
+               }}
+             scroll={{ x: 'max-content' }}
+             size="small"
+           />
         </Paper>
       )}
 
