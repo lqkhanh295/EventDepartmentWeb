@@ -18,7 +18,7 @@ import { AuthProvider, useAuth } from './frontend/contexts/AuthContext';
 import { Layout } from './frontend/components/Layout';
 
 // Pages
-import { Dashboard, VendorsPage, GuidesPage, EventGuidePage, TaxLookupPage, PaperworkPage, LoginPage } from './frontend/pages';
+import { Dashboard, VendorsPage, EventGuidePage, TaxLookupPage, PaperworkPage, LoginPage } from './frontend/pages';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -49,7 +49,6 @@ const AppRoutes = () => {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/vendors" element={<VendorsPage />} />
                 <Route path="/event-guide" element={<EventGuidePage />} />
-                <Route path="/guides" element={<GuidesPage />} />
                 <Route path="/tax-lookup" element={<TaxLookupPage />} />
                 <Route path="/paperwork" element={<PaperworkPage />} />
               </Routes>
