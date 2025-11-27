@@ -1,0 +1,398 @@
+/* Global Styles - CSG Event Department */
+
+/* CSS Variables */
+:root {
+  --primary-gold: #FFD700;
+  --primary-gold-light: #FFE44D;
+  --primary-gold-dark: #CCB000;
+  --bg-dark: #121212;
+  --bg-paper: #1e1e1e;
+  --bg-elevated: #252525;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --gradient-gold: linear-gradient(135deg, #FFD700 0%, #CCB000 100%);
+  --gradient-dark: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  --shadow-gold: 0 4px 20px rgba(255, 215, 0, 0.2);
+  --shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Be Vietnam Pro', 'Roboto', 'Arial', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-gold-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-gold);
+}
+
+/* Selection */
+::selection {
+  background: var(--primary-gold);
+  color: var(--bg-dark);
+}
+
+/* Links */
+a {
+  color: var(--primary-gold);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: var(--primary-gold-light);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+/* Gold Accent Text */
+.gold-text {
+  color: var(--primary-gold);
+}
+
+.gold-gradient-text {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+/* Card Glow Effect */
+.card-glow {
+  position: relative;
+}
+
+.card-glow::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: var(--gradient-gold);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card-glow:hover::before {
+  opacity: 0.3;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease forwards;
+}
+
+/* Loading Skeleton */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-paper) 0%,
+    var(--bg-elevated) 50%,
+    var(--bg-paper) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}
+
+/* Section Styling */
+.section {
+  padding: 60px 0;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 40px 0;
+  }
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--primary-gold-dark),
+    transparent
+  );
+  margin: 40px 0;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-gold {
+  background: rgba(255, 215, 0, 0.15);
+  color: var(--primary-gold);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+/* Ant Design Dark Mode Overrides */
+.ant-card {
+  background: var(--bg-paper) !important;
+  border-color: rgba(255, 215, 0, 0.1) !important;
+}
+
+.ant-input,
+.ant-select-selector,
+.ant-input-affix-wrapper {
+  background: var(--bg-elevated) !important;
+  border-color: rgba(255, 215, 0, 0.2) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-input::placeholder,
+.ant-select-selection-placeholder {
+  color: var(--text-secondary) !important;
+}
+
+.ant-input:hover,
+.ant-input:focus,
+.ant-select-selector:hover,
+.ant-input-affix-wrapper:hover {
+  border-color: var(--primary-gold) !important;
+}
+
+.ant-select-dropdown {
+  background: var(--bg-paper) !important;
+}
+
+.ant-select-item {
+  color: var(--text-primary) !important;
+}
+
+.ant-select-item-option-active,
+.ant-select-item-option-selected {
+  background: rgba(255, 215, 0, 0.15) !important;
+}
+
+.ant-modal-content {
+  background: var(--bg-paper) !important;
+}
+
+.ant-modal-header {
+  background: var(--bg-paper) !important;
+  border-bottom-color: rgba(255, 215, 0, 0.1) !important;
+}
+
+.ant-modal-title {
+  color: var(--text-primary) !important;
+}
+
+.ant-table {
+  background: var(--bg-paper) !important;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--bg-elevated) !important;
+  color: var(--primary-gold) !important;
+  border-bottom-color: rgba(255, 215, 0, 0.2) !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom-color: rgba(255, 215, 0, 0.1) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: rgba(255, 215, 0, 0.05) !important;
+}
+
+.ant-pagination-item {
+  background: var(--bg-elevated) !important;
+  border-color: rgba(255, 215, 0, 0.2) !important;
+}
+
+.ant-pagination-item a {
+  color: var(--text-primary) !important;
+}
+
+.ant-pagination-item-active {
+  background: var(--primary-gold) !important;
+  border-color: var(--primary-gold) !important;
+}
+
+.ant-pagination-item-active a {
+  color: var(--bg-dark) !important;
+}
+
+/* Guide Content Styling */
+.guide-content {
+  color: var(--text-primary);
+  line-height: 1.8;
+}
+
+.guide-content h1,
+.guide-content h2,
+.guide-content h3 {
+  color: var(--primary-gold);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.guide-content p {
+  margin-bottom: 1rem;
+}
+
+.guide-content ul,
+.guide-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.guide-content li {
+  margin-bottom: 0.5rem;
+}
+
+.guide-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.guide-content th,
+.guide-content td {
+  padding: 12px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  text-align: left;
+}
+
+.guide-content th {
+  background: var(--bg-elevated);
+  color: var(--primary-gold);
+}
+
+.guide-content a {
+  color: var(--primary-gold);
+  text-decoration: underline;
+}
+
+.guide-content img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
