@@ -17,6 +17,25 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Kiểm tra email có quyền admin không
+  const checkAdminEmail = async (email) => {
+    try {
+      const docRef = doc(db, 'admin', 'cEoiTO4BLNaEknzTHedr');
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const adminEmails = data.adminEmail || [];
+        return adminEmails.map(e => e.toLowerCase().trim()).includes(email.toLowerCase());
+      }
+      return false;
+    } catch (err) {
+      console.error('Error checking admin emails:', err);
+      return false;
+    }
+  };
 
   // Kiểm tra email có trong whitelist không
   const checkAllowedEmail = async (email) => {
@@ -85,6 +104,8 @@ export const AuthProvider = ({ children }) => {
       if (firebaseUser) {
         const isAllowed = await checkAllowedEmail(firebaseUser.email);
         if (isAllowed) {
+          const adminStatus = await checkAdminEmail(firebaseUser.email);
+          setIsAdmin(adminStatus);
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
@@ -94,9 +115,11 @@ export const AuthProvider = ({ children }) => {
         } else {
           await signOut(auth);
           setUser(null);
+          setIsAdmin(false);
         }
       } else {
         setUser(null);
+        setIsAdmin(false);
       }
       setLoading(false);
     });
@@ -108,6 +131,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     error,
+    isAdmin,
     loginWithGoogle,
     logout
   };

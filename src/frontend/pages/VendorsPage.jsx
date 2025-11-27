@@ -12,7 +12,8 @@ import {
   Alert,
   Paper,
   Chip,
-  Link
+  Link,
+  Button
 } from '@mui/material';
 import { Table } from 'antd';
 import SearchIcon from '@mui/icons-material/Search';
@@ -21,15 +22,26 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import StoreIcon from '@mui/icons-material/Store';
 import { useSearchParams } from 'react-router-dom';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import { PageHeader, Loading, EmptyState, VendorForm } from '../components';
+import { useAuth } from '../contexts/AuthContext';
 import {
   getAllVendors,
-  addVendor
+  addVendor,
+  updateVendor,
+  deleteVendor
 } from '../../backend/services/vendorService';
 
 
 const VendorsPage = () => {
   const [searchParams] = useSearchParams();
+  const { isAdmin } = useAuth();
   
   const [vendors, setVendors] = useState([]);
   const [allVendors, setAllVendors] = useState([]);
@@ -38,6 +50,8 @@ const VendorsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEvent, setSelectedEvent] = useState('all');
   const [formOpen, setFormOpen] = useState(false);
+  const [editingVendor, setEditingVendor] = useState(null);
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, vendor: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
@@ -160,12 +174,49 @@ const VendorsPage = () => {
     }
   };
 
+  const handleUpdateVendor = async (vendorData) => {
+    try {
+      await updateVendor(editingVendor.id, vendorData);
+      showSnackbar('Cập nhật vendor thành công!', 'success');
+      loadVendors();
+    } catch (error) {
+      console.error('Error updating vendor:', error);
+      showSnackbar('Lỗi khi cập nhật vendor', 'error');
+    }
+  };
+
+  const handleDeleteVendor = async () => {
+    try {
+      await deleteVendor(deleteDialog.vendor.id);
+      showSnackbar('Xóa vendor thành công!', 'success');
+      setDeleteDialog({ open: false, vendor: null });
+      loadVendors();
+    } catch (error) {
+      console.error('Error deleting vendor:', error);
+      showSnackbar('Lỗi khi xóa vendor', 'error');
+    }
+  };
+
   const handleFormClose = () => {
     setFormOpen(false);
+    setEditingVendor(null);
   };
 
   const handleFormSubmit = (data) => {
-    handleAddVendor(data);
+    if (editingVendor) {
+      handleUpdateVendor(data);
+    } else {
+      handleAddVendor(data);
+    }
+  };
+
+  const handleEditClick = (vendor) => {
+    setEditingVendor(vendor);
+    setFormOpen(true);
+  };
+
+  const handleDeleteClick = (vendor) => {
+    setDeleteDialog({ open: true, vendor });
   };
 
   const showSnackbar = (message, severity) => {
@@ -335,6 +386,30 @@ const VendorsPage = () => {
         </Box>
       )
     },
+    ...(isAdmin ? [{
+      title: 'Thao tác',
+      key: 'actions',
+      width: 100,
+      align: 'center',
+      render: (_, record) => (
+        <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+          <IconButton
+            size="small"
+            onClick={() => handleEditClick(record)}
+            sx={{ color: '#4ECDC4', '&:hover': { background: 'rgba(78, 205, 196, 0.1)' } }}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={() => handleDeleteClick(record)}
+            sx={{ color: '#f44336', '&:hover': { background: 'rgba(244, 67, 54, 0.1)' } }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      )
+    }] : [])
   ];
 
   return (
@@ -457,7 +532,32 @@ const VendorsPage = () => {
         open={formOpen}
         onClose={handleFormClose}
         onSubmit={handleFormSubmit}
+        initialData={editingVendor}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, vendor: null })}
+        PaperProps={{
+          sx: { background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)' }
+        }}
+      >
+        <DialogTitle sx={{ color: '#FFD700' }}>Xác nhận xóa</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: '#b3b3b3' }}>
+            Bạn có chắc muốn xóa vendor "{deleteDialog.vendor?.name}"?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialog({ open: false, vendor: null })} sx={{ color: '#888' }}>
+            Hủy
+          </Button>
+          <Button onClick={handleDeleteVendor} sx={{ color: '#f44336' }}>
+            Xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Snackbar */}
       <Snackbar

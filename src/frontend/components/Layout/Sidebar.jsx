@@ -54,7 +54,7 @@ const menuItems = [
   }
 ];
 
-const Sidebar = ({ open, onClose }) => {
+const Sidebar = ({ open, onClose, isAdmin }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
@@ -67,13 +67,16 @@ const Sidebar = ({ open, onClose }) => {
     }
   };
 
+  const bgColor = isAdmin ? '#1a1a0a' : '#121212';
+  const borderColor = isAdmin ? 'rgba(255, 215, 0, 0.2)' : '#2a2a2a';
+
   const drawerContent = (
     <Box
       sx={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: '#121212'
+        background: bgColor
       }}
     >
       {/* Spacer for AppBar */}
@@ -159,8 +162,8 @@ const Sidebar = ({ open, onClose }) => {
             display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
-              background: '#121212',
-              borderRight: '1px solid #2a2a2a'
+              background: bgColor,
+              borderRight: `1px solid ${borderColor}`
             }
           }}
         >
@@ -174,8 +177,8 @@ const Sidebar = ({ open, onClose }) => {
             display: { xs: 'none', md: 'block' },
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
-              background: '#121212',
-              borderRight: '1px solid #2a2a2a'
+              background: bgColor,
+              borderRight: `1px solid ${borderColor}`
             }
           }}
           open

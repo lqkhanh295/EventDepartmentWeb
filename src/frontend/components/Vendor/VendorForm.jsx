@@ -24,7 +24,7 @@ const vatOptions = [
   'Khác'
 ];
 
-const VendorForm = ({ open, onClose, onSubmit }) => {
+const VendorForm = ({ open, onClose, onSubmit, initialData = null }) => {
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
@@ -36,22 +36,36 @@ const VendorForm = ({ open, onClose, onSubmit }) => {
   });
   
   const [errors, setErrors] = useState({});
+  const isEditMode = !!initialData;
 
   useEffect(() => {
     if (open) {
-      // Reset form khi mở
-      setFormData({
-        name: '',
-        contact: '',
-        buyDetail: '',
-        vat: '',
-        feedback: '',
-        notes: '',
-        event: ''
-      });
+      if (initialData) {
+        // Populate form với data từ vendor đang edit
+        setFormData({
+          name: initialData.name || '',
+          contact: initialData.contact || '',
+          buyDetail: initialData.buyDetail || '',
+          vat: initialData.vat || '',
+          feedback: initialData.feedback || '',
+          notes: initialData.notes || '',
+          event: initialData.events?.join(', ') || initialData.event || ''
+        });
+      } else {
+        // Reset form khi mở
+        setFormData({
+          name: '',
+          contact: '',
+          buyDetail: '',
+          vat: '',
+          feedback: '',
+          notes: '',
+          event: ''
+        });
+      }
       setErrors({});
     }
-  }, [open]);
+  }, [open, initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -117,7 +131,7 @@ const VendorForm = ({ open, onClose, onSubmit }) => {
             WebkitTextFillColor: 'transparent'
           }}
         >
-          Thêm Vendor mới
+          {isEditMode ? 'Chỉnh sửa Vendor' : 'Thêm Vendor mới'}
         </Typography>
         <IconButton onClick={onClose} sx={{ color: '#888' }}>
           <CloseIcon />
@@ -244,7 +258,7 @@ const VendorForm = ({ open, onClose, onSubmit }) => {
             }
           }}
         >
-          Thêm mới
+          {isEditMode ? 'Cập nhật' : 'Thêm mới'}
         </Button>
       </DialogActions>
     </Dialog>
