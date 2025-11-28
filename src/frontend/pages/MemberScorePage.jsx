@@ -38,9 +38,9 @@ import {
 } from '../../backend/services/memberService';
 
 const semesterInfo = {
-  spring: { name: 'Spring', nameVi: 'Xuân', color: '#4CAF50' },
-  summer: { name: 'Summer', nameVi: 'Hè', color: '#FF9800' },
-  fall: { name: 'Fall', nameVi: 'Thu', color: '#2196F3' },
+  spring: { name: 'Spring', color: '#4CAF50' },
+  summer: { name: 'Summer', color: '#FF9800' },
+  fall: { name: 'Fall', color: '#2196F3' },
   year: { name: 'Cả năm', nameVi: 'Tổng hợp', color: '#FFD700' }
 };
 
@@ -90,9 +90,9 @@ const MemberScorePage = () => {
         setMembers(membersData);
         // Gộp tất cả projects với prefix kỳ
         const allProjects = [
-          ...springProjects.map(p => ({ ...p, semester: 'spring', displayName: `[Xuân] ${p.Name || p.key}` })),
-          ...summerProjects.map(p => ({ ...p, semester: 'summer', displayName: `[Hè] ${p.Name || p.key}` })),
-          ...fallProjects.map(p => ({ ...p, semester: 'fall', displayName: `[Thu] ${p.Name || p.key}` }))
+          ...springProjects.map(p => ({ ...p, semester: 'spring', displayName: `[Sp] ${p.Name || p.key}` })),
+          ...summerProjects.map(p => ({ ...p, semester: 'summer', displayName: `[Su] ${p.Name || p.key}` })),
+          ...fallProjects.map(p => ({ ...p, semester: 'fall', displayName: `[Fa] ${p.Name || p.key}` }))
         ];
         setProjects(allProjects);
       } else {
@@ -450,7 +450,7 @@ const MemberScorePage = () => {
         {Object.entries(semesterInfo).map(([key, info]) => (
           <Chip
             key={key}
-            label={key === 'year' ? `🏆 ${info.name}` : `${info.name} - ${info.nameVi}`}
+            label={key === 'year' ? `🏆 ${info.name}` : info.name}
             onClick={() => navigate(`/members/${key}`)}
             sx={{
               background: semester === key ? `${info.color}30` : 'transparent',
