@@ -1,6 +1,7 @@
 // Sidebar Component
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   Drawer,
   List,
@@ -114,26 +115,40 @@ const Sidebar = ({ open, onClose, isAdmin }) => {
           
           return (
             <ListItem key={item.id} disablePadding sx={{ mb: 0.75, px: 1 }}>
-              <ListItemButton
-                onClick={() => handleNavigation(item.path)}
-                sx={{
-                  borderRadius: 1,
-                  py: 1.5,
-                  px: 2,
-                  background: isActive 
-                    ? 'rgba(255, 215, 0, 0.1)' 
-                    : 'transparent',
-                  border: isActive ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid transparent',
-                  '&:hover': {
-                    background: isActive 
-                      ? 'rgba(255, 215, 0, 0.15)' 
-                      : 'rgba(255, 255, 255, 0.05)',
-                    borderColor: isActive ? 'rgba(255, 215, 0, 0.4)' : 'rgba(255, 255, 255, 0.1)',
-                    transform: 'translateX(4px)'
-                  },
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  duration: 0.3, 
+                  delay: menuItems.indexOf(item) * 0.04,
+                  ease: [0.4, 0, 0.2, 1]
                 }}
+                style={{ width: '100%' }}
               >
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{ width: '100%' }}
+                >
+                  <ListItemButton
+                    onClick={() => handleNavigation(item.path)}
+                    sx={{
+                      borderRadius: 1,
+                      py: 1.5,
+                      px: 2,
+                      background: isActive 
+                        ? 'rgba(255, 215, 0, 0.1)' 
+                        : 'transparent',
+                      border: isActive ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid transparent',
+                      '&:hover': {
+                        background: isActive 
+                          ? 'rgba(255, 215, 0, 0.15)' 
+                          : 'rgba(255, 255, 255, 0.05)',
+                        borderColor: isActive ? 'rgba(255, 215, 0, 0.4)' : 'rgba(255, 255, 255, 0.1)'
+                      },
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  >
                 <ListItemIcon
                   sx={{
                     color: isActive ? '#FFD700' : '#999',
@@ -154,7 +169,9 @@ const Sidebar = ({ open, onClose, isAdmin }) => {
                     letterSpacing: '0.3px'
                   }}
                 />
-              </ListItemButton>
+                  </ListItemButton>
+                </motion.div>
+              </motion.div>
             </ListItem>
           );
         })}

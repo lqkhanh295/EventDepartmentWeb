@@ -1,5 +1,7 @@
 // Dashboard Page - Trang tổng quan
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useSpring, animated } from 'react-spring';
 import {
   Box,
   Grid,
@@ -21,24 +23,44 @@ import WeatherWidget from '../components/Weather/WeatherWidget';
 import { getAllVendors } from '../../backend/services/vendorService';
 import { getAllGuides } from '../../backend/services/guideService';
 
-const StatCard = ({ title, value, onClick }) => (
-  <Card
-    onClick={onClick}
-    sx={{
-      cursor: onClick ? 'pointer' : 'default',
-      background: '#1a1a1a',
-      border: '1px solid #333333',
-      borderRadius: 2,
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      height: '100%',
-      '&:hover': onClick ? {
-        borderColor: '#FFD700',
-        background: '#1f1f1f',
-        transform: 'translateY(-4px)',
-        boxShadow: '0 8px 24px rgba(255, 215, 0, 0.15)'
-      } : {}
-    }}
-  >
+const StatCard = ({ title, value, onClick, index = 0 }) => {
+  const [hovered, setHovered] = useState(false);
+  const springProps = useSpring({
+    transform: hovered && onClick ? 'translateY(-4px)' : 'translateY(0px)',
+    boxShadow: hovered && onClick 
+      ? '0 8px 24px rgba(255, 215, 0, 0.15)' 
+      : '0 0px 0px rgba(255, 215, 0, 0)',
+    config: { tension: 300, friction: 20 }
+  });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        duration: 0.4, 
+        delay: index * 0.08,
+        ease: [0.4, 0, 0.2, 1]
+      }}
+      style={{ height: '100%' }}
+    >
+      <animated.div style={springProps}>
+        <Card
+          onClick={onClick}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          component={motion.div}
+          whileTap={onClick ? { scale: 0.98 } : {}}
+          sx={{
+            cursor: onClick ? 'pointer' : 'default',
+            background: hovered && onClick ? '#1f1f1f' : '#1a1a1a',
+            border: '1px solid',
+            borderColor: hovered && onClick ? '#FFD700' : '#333333',
+            borderRadius: 2,
+            height: '100%',
+            transition: 'background 0.3s ease, border-color 0.3s ease'
+          }}
+        >
     <CardContent sx={{ p: 3.5 }}>
       <Box>
         <Typography
@@ -68,30 +90,55 @@ const StatCard = ({ title, value, onClick }) => (
       </Box>
     </CardContent>
   </Card>
-);
+      </animated.div>
+    </motion.div>
+  );
+};
 
-const QuickActionCard = ({ title, description, onClick }) => (
-  <Card
-    onClick={onClick}
-    sx={{
-      cursor: 'pointer',
-      background: '#1a1a1a',
-      border: '1px solid #333333',
-      borderRadius: 2,
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      height: '100%',
-      '&:hover': {
-        borderColor: '#FFD700',
-        background: '#1f1f1f',
-        transform: 'translateY(-6px)',
-        boxShadow: '0 12px 32px rgba(255, 215, 0, 0.2)',
-        '& .arrow-icon': {
-          transform: 'translateX(6px)',
-          color: '#FFD700'
-        }
-      }
-    }}
-  >
+const QuickActionCard = ({ title, description, onClick, index = 0 }) => {
+  const [hovered, setHovered] = useState(false);
+  const springProps = useSpring({
+    transform: hovered ? 'translateY(-6px)' : 'translateY(0px)',
+    boxShadow: hovered 
+      ? '0 12px 32px rgba(255, 215, 0, 0.2)' 
+      : '0 0px 0px rgba(255, 215, 0, 0)',
+    config: { tension: 300, friction: 20 }
+  });
+
+  const arrowSpring = useSpring({
+    transform: hovered ? 'translateX(6px)' : 'translateX(0px)',
+    color: hovered ? '#FFD700' : '#999',
+    config: { tension: 300, friction: 20 }
+  });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        duration: 0.4, 
+        delay: index * 0.08,
+        ease: [0.4, 0, 0.2, 1]
+      }}
+      style={{ height: '100%' }}
+    >
+      <animated.div style={springProps}>
+        <Card
+          onClick={onClick}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          component={motion.div}
+          whileTap={{ scale: 0.98 }}
+          sx={{
+            cursor: 'pointer',
+            background: hovered ? '#1f1f1f' : '#1a1a1a',
+            border: '1px solid',
+            borderColor: hovered ? '#FFD700' : '#333333',
+            borderRadius: 2,
+            height: '100%',
+            transition: 'background 0.3s ease, border-color 0.3s ease'
+          }}
+        >
     <CardContent sx={{ p: 3.5 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
         <Typography
@@ -106,10 +153,12 @@ const QuickActionCard = ({ title, description, onClick }) => (
         >
           {title}
         </Typography>
-        <ArrowForwardIcon 
-          className="arrow-icon"
-          sx={{ fontSize: 20, color: '#999', transition: 'all 0.3s ease', ml: 1 }} 
-        />
+        <animated.div style={arrowSpring}>
+          <ArrowForwardIcon 
+            className="arrow-icon"
+            sx={{ fontSize: 20, ml: 1 }} 
+          />
+        </animated.div>
       </Box>
       <Typography
         variant="body2"
@@ -123,7 +172,10 @@ const QuickActionCard = ({ title, description, onClick }) => (
       </Typography>
     </CardContent>
   </Card>
-);
+      </animated.div>
+    </motion.div>
+  );
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -182,43 +234,49 @@ const Dashboard = () => {
   return (
     <Box>
       {/* Welcome Banner */}
-      <Box
-        sx={{
-          background: '#1a1a1a',
-          border: '1px solid #2a2a2a',
-          borderRadius: 2,
-          p: { xs: 3, md: 4 },
-          mb: 4
-        }}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
-          <Box
-            component="img"
-            src={require('../../image/logocsg.png')}
-            alt="Cóc Sài Gòn Logo"
-            sx={{
-              height: { xs: 36, sm: 44 },
-              width: 'auto'
-            }}
-          />
+        <Box
+          sx={{
+            background: '#1a1a1a',
+            border: '1px solid #2a2a2a',
+            borderRadius: 2,
+            p: { xs: 3, md: 4 },
+            mb: 4
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
+            <Box
+              component="img"
+              src={require('../../image/logocsg.png')}
+              alt="Cóc Sài Gòn Logo"
+              sx={{
+                height: { xs: 36, sm: 44 },
+                width: 'auto'
+              }}
+            />
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: '#fff',
+                fontSize: { xs: '1.25rem', sm: '1.5rem' }
+              }}
+            >
+              Event Department
+            </Typography>
+          </Box>
           <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 600,
-              color: '#fff',
-              fontSize: { xs: '1.25rem', sm: '1.5rem' }
-            }}
+            variant="body2"
+            sx={{ color: '#666', maxWidth: 500, fontSize: '0.9rem' }}
           >
-            Event Department
+            Hệ thống quản lý thông tin Ban Event - CLB Truyền thông Cóc Sài Gòn
           </Typography>
         </Box>
-        <Typography
-          variant="body2"
-          sx={{ color: '#666', maxWidth: 500, fontSize: '0.9rem' }}
-        >
-          Hệ thống quản lý thông tin Ban Event - CLB Truyền thông Cóc Sài Gòn
-        </Typography>
-      </Box>
+      </motion.div>
 
       {/* Statistics */}
       <Typography
@@ -240,6 +298,7 @@ const Dashboard = () => {
             title="Vendor"
             value={stats.vendors}
             onClick={() => navigate('/vendors')}
+            index={0}
           />
         </Grid>
         <Grid item xs={6} md={3}>
@@ -247,12 +306,14 @@ const Dashboard = () => {
             title="Nhân sự"
             value="103"
             onClick={() => navigate('/event-guide')}
+            index={1}
           />
         </Grid>
         <Grid item xs={6} md={3}>
           <StatCard
             title="Số dự án còn lại trong kỳ"
             value="0"
+            index={2}
           />
         </Grid>
         <Grid item xs={6} md={3}>
@@ -260,6 +321,7 @@ const Dashboard = () => {
             title="Contact"
             value="Minh Đức"
             onClick={() => window.open('https://www.facebook.com/minh.uc.287528', '_blank')}
+            index={3}
           />
         </Grid>
       </Grid>
@@ -289,6 +351,7 @@ const Dashboard = () => {
             title="Danh sách Vendor"
             description="Quản lý thông tin vendor"
             onClick={() => navigate('/vendors')}
+            index={0}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
@@ -296,6 +359,7 @@ const Dashboard = () => {
             title="Event Guide"
             description="Hướng dẫn tổ chức sự kiện"
             onClick={() => navigate('/event-guide')}
+            index={1}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
@@ -303,6 +367,7 @@ const Dashboard = () => {
             title="Tra cứu MST"
             description="Tra cứu mã số thuế doanh nghiệp"
             onClick={() => navigate('/tax-lookup')}
+            index={2}
           />
         </Grid>
       </Grid>

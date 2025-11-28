@@ -6,6 +6,7 @@ import {
   Paper,
   CircularProgress
 } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import CloudIcon from '@mui/icons-material/Cloud';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
@@ -180,6 +181,34 @@ const WeatherWidget = () => {
 
   if (loading) {
     return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Paper sx={{ 
+          p: 3, 
+          background: '#1a1a1a', 
+          border: '1px solid #333333', 
+          borderRadius: 2,
+          boxShadow: 'none'
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+            <CircularProgress size={24} sx={{ color: '#FFD700' }} />
+          </Box>
+        </Paper>
+      </motion.div>
+    );
+  }
+
+  if (!weather || !weather.dataseries) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+    >
       <Paper sx={{ 
         p: 3, 
         background: '#1a1a1a', 
@@ -187,23 +216,6 @@ const WeatherWidget = () => {
         borderRadius: 2,
         boxShadow: 'none'
       }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-          <CircularProgress size={24} sx={{ color: '#FFD700' }} />
-        </Box>
-      </Paper>
-    );
-  }
-
-  if (!weather || !weather.dataseries) return null;
-
-  return (
-    <Paper sx={{ 
-      p: 3, 
-      background: '#1a1a1a', 
-      border: '1px solid #333333', 
-      borderRadius: 2,
-      boxShadow: 'none'
-    }}>
       <Typography 
         variant="caption" 
         sx={{ 
@@ -248,25 +260,38 @@ const WeatherWidget = () => {
             : (day.temp2m || 0);
           
           return (
-            <Box
+            <motion.div
               key={idx}
-              sx={{
-                width: '100%',
-                textAlign: 'center',
-                p: { xs: 1.5, sm: 2 },
-                borderRadius: 2,
-                background: '#121212',
-                border: '1px solid #2a2a2a',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                cursor: 'pointer',
-                '&:hover': {
-                  borderColor: '#FFD700',
-                  background: '#1a1a1a',
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 4px 12px rgba(255, 215, 0, 0.15)'
-                }
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ 
+                duration: 0.3, 
+                delay: idx * 0.05,
+                ease: [0.4, 0, 0.2, 1]
               }}
+              whileHover={{ 
+                y: -4,
+                transition: { duration: 0.2 }
+              }}
+              style={{ width: '100%' }}
             >
+              <Box
+                sx={{
+                  width: '100%',
+                  textAlign: 'center',
+                  p: { xs: 1.5, sm: 2 },
+                  borderRadius: 2,
+                  background: '#121212',
+                  border: '1px solid #2a2a2a',
+                  transition: 'border-color 0.3s ease, background 0.3s ease',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    borderColor: '#FFD700',
+                    background: '#1a1a1a',
+                    boxShadow: '0 4px 12px rgba(255, 215, 0, 0.15)'
+                  }
+                }}
+              >
               <Typography 
                 variant="caption" 
                 sx={{ 
@@ -341,10 +366,12 @@ const WeatherWidget = () => {
                 </Typography>
               </Box>
             </Box>
+            </motion.div>
           );
         })}
       </Box>
     </Paper>
+    </motion.div>
   );
 };
 
