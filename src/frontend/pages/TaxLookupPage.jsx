@@ -80,11 +80,15 @@ const TaxLookupPage = () => {
       {/* Search Box */}
       <Paper
         sx={{
-          p: 3,
+          p: 3.5,
           mb: 3,
-          background: '#1e1e1e',
-          border: '1px solid rgba(255, 215, 0, 0.2)',
-          borderRadius: 3
+          background: '#1a1a1a',
+          border: '1px solid #333333',
+          borderRadius: 2,
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            borderColor: 'rgba(255, 215, 0, 0.3)'
+          }
         }}
       >
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
@@ -102,13 +106,18 @@ const TaxLookupPage = () => {
               flex: 1,
               minWidth: 250,
               '& .MuiOutlinedInput-root': {
-                background: '#252525',
-                '& fieldset': { borderColor: 'rgba(255, 215, 0, 0.3)' },
-                '&:hover fieldset': { borderColor: '#FFD700' },
-                '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                background: '#121212',
+                borderRadius: 2,
+                '& fieldset': { borderColor: '#333333' },
+                '&:hover fieldset': { borderColor: 'rgba(255, 215, 0, 0.5)' },
+                '&.Mui-focused fieldset': { borderColor: '#FFD700', borderWidth: 2 }
               },
-              '& .MuiInputLabel-root': { color: '#888' },
-              '& .MuiInputBase-input': { color: '#fff' }
+              '& .MuiInputLabel-root': { color: '#B3B3B3' },
+              '& .MuiInputBase-input': { 
+                color: '#FFFFFF',
+                fontSize: '0.95rem',
+                padding: '14px 16px'
+              }
             }}
           />
           <Button
@@ -119,15 +128,24 @@ const TaxLookupPage = () => {
             sx={{
               px: 4,
               height: 56,
-              background: 'linear-gradient(135deg, #FFD700 0%, #CCB000 100%)',
-              color: '#1a1a1a',
-              fontWeight: 600,
+              background: '#FFD700',
+              color: '#000000',
+              fontWeight: 700,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontSize: '0.95rem',
+              letterSpacing: '0.5px',
+              boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)',
+              transition: 'all 0.3s ease',
               '&:hover': {
-                background: 'linear-gradient(135deg, #FFE44D 0%, #FFD700 100%)'
+                background: '#FFE44D',
+                boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)',
+                transform: 'translateY(-2px)'
               },
               '&.Mui-disabled': {
-                background: '#333',
-                color: '#666'
+                background: '#2a2a2a',
+                color: '#666',
+                boxShadow: 'none'
               }
             }}
           >
@@ -146,10 +164,14 @@ const TaxLookupPage = () => {
       {result && (
         <Paper
           sx={{
-            p: 3,
-            background: '#1e1e1e',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
-            borderRadius: 3
+            p: 3.5,
+            background: '#1a1a1a',
+            border: '1px solid #333333',
+            borderRadius: 2,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              borderColor: 'rgba(255, 215, 0, 0.4)'
+            }
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -279,7 +301,7 @@ const TaxLookupPage = () => {
             p: 3,
             background: '#1e1e1e',
             border: '1px solid rgba(255, 215, 0, 0.1)',
-            borderRadius: 3
+            borderRadius: 2
           }}
         >
           <Typography variant="h6" sx={{ color: '#FFD700', mb: 2 }}>

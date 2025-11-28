@@ -21,82 +21,103 @@ import WeatherWidget from '../components/Weather/WeatherWidget';
 import { getAllVendors } from '../../backend/services/vendorService';
 import { getAllGuides } from '../../backend/services/guideService';
 
-const StatCard = ({ title, value, icon: Icon, onClick }) => (
+const StatCard = ({ title, value, onClick }) => (
   <Card
     onClick={onClick}
     sx={{
       cursor: onClick ? 'pointer' : 'default',
       background: '#1a1a1a',
-      border: '1px solid #2a2a2a',
+      border: '1px solid #333333',
       borderRadius: 2,
-      transition: 'border-color 0.2s ease',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      height: '100%',
       '&:hover': onClick ? {
-        borderColor: '#FFD700'
+        borderColor: '#FFD700',
+        background: '#1f1f1f',
+        transform: 'translateY(-4px)',
+        boxShadow: '0 8px 24px rgba(255, 215, 0, 0.15)'
       } : {}
     }}
   >
-    <CardContent sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Box>
-          <Typography
-            variant="body2"
-            sx={{ color: '#666', mb: 1, fontWeight: 400, fontSize: '0.85rem' }}
-          >
-            {title}
-          </Typography>
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 600,
-              color: '#fff',
-              fontSize: { xs: '1.75rem', sm: '2rem' }
-            }}
-          >
-            {value}
-          </Typography>
-        </Box>
-        <Icon sx={{ fontSize: 24, color: '#666' }} />
+    <CardContent sx={{ p: 3.5 }}>
+      <Box>
+        <Typography
+          variant="body2"
+          sx={{ 
+            color: '#B3B3B3', 
+            mb: 1.5, 
+            fontWeight: 500, 
+            fontSize: '0.8rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 700,
+            color: '#FFFFFF',
+            fontSize: { xs: '1.875rem', sm: '2.25rem' },
+            lineHeight: 1.2
+          }}
+        >
+          {value}
+        </Typography>
       </Box>
     </CardContent>
   </Card>
 );
 
-const QuickActionCard = ({ title, description, icon: Icon, onClick }) => (
+const QuickActionCard = ({ title, description, onClick }) => (
   <Card
     onClick={onClick}
     sx={{
       cursor: 'pointer',
       background: '#1a1a1a',
-      border: '1px solid #2a2a2a',
+      border: '1px solid #333333',
       borderRadius: 2,
-      transition: 'border-color 0.2s ease',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       height: '100%',
       '&:hover': {
         borderColor: '#FFD700',
+        background: '#1f1f1f',
+        transform: 'translateY(-6px)',
+        boxShadow: '0 12px 32px rgba(255, 215, 0, 0.2)',
         '& .arrow-icon': {
-          transform: 'translateX(4px)',
+          transform: 'translateX(6px)',
           color: '#FFD700'
         }
       }
     }}
   >
-    <CardContent sx={{ p: 3 }}>
+    <CardContent sx={{ p: 3.5 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-        <Icon sx={{ fontSize: 24, color: '#FFD700' }} />
+        <Typography
+          variant="body1"
+          sx={{ 
+            fontWeight: 600, 
+            color: '#FFFFFF', 
+            fontSize: '1.1rem',
+            letterSpacing: '0.2px',
+            flex: 1
+          }}
+        >
+          {title}
+        </Typography>
         <ArrowForwardIcon 
           className="arrow-icon"
-          sx={{ fontSize: 18, color: '#666', transition: 'all 0.2s ease' }} 
+          sx={{ fontSize: 20, color: '#999', transition: 'all 0.3s ease', ml: 1 }} 
         />
       </Box>
       <Typography
-        variant="body1"
-        sx={{ fontWeight: 500, color: '#fff', mb: 0.5 }}
-      >
-        {title}
-      </Typography>
-      <Typography
         variant="body2"
-        sx={{ color: '#666', fontSize: '0.85rem' }}
+        sx={{ 
+          color: '#B3B3B3', 
+          fontSize: '0.875rem',
+          lineHeight: 1.5
+        }}
       >
         {description}
       </Typography>
@@ -202,7 +223,14 @@ const Dashboard = () => {
       {/* Statistics */}
       <Typography
         variant="body2"
-        sx={{ color: '#666', mb: 2, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 1 }}
+        sx={{ 
+          color: '#B3B3B3', 
+          mb: 3, 
+          fontWeight: 600, 
+          textTransform: 'uppercase', 
+          letterSpacing: 1.5,
+          fontSize: '0.8rem'
+        }}
       >
         Thống kê
       </Typography>
@@ -211,7 +239,6 @@ const Dashboard = () => {
           <StatCard
             title="Vendor"
             value={stats.vendors}
-            icon={StorefrontOutlinedIcon}
             onClick={() => navigate('/vendors')}
           />
         </Grid>
@@ -219,7 +246,6 @@ const Dashboard = () => {
           <StatCard
             title="Nhân sự"
             value="103"
-            icon={AutoStoriesOutlinedIcon}
             onClick={() => navigate('/event-guide')}
           />
         </Grid>
@@ -227,14 +253,12 @@ const Dashboard = () => {
           <StatCard
             title="Số dự án còn lại trong kỳ"
             value="0"
-            icon={CategoryOutlinedIcon}
           />
         </Grid>
         <Grid item xs={6} md={3}>
           <StatCard
             title="Contact"
             value="Minh Đức"
-            icon={SyncOutlinedIcon}
             onClick={() => window.open('https://www.facebook.com/minh.uc.287528', '_blank')}
           />
         </Grid>
@@ -248,7 +272,14 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <Typography
         variant="body2"
-        sx={{ color: '#666', mb: 2, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 1 }}
+        sx={{ 
+          color: '#B3B3B3', 
+          mb: 3, 
+          fontWeight: 600, 
+          textTransform: 'uppercase', 
+          letterSpacing: 1.5,
+          fontSize: '0.8rem'
+        }}
       >
         Truy cập nhanh
       </Typography>
@@ -257,7 +288,6 @@ const Dashboard = () => {
           <QuickActionCard
             title="Danh sách Vendor"
             description="Quản lý thông tin vendor"
-            icon={StorefrontOutlinedIcon}
             onClick={() => navigate('/vendors')}
           />
         </Grid>
@@ -265,7 +295,6 @@ const Dashboard = () => {
           <QuickActionCard
             title="Event Guide"
             description="Hướng dẫn tổ chức sự kiện"
-            icon={AutoStoriesOutlinedIcon}
             onClick={() => navigate('/event-guide')}
           />
         </Grid>
@@ -273,7 +302,6 @@ const Dashboard = () => {
           <QuickActionCard
             title="Tra cứu MST"
             description="Tra cứu mã số thuế doanh nghiệp"
-            icon={SearchOutlinedIcon}
             onClick={() => navigate('/tax-lookup')}
           />
         </Grid>

@@ -16,15 +16,15 @@ import BlurOnIcon from '@mui/icons-material/BlurOn';
 // Map 7Timer weather type to icon
 const getWeatherIcon = (weatherType) => {
   const weather = weatherType?.toLowerCase() || '';
-  if (weather.includes('clear')) return <WbSunnyIcon sx={{ fontSize: 20, color: '#FFD700' }} />;
-  if (weather.includes('pcloudy')) return <CloudIcon sx={{ fontSize: 20, color: '#888' }} />;
-  if (weather.includes('mcloudy') || weather.includes('cloudy')) return <CloudIcon sx={{ fontSize: 20, color: '#666' }} />;
-  if (weather.includes('humid') || weather.includes('fog')) return <BlurOnIcon sx={{ fontSize: 20, color: '#666' }} />;
-  if (weather.includes('lightrain') || weather.includes('oshower') || weather.includes('ishower')) return <WaterDropIcon sx={{ fontSize: 20, color: '#2196F3' }} />;
-  if (weather.includes('rain')) return <WaterDropIcon sx={{ fontSize: 20, color: '#1976D2' }} />;
-  if (weather.includes('snow') || weather.includes('rainsnow')) return <AcUnitIcon sx={{ fontSize: 20, color: '#E0E0E0' }} />;
-  if (weather.includes('ts') || weather.includes('tstorm')) return <ThunderstormIcon sx={{ fontSize: 20, color: '#9C27B0' }} />;
-  return <WbSunnyIcon sx={{ fontSize: 20, color: '#FFD700' }} />;
+  if (weather.includes('clear')) return <WbSunnyIcon sx={{ fontSize: 32, color: '#FFD700' }} />;
+  if (weather.includes('pcloudy')) return <CloudIcon sx={{ fontSize: 32, color: '#B3B3B3' }} />;
+  if (weather.includes('mcloudy') || weather.includes('cloudy')) return <CloudIcon sx={{ fontSize: 32, color: '#999999' }} />;
+  if (weather.includes('humid') || weather.includes('fog')) return <BlurOnIcon sx={{ fontSize: 32, color: '#999999' }} />;
+  if (weather.includes('lightrain') || weather.includes('oshower') || weather.includes('ishower')) return <WaterDropIcon sx={{ fontSize: 32, color: '#4A9EFF' }} />;
+  if (weather.includes('rain')) return <WaterDropIcon sx={{ fontSize: 32, color: '#2196F3' }} />;
+  if (weather.includes('snow') || weather.includes('rainsnow')) return <AcUnitIcon sx={{ fontSize: 32, color: '#E0E0E0' }} />;
+  if (weather.includes('ts') || weather.includes('tstorm')) return <ThunderstormIcon sx={{ fontSize: 32, color: '#9C27B0' }} />;
+  return <WbSunnyIcon sx={{ fontSize: 32, color: '#FFD700' }} />;
 };
 
 // Map 7Timer weather type to Vietnamese description
@@ -180,9 +180,15 @@ const WeatherWidget = () => {
 
   if (loading) {
     return (
-      <Paper sx={{ p: 2, background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-          <CircularProgress size={20} sx={{ color: '#FFD700' }} />
+      <Paper sx={{ 
+        p: 3, 
+        background: '#1a1a1a', 
+        border: '1px solid #333333', 
+        borderRadius: 2,
+        boxShadow: 'none'
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+          <CircularProgress size={24} sx={{ color: '#FFD700' }} />
         </Box>
       </Paper>
     );
@@ -191,11 +197,50 @@ const WeatherWidget = () => {
   if (!weather || !weather.dataseries) return null;
 
   return (
-    <Paper sx={{ p: 2, background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 2 }}>
-      <Typography variant="caption" sx={{ color: '#666', mb: 1.5, display: 'block', fontSize: '0.75rem', fontWeight: 500 }}>
+    <Paper sx={{ 
+      p: 3, 
+      background: '#1a1a1a', 
+      border: '1px solid #333333', 
+      borderRadius: 2,
+      boxShadow: 'none'
+    }}>
+      <Typography 
+        variant="caption" 
+        sx={{ 
+          color: '#B3B3B3', 
+          mb: 2.5, 
+          display: 'block', 
+          fontSize: '0.8rem', 
+          fontWeight: 600,
+          letterSpacing: '0.5px',
+          textTransform: 'uppercase'
+        }}
+      >
         Thời tiết 7 ngày tới - {CITY_NAME}
       </Typography>
-      <Box sx={{ display: 'flex', gap: 1.5, overflowX: 'auto', pb: 0.5, '&::-webkit-scrollbar': { height: 4 } }}>
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: { xs: 'repeat(7, 1fr)' },
+        gap: { xs: 1, sm: 1.5, md: 2 },
+        width: '100%',
+        overflowX: { xs: 'auto', sm: 'visible' },
+        pb: 1,
+        '&::-webkit-scrollbar': { 
+          height: 6,
+          borderRadius: 3
+        },
+        '&::-webkit-scrollbar-track': {
+          background: '#121212',
+          borderRadius: 3
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: '#404040',
+          borderRadius: 2,
+          '&:hover': {
+            background: '#FFD700'
+          }
+        }
+      }}>
         {weather.dataseries.map((day, idx) => {
           const rainChance = getRainChance(day.prec_type, day.prec_amount);
           const temp = typeof day.temp2m === 'object' && day.temp2m !== null 
@@ -206,34 +251,92 @@ const WeatherWidget = () => {
             <Box
               key={idx}
               sx={{
-                minWidth: 85,
+                width: '100%',
                 textAlign: 'center',
-                p: 1.5,
-                borderRadius: 1.5,
+                p: { xs: 1.5, sm: 2 },
+                borderRadius: 2,
                 background: '#121212',
                 border: '1px solid #2a2a2a',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                cursor: 'pointer',
                 '&:hover': {
                   borderColor: '#FFD700',
-                  transform: 'translateY(-2px)'
+                  background: '#1a1a1a',
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 4px 12px rgba(255, 215, 0, 0.15)'
                 }
               }}
             >
-              <Typography variant="caption" sx={{ color: '#999', fontSize: '0.7rem', display: 'block', mb: 1, fontWeight: 500 }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: '#B3B3B3', 
+                  fontSize: '0.75rem', 
+                  display: 'block', 
+                  mb: 1.5, 
+                  fontWeight: 600,
+                  letterSpacing: '0.3px'
+                }}
+              >
                 {formatDate(day.timepoint, initTime, idx)}
               </Typography>
-              <Box sx={{ mb: 1, display: 'flex', justifyContent: 'center' }}>
+              <Box sx={{ 
+                mb: 1.5, 
+                display: 'flex', 
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: 40
+              }}>
                 {getWeatherIcon(day.weather)}
               </Box>
-              <Typography variant="caption" sx={{ color: '#FFD700', fontSize: '0.9rem', fontWeight: 700, display: 'block', mb: 0.5 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: '#FFD700', 
+                  fontSize: '1.5rem', 
+                  fontWeight: 700, 
+                  display: 'block', 
+                  mb: 1,
+                  lineHeight: 1.2
+                }}
+              >
                 {temp}°
               </Typography>
-              <Typography variant="caption" sx={{ color: '#888', fontSize: '0.65rem', display: 'block', mb: 0.5, lineHeight: 1.2 }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: '#B3B3B3', 
+                  fontSize: '0.75rem', 
+                  display: 'block', 
+                  mb: 1.5, 
+                  lineHeight: 1.4,
+                  fontWeight: 500
+                }}
+              >
                 {getWeatherDescription(day.weather)}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, mt: 0.5 }}>
-                <WaterDropIcon sx={{ fontSize: 12, color: rainChance > 0 ? '#2196F3' : '#666' }} />
-                <Typography variant="caption" sx={{ color: rainChance > 0 ? '#2196F3' : '#666', fontSize: '0.65rem', fontWeight: 500 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: 0.5,
+                mt: 1,
+                pt: 1,
+                borderTop: '1px solid #2a2a2a'
+              }}>
+                <WaterDropIcon sx={{ 
+                  fontSize: 14, 
+                  color: rainChance > 0 ? '#4A9EFF' : '#666666',
+                  opacity: rainChance > 0 ? 1 : 0.5
+                }} />
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: rainChance > 0 ? '#4A9EFF' : '#999999', 
+                    fontSize: '0.7rem', 
+                    fontWeight: 600
+                  }}
+                >
                   {rainChance}%
                 </Typography>
               </Box>

@@ -29,7 +29,7 @@ const Header = ({ onMenuClick, isAdmin }) => {
       elevation={0}
       sx={{ 
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        background: isAdmin ? 'linear-gradient(135deg, #2a2a0a 0%, #1a1a05 100%)' : '#121212',
+        background: isAdmin ? '#1a1a0a' : '#121212',
         borderBottom: isAdmin ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid #2a2a2a'
       }}
     >
@@ -45,25 +45,30 @@ const Header = ({ onMenuClick, isAdmin }) => {
             </IconButton>
           )}
           
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box
               component="img"
               src={logoCsg}
               alt="CSG Logo"
               sx={{
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 borderRadius: 1,
-                objectFit: 'contain'
+                objectFit: 'contain',
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)'
+                }
               }}
             />
             
             <Typography
               variant="body1"
               sx={{
-                fontWeight: 500,
-                color: isAdmin ? '#FFD700' : '#fff',
-                fontSize: '0.95rem'
+                fontWeight: 600,
+                color: isAdmin ? '#FFD700' : '#FFFFFF',
+                fontSize: '1rem',
+                letterSpacing: '0.3px'
               }}
             >
               CSG Event {isAdmin && '(Admin)'}
@@ -119,9 +124,10 @@ const Header = ({ onMenuClick, isAdmin }) => {
           <Typography
             variant="body2"
             sx={{
-              color: '#666',
+              color: '#B3B3B3',
               display: { xs: 'none', md: 'block' },
-              fontSize: '0.85rem'
+              fontSize: '0.875rem',
+              fontWeight: 500
             }}
           >
             Xin chào, {user?.displayName || 'Guest'}
@@ -130,11 +136,16 @@ const Header = ({ onMenuClick, isAdmin }) => {
             <IconButton
               onClick={logout}
               sx={{ 
-                color: '#666',
-                '&:hover': { color: '#fff' }
+                color: '#999',
+                transition: 'all 0.2s ease',
+                '&:hover': { 
+                  color: '#FFD700',
+                  background: 'rgba(255, 215, 0, 0.1)',
+                  transform: 'scale(1.1)'
+                }
               }}
             >
-              <LogoutOutlinedIcon sx={{ fontSize: 20 }} />
+              <LogoutOutlinedIcon sx={{ fontSize: 22 }} />
             </IconButton>
           </Tooltip>
         </Box>

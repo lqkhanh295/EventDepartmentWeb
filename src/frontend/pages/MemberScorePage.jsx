@@ -324,13 +324,20 @@ const MemberScorePage = () => {
     // Dynamic project columns
     ...projects.map(project => ({
       title: (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <span>{project.displayName || project.Name || project.key}</span>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 0.5,
+          whiteSpace: 'nowrap'
+        }}>
+          <span>
+            {project.displayName || project.Name || project.key}
+          </span>
           {isAdminMode && semester !== 'year' && (
             <IconButton 
               size="small" 
               onClick={() => setDeleteDialog({ open: true, type: 'project', item: project })}
-              sx={{ color: '#f44336', p: 0.25 }}
+              sx={{ color: '#f44336', p: 0.25, flexShrink: 0 }}
             >
               <DeleteIcon sx={{ fontSize: 14 }} />
             </IconButton>
@@ -338,7 +345,7 @@ const MemberScorePage = () => {
         </Box>
       ),
       key: `${project.semester || semester}_${project.key}`,
-      width: 120,
+      width: 'auto',
       align: 'center',
       render: (_, record) => {
         const score = getProjectScore(record, project);
@@ -371,12 +378,21 @@ const MemberScorePage = () => {
             onClick={() => handleEditScore(record.id, project.key, score, project.semester || semester)}
             sx={{
               cursor: isAdminMode ? 'pointer' : 'default',
-              p: 0.5,
+              p: 0.75,
               borderRadius: 1,
               background: score > 0 ? 'rgba(76, 175, 80, 0.15)' : 'rgba(244, 67, 54, 0.1)',
-              color: score > 0 ? '#4CAF50' : '#666',
-              fontWeight: 500,
-              '&:hover': isAdminMode ? { background: 'rgba(255, 215, 0, 0.2)' } : {}
+              color: score > 0 ? '#4CAF50' : '#999',
+              fontWeight: 600,
+              minWidth: 50,
+              width: '100%',
+              display: 'block',
+              textAlign: 'center',
+              boxSizing: 'border-box',
+              transition: 'all 0.2s ease',
+              '&:hover': isAdminMode ? { 
+                background: 'rgba(255, 215, 0, 0.2)',
+                border: '1px solid rgba(255, 215, 0, 0.4)'
+              } : {}
             }}
           >
             {score}
@@ -453,15 +469,18 @@ const MemberScorePage = () => {
             label={key === 'year' ? `🏆 ${info.name}` : info.name}
             onClick={() => navigate(`/members/${key}`)}
             sx={{
-              background: semester === key ? `${info.color}30` : 'transparent',
-              color: semester === key ? info.color : '#666',
-              border: `1px solid ${semester === key ? info.color : '#333'}`,
-              fontWeight: semester === key ? 600 : 400,
-              fontSize: '0.85rem',
+              background: semester === key ? `${info.color}20` : 'transparent',
+              color: semester === key ? info.color : '#B3B3B3',
+              border: `1px solid ${semester === key ? info.color : '#333333'}`,
+              borderRadius: 1,
+              fontWeight: semester === key ? 600 : 500,
+              fontSize: '0.875rem',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
+              px: 2,
+              py: 0.75,
               '&:hover': {
-                background: `${info.color}20`,
+                background: `${info.color}15`,
                 borderColor: info.color
               }
             }}
@@ -475,12 +494,16 @@ const MemberScorePage = () => {
           variant={sortMode === 'rank' ? 'contained' : 'outlined'}
           onClick={() => setSortMode(sortMode === 'rank' ? 'default' : 'rank')}
           sx={{
-            borderColor: 'rgba(255, 107, 107, 0.5)',
-            color: sortMode === 'rank' ? '#1a1a1a' : '#FF6B6B',
+            borderColor: sortMode === 'rank' ? '#FF6B6B' : '#333333',
+            color: sortMode === 'rank' ? '#FFFFFF' : '#FF6B6B',
             background: sortMode === 'rank' ? '#FF6B6B' : 'transparent',
+            borderRadius: 1,
+            fontWeight: 600,
+            textTransform: 'none',
+            px: 3,
             '&:hover': { 
               borderColor: '#FF6B6B', 
-              background: sortMode === 'rank' ? '#FF6B6B' : 'rgba(255, 107, 107, 0.1)' 
+              background: sortMode === 'rank' ? '#FF5252' : 'rgba(255, 107, 107, 0.1)' 
             }
           }}
         >
@@ -494,8 +517,10 @@ const MemberScorePage = () => {
               startIcon={<AddIcon />}
               onClick={() => setProjectDialog({ open: true })}
               sx={{
-                borderColor: 'rgba(78, 205, 196, 0.5)',
+                borderColor: '#333333',
                 color: '#4ECDC4',
+                borderRadius: 1,
+                textTransform: 'none',
                 '&:hover': { borderColor: '#4ECDC4', background: 'rgba(78, 205, 196, 0.1)' }
               }}
             >
@@ -505,8 +530,10 @@ const MemberScorePage = () => {
               variant="outlined"
               onClick={() => navigate(`/members/import?semester=${semester}`)}
               sx={{
-                borderColor: 'rgba(255, 215, 0, 0.5)',
+                borderColor: '#333333',
                 color: '#FFD700',
+                borderRadius: 1,
+                textTransform: 'none',
                 '&:hover': { borderColor: '#FFD700', background: 'rgba(255, 215, 0, 0.1)' }
               }}
             >
@@ -528,10 +555,10 @@ const MemberScorePage = () => {
           onAction={isAdminMode ? () => setMemberDialog({ open: true, data: null }) : undefined}
         />
       ) : (
-        <Paper sx={{ background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.1)', borderRadius: 3, overflow: 'hidden' }}>
-<Table
-             columns={columns}
-             dataSource={
+        <Paper sx={{ background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2, overflow: 'hidden' }}>
+          <Table
+            columns={columns}
+            dataSource={
                sortMode === 'rank'
                  ? [...members]
                      .sort((a, b) => {
@@ -543,16 +570,40 @@ const MemberScorePage = () => {
                      .map((m, idx) => ({ ...m, key: m.id || idx }))
                  : members.map((m, idx) => ({ ...m, key: m.id || idx }))
              }
-             pagination={{ 
-                 current: pagination.current,
-                 pageSize: pagination.pageSize, 
-                 showSizeChanger: true, 
-                 pageSizeOptions: ['10', '20', '50', '100'],
-                 onChange: (page, pageSize) => setPagination({ current: page, pageSize })
-               }}
-             scroll={{ x: 'max-content' }}
-             size="small"
-           />
+            pagination={{ 
+              current: pagination.current,
+              pageSize: pagination.pageSize, 
+              showSizeChanger: true, 
+              pageSizeOptions: ['10', '20', '50', '100'],
+              onChange: (page, pageSize) => setPagination({ current: page, pageSize })
+            }}
+            scroll={{ x: 'max-content', y: 'calc(100vh - 400px)' }}
+            size="small"
+            style={{ 
+              background: '#1a1a1a'
+            }}
+            components={{
+              body: {
+                cell: (props) => {
+                  const isFixed = props.className && (
+                    props.className.includes('ant-table-cell-fix-left') || 
+                    props.className.includes('ant-table-cell-fix-right')
+                  );
+                  return (
+                    <td {...props} style={{ 
+                      ...props.style, 
+                      position: isFixed ? 'sticky' : 'relative',
+                      zIndex: isFixed ? 10 : 1,
+                      padding: '8px 12px',
+                      backgroundColor: '#1a1a1a',
+                      overflow: 'visible',
+                      whiteSpace: 'nowrap'
+                    }} />
+                  );
+                }
+              }
+            }}
+          />
         </Paper>
       )}
 
@@ -562,9 +613,9 @@ const MemberScorePage = () => {
         onClose={() => setMemberDialog({ open: false, data: null })}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)' } }}
+        PaperProps={{ sx: { background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2 } }}
       >
-        <DialogTitle sx={{ color: '#FFD700' }}>Thêm Member mới</DialogTitle>
+        <DialogTitle sx={{ color: '#FFFFFF', fontWeight: 600, pb: 1 }}>Thêm Member mới</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <TextField
@@ -573,6 +624,17 @@ const MemberScorePage = () => {
               onChange={(e) => setMemberForm({ ...memberForm, mssv: e.target.value })}
               placeholder="VD: SE171224"
               fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  background: '#121212',
+                  borderRadius: 1,
+                  '& fieldset': { borderColor: '#333333' },
+                  '&:hover fieldset': { borderColor: '#FFD700' },
+                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                },
+                '& .MuiInputLabel-root': { color: '#B3B3B3' },
+                '& .MuiInputBase-input': { color: '#FFFFFF' }
+              }}
             />
             <TextField
               label="Họ và Tên"
@@ -580,6 +642,17 @@ const MemberScorePage = () => {
               onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
               placeholder="VD: Nguyễn Văn A"
               fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  background: '#121212',
+                  borderRadius: 1,
+                  '& fieldset': { borderColor: '#333333' },
+                  '&:hover fieldset': { borderColor: '#FFD700' },
+                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                },
+                '& .MuiInputLabel-root': { color: '#B3B3B3' },
+                '& .MuiInputBase-input': { color: '#FFFFFF' }
+              }}
             />
             <FormControlLabel
               control={
@@ -598,12 +671,39 @@ const MemberScorePage = () => {
               multiline
               rows={2}
               fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  background: '#121212',
+                  borderRadius: 1,
+                  '& fieldset': { borderColor: '#333333' },
+                  '&:hover fieldset': { borderColor: '#FFD700' },
+                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                },
+                '& .MuiInputLabel-root': { color: '#B3B3B3' },
+                '& .MuiInputBase-input': { color: '#FFFFFF' }
+              }}
             />
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setMemberDialog({ open: false, data: null })} sx={{ color: '#888' }}>Hủy</Button>
-          <Button onClick={handleAddMember} variant="contained" sx={{ background: currentSemester.color, color: '#fff' }}>
+          <Button 
+            onClick={() => setMemberDialog({ open: false, data: null })} 
+            sx={{ color: '#B3B3B3', borderRadius: 1, textTransform: 'none' }}
+          >
+            Hủy
+          </Button>
+          <Button 
+            onClick={handleAddMember} 
+            variant="contained" 
+            sx={{ 
+              background: currentSemester.color, 
+              color: '#FFFFFF',
+              borderRadius: 1,
+              textTransform: 'none',
+              fontWeight: 600,
+              '&:hover': { background: currentSemester.color, opacity: 0.9 }
+            }}
+          >
             Thêm
           </Button>
         </DialogActions>
@@ -615,9 +715,9 @@ const MemberScorePage = () => {
         onClose={() => setProjectDialog({ open: false })}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)' } }}
+        PaperProps={{ sx: { background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2 } }}
       >
-        <DialogTitle sx={{ color: '#FFD700' }}>Thêm Project - {currentSemester.name}</DialogTitle>
+        <DialogTitle sx={{ color: '#FFFFFF', fontWeight: 600, pb: 1 }}>Thêm Project - {currentSemester.name}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <TextField
@@ -626,6 +726,17 @@ const MemberScorePage = () => {
               onChange={(e) => setProjectForm({ ...projectForm, Name: e.target.value })}
               placeholder="VD: Hội Xuân Làng Cóc"
               fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  background: '#121212',
+                  borderRadius: 1,
+                  '& fieldset': { borderColor: '#333333' },
+                  '&:hover fieldset': { borderColor: '#FFD700' },
+                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                },
+                '& .MuiInputLabel-root': { color: '#B3B3B3' },
+                '& .MuiInputBase-input': { color: '#FFFFFF' }
+              }}
             />
             <TextField
               label="Key (viết tắt, không dấu)"
@@ -634,6 +745,17 @@ const MemberScorePage = () => {
               placeholder="VD: HXLC"
               helperText="Key dùng để lưu điểm, nên ngắn gọn"
               fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  background: '#121212',
+                  borderRadius: 1,
+                  '& fieldset': { borderColor: '#333333' },
+                  '&:hover fieldset': { borderColor: '#FFD700' },
+                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                },
+                '& .MuiInputLabel-root': { color: '#B3B3B3' },
+                '& .MuiInputBase-input': { color: '#FFFFFF' }
+              }}
             />
             <TextField
               label="Thứ tự hiển thị"
@@ -641,12 +763,39 @@ const MemberScorePage = () => {
               value={projectForm.order}
               onChange={(e) => setProjectForm({ ...projectForm, order: parseInt(e.target.value) || 1 })}
               fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  background: '#121212',
+                  borderRadius: 1,
+                  '& fieldset': { borderColor: '#333333' },
+                  '&:hover fieldset': { borderColor: '#FFD700' },
+                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                },
+                '& .MuiInputLabel-root': { color: '#B3B3B3' },
+                '& .MuiInputBase-input': { color: '#FFFFFF' }
+              }}
             />
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setProjectDialog({ open: false })} sx={{ color: '#888' }}>Hủy</Button>
-          <Button onClick={handleAddProject} variant="contained" sx={{ background: '#4ECDC4', color: '#1a1a1a' }}>
+          <Button 
+            onClick={() => setProjectDialog({ open: false })} 
+            sx={{ color: '#B3B3B3', borderRadius: 1, textTransform: 'none' }}
+          >
+            Hủy
+          </Button>
+          <Button 
+            onClick={handleAddProject} 
+            variant="contained" 
+            sx={{ 
+              background: '#4ECDC4', 
+              color: '#000000',
+              borderRadius: 1,
+              textTransform: 'none',
+              fontWeight: 600,
+              '&:hover': { background: '#4ECDC4', opacity: 0.9 }
+            }}
+          >
             Thêm
           </Button>
         </DialogActions>
@@ -656,9 +805,9 @@ const MemberScorePage = () => {
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, type: '', item: null })}
-        PaperProps={{ sx: { background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)' } }}
+        PaperProps={{ sx: { background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2 } }}
       >
-        <DialogTitle sx={{ color: '#f44336' }}>Xác nhận xóa</DialogTitle>
+        <DialogTitle sx={{ color: '#FFFFFF', fontWeight: 600, pb: 1 }}>Xác nhận xóa</DialogTitle>
         <DialogContent>
           <Typography sx={{ color: '#b3b3b3' }}>
             Bạn có chắc muốn xóa {deleteDialog.type === 'member' ? 'member' : 'project'} "
@@ -666,8 +815,24 @@ const MemberScorePage = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, type: '', item: null })} sx={{ color: '#888' }}>Hủy</Button>
-          <Button onClick={handleDelete} sx={{ color: '#f44336' }}>Xóa</Button>
+          <Button 
+            onClick={() => setDeleteDialog({ open: false, type: '', item: null })} 
+            sx={{ color: '#B3B3B3', borderRadius: 1, textTransform: 'none' }}
+          >
+            Hủy
+          </Button>
+          <Button 
+            onClick={handleDelete} 
+            sx={{ 
+              color: '#f44336',
+              borderRadius: 1,
+              textTransform: 'none',
+              fontWeight: 600,
+              '&:hover': { background: 'rgba(244, 67, 54, 0.1)' }
+            }}
+          >
+            Xóa
+          </Button>
         </DialogActions>
       </Dialog>
 
