@@ -28,8 +28,31 @@ export const AuthProvider = ({ children }) => {
       
       if (docSnap.exists()) {
         const data = docSnap.data();
-        const adminEmails = data.adminEmail || [];
-        return adminEmails.map(e => e.toLowerCase().trim()).includes(email.toLowerCase());
+        const adminEmailField = data.adminEmail || [];
+        
+        // Xử lý cả trường hợp là array hoặc string
+        let emailList = [];
+        if (Array.isArray(adminEmailField)) {
+          // Nếu là array, xử lý từng phần tử
+          adminEmailField.forEach(item => {
+            if (typeof item === 'string') {
+              // Nếu phần tử là string, có thể chứa nhiều email cách nhau bởi space
+              const emails = item.split(/\s+/).filter(e => e.trim());
+              emailList.push(...emails);
+            } else {
+              emailList.push(item);
+            }
+          });
+        } else if (typeof adminEmailField === 'string') {
+          // Nếu là string, split bởi space hoặc newline
+          emailList = adminEmailField.split(/[\s\n\r]+/).filter(e => e.trim());
+        }
+        
+        const normalizedEmail = email.toLowerCase().trim();
+        const isAdmin = emailList.some(e => e.toLowerCase().trim() === normalizedEmail);
+        
+        console.log('checkAdminEmail - email:', email, 'emailList:', emailList, 'isAdmin:', isAdmin);
+        return isAdmin;
       }
       return false;
     } catch (err) {

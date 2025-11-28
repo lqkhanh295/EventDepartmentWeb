@@ -23,7 +23,7 @@ const Layout = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', background: bgColor }}>
-      <Header onMenuClick={handleDrawerToggle} isAdmin={isAdminMode} />
+      <Header onMenuClick={handleDrawerToggle} />
       <Sidebar open={mobileOpen} onClose={handleDrawerToggle} isAdmin={isAdminMode} />
       
       <Box

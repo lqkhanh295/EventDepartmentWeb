@@ -18,10 +18,13 @@ import { Switch, FormControlLabel } from '@mui/material';
 import logoCsg from '../../../image/logocsg.png';
 import { useAuth } from '../../contexts/AuthContext';
 
-const Header = ({ onMenuClick, isAdmin }) => {
-  const { user, logout, isAdmin: hasAdminPermission, isAdminMode, toggleAdminMode } = useAuth();
+const Header = ({ onMenuClick }) => {
+  const { user, logout, isAdmin, isAdminMode, toggleAdminMode } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Debug: log để kiểm tra
+  console.log('Header - isAdmin:', isAdmin, 'isAdminMode:', isAdminMode, 'user:', user?.email);
 
   return (
     <AppBar 
@@ -29,8 +32,8 @@ const Header = ({ onMenuClick, isAdmin }) => {
       elevation={0}
       sx={{ 
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        background: isAdmin ? '#1a1a0a' : '#121212',
-        borderBottom: isAdmin ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid #2a2a2a'
+        background: isAdminMode ? '#1a1a0a' : '#121212',
+        borderBottom: isAdminMode ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid #2a2a2a'
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -66,19 +69,19 @@ const Header = ({ onMenuClick, isAdmin }) => {
               variant="body1"
               sx={{
                 fontWeight: 600,
-                color: isAdmin ? '#FFD700' : '#FFFFFF',
+                color: isAdminMode ? '#FFD700' : '#FFFFFF',
                 fontSize: '1rem',
                 letterSpacing: '0.3px'
               }}
             >
-              CSG Event {isAdmin && '(Admin)'}
+              CSG Event {isAdminMode && '(Admin)'}
             </Typography>
           </Box>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {/* Switch Admin/Member - chỉ hiển thị nếu có quyền admin */}
-          {hasAdminPermission && (
+          {isAdmin && (
             <FormControlLabel
               control={
                 <Switch
@@ -91,6 +94,12 @@ const Header = ({ onMenuClick, isAdmin }) => {
                     },
                     '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
                       backgroundColor: '#FFD700',
+                    },
+                    '& .MuiSwitch-switchBase': {
+                      color: '#999',
+                    },
+                    '& .MuiSwitch-track': {
+                      backgroundColor: '#333',
                     },
                   }}
                 />
@@ -106,8 +115,8 @@ const Header = ({ onMenuClick, isAdmin }) => {
                     </>
                   ) : (
                     <>
-                      <PersonIcon sx={{ fontSize: 16, color: '#666' }} />
-                      <Typography sx={{ color: '#666', fontSize: '0.75rem', fontWeight: 500 }}>
+                      <PersonIcon sx={{ fontSize: 16, color: '#B3B3B3' }} />
+                      <Typography sx={{ color: '#B3B3B3', fontSize: '0.75rem', fontWeight: 500 }}>
                         Member
                       </Typography>
                     </>
