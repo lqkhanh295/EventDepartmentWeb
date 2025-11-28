@@ -17,6 +17,7 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, Loading } from '../components';
+import WeatherWidget from '../components/Weather/WeatherWidget';
 import { getAllVendors } from '../../backend/services/vendorService';
 import { getAllGuides } from '../../backend/services/guideService';
 
@@ -238,6 +239,11 @@ const Dashboard = () => {
           />
         </Grid>
       </Grid>
+
+      {/* Weather Widget */}
+      <Box sx={{ mb: 4 }}>
+        <WeatherWidget />
+      </Box>
 
       {/* Quick Actions */}
       <Typography

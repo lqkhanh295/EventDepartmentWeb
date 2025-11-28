@@ -12,11 +12,14 @@ import {
 } from '@mui/material';
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import PersonIcon from '@mui/icons-material/Person';
+import { Switch, FormControlLabel } from '@mui/material';
 import logoCsg from '../../../image/logocsg.png';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Header = ({ onMenuClick, isAdmin }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin: hasAdminPermission, isAdminMode, toggleAdminMode } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -69,6 +72,50 @@ const Header = ({ onMenuClick, isAdmin }) => {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* Switch Admin/Member - chỉ hiển thị nếu có quyền admin */}
+          {hasAdminPermission && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isAdminMode}
+                  onChange={toggleAdminMode}
+                  size="small"
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: '#FFD700',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: '#FFD700',
+                    },
+                  }}
+                />
+              }
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {isAdminMode ? (
+                    <>
+                      <AdminPanelSettingsIcon sx={{ fontSize: 16, color: '#FFD700' }} />
+                      <Typography sx={{ color: '#FFD700', fontSize: '0.75rem', fontWeight: 500 }}>
+                        Admin
+                      </Typography>
+                    </>
+                  ) : (
+                    <>
+                      <PersonIcon sx={{ fontSize: 16, color: '#666' }} />
+                      <Typography sx={{ color: '#666', fontSize: '0.75rem', fontWeight: 500 }}>
+                        Member
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+              }
+              sx={{ 
+                m: 0,
+                '& .MuiFormControlLabel-label': { ml: 0.5 }
+              }}
+            />
+          )}
+          
           <Typography
             variant="body2"
             sx={{

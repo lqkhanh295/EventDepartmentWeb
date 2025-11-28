@@ -47,7 +47,7 @@ const semesterInfo = {
 const MemberScorePage = () => {
   const { semester } = useParams();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdminMode } = useAuth();
   
   const currentSemester = semesterInfo[semester] || semesterInfo.fall;
   const currentYear = new Date().getFullYear();
@@ -145,7 +145,7 @@ const MemberScorePage = () => {
 
   // Handle edit score
   const handleEditScore = (memberId, projectKey, currentValue, projectSemester = semester) => {
-    if (!isAdmin) return;
+    if (!isAdminMode) return;
     setEditingCell({ memberId, projectKey, projectSemester });
     setEditValue(currentValue?.toString() || '0');
   };
@@ -326,7 +326,7 @@ const MemberScorePage = () => {
       title: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <span>{project.displayName || project.Name || project.key}</span>
-          {isAdmin && semester !== 'year' && (
+          {isAdminMode && semester !== 'year' && (
             <IconButton 
               size="small" 
               onClick={() => setDeleteDialog({ open: true, type: 'project', item: project })}
@@ -370,13 +370,13 @@ const MemberScorePage = () => {
           <Box
             onClick={() => handleEditScore(record.id, project.key, score, project.semester || semester)}
             sx={{
-              cursor: isAdmin ? 'pointer' : 'default',
+              cursor: isAdminMode ? 'pointer' : 'default',
               p: 0.5,
               borderRadius: 1,
               background: score > 0 ? 'rgba(76, 175, 80, 0.15)' : 'rgba(244, 67, 54, 0.1)',
               color: score > 0 ? '#4CAF50' : '#666',
               fontWeight: 500,
-              '&:hover': isAdmin ? { background: 'rgba(255, 215, 0, 0.2)' } : {}
+              '&:hover': isAdminMode ? { background: 'rgba(255, 215, 0, 0.2)' } : {}
             }}
           >
             {score}
@@ -406,7 +406,7 @@ const MemberScorePage = () => {
         </Typography>
       )
     },
-    ...(isAdmin ? [{
+    ...(isAdminMode ? [{
       title: '',
       key: 'actions',
       width: 60,
@@ -440,9 +440,9 @@ const MemberScorePage = () => {
           { label: 'Members', path: '/members' },
           { label: `${currentSemester.name} ${currentYear}` }
         ]}
-        actionText={isAdmin ? "Thêm Member" : undefined}
-        actionIcon={isAdmin ? AddIcon : undefined}
-        onAction={isAdmin ? () => setMemberDialog({ open: true, data: null }) : undefined}
+        actionText={isAdminMode ? "Thêm Member" : undefined}
+        actionIcon={isAdminMode ? AddIcon : undefined}
+        onAction={isAdminMode ? () => setMemberDialog({ open: true, data: null }) : undefined}
       />
 
       {/* Semester Tabs */}
@@ -487,7 +487,7 @@ const MemberScorePage = () => {
           Xếp hạng
         </Button>
         
-        {isAdmin && semester !== 'year' && (
+        {isAdminMode && semester !== 'year' && (
           <>
             <Button
               variant="outlined"
@@ -524,8 +524,8 @@ const MemberScorePage = () => {
           icon={PeopleIcon}
           title="Chưa có member nào"
           description={`Thêm member đầu tiên cho kỳ ${currentSemester.name}`}
-          actionText={isAdmin ? "Thêm Member" : undefined}
-          onAction={isAdmin ? () => setMemberDialog({ open: true, data: null }) : undefined}
+          actionText={isAdminMode ? "Thêm Member" : undefined}
+          onAction={isAdminMode ? () => setMemberDialog({ open: true, data: null }) : undefined}
         />
       ) : (
         <Paper sx={{ background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.1)', borderRadius: 3, overflow: 'hidden' }}>

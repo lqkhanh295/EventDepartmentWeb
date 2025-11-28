@@ -41,7 +41,7 @@ import {
 
 const VendorsPage = () => {
   const [searchParams] = useSearchParams();
-  const { isAdmin } = useAuth();
+  const { isAdminMode } = useAuth();
   
   const [vendors, setVendors] = useState([]);
   const [allVendors, setAllVendors] = useState([]);
@@ -386,7 +386,7 @@ const VendorsPage = () => {
         </Box>
       )
     },
-    ...(isAdmin ? [{
+    ...(isAdminMode ? [{
       title: 'Thao tác',
       key: 'actions',
       width: 100,

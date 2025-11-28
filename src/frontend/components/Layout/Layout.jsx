@@ -11,20 +11,20 @@ const Layout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { isAdmin } = useAuth();
+  const { isAdminMode } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   // Admin theme: vàng chủ đạo
-  const bgColor = isAdmin ? '#1a1a0a' : '#121212';
-  const mainBgColor = isAdmin ? '#1a1a0a' : '#121212';
+  const bgColor = isAdminMode ? '#1a1a0a' : '#121212';
+  const mainBgColor = isAdminMode ? '#1a1a0a' : '#121212';
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', background: bgColor }}>
-      <Header onMenuClick={handleDrawerToggle} isAdmin={isAdmin} />
-      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} isAdmin={isAdmin} />
+      <Header onMenuClick={handleDrawerToggle} isAdmin={isAdminMode} />
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} isAdmin={isAdminMode} />
       
       <Box
         component="main"

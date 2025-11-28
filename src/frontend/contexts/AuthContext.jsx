@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false); // Trạng thái hiện tại (có thể là admin nhưng đang ở chế độ member)
 
   // Kiểm tra email có quyền admin không
   const checkAdminEmail = async (email) => {
@@ -106,6 +107,8 @@ export const AuthProvider = ({ children }) => {
         if (isAllowed) {
           const adminStatus = await checkAdminEmail(firebaseUser.email);
           setIsAdmin(adminStatus);
+          // Nếu là admin, mặc định bật chế độ admin
+          setIsAdminMode(adminStatus);
           setUser({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
@@ -116,10 +119,12 @@ export const AuthProvider = ({ children }) => {
           await signOut(auth);
           setUser(null);
           setIsAdmin(false);
+          setIsAdminMode(false);
         }
       } else {
         setUser(null);
         setIsAdmin(false);
+        setIsAdminMode(false);
       }
       setLoading(false);
     });
@@ -127,11 +132,20 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  // Chuyển đổi giữa chế độ admin và member (chỉ cho phép nếu có quyền admin)
+  const toggleAdminMode = () => {
+    if (isAdmin) {
+      setIsAdminMode(prev => !prev);
+    }
+  };
+
   const value = {
     user,
     loading,
     error,
-    isAdmin,
+    isAdmin, // Có quyền admin hay không
+    isAdminMode, // Đang ở chế độ admin hay member
+    toggleAdminMode,
     loginWithGoogle,
     logout
   };

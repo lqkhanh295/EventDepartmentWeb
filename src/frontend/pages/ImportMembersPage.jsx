@@ -26,7 +26,7 @@ import { addMember, getAllMembers, updateMember, getAllProjects, addProject, del
 const ImportMembersPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isAdmin } = useAuth();
+  const { isAdminMode } = useAuth();
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [projectColumns, setProjectColumns] = useState([]); // Các cột điểm project
@@ -249,7 +249,7 @@ const ImportMembersPage = () => {
     setSnackbar({ open: true, message, severity });
   };
 
-  if (!isAdmin) {
+  if (!isAdminMode) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
         <Typography sx={{ color: '#f44336' }}>Bạn không có quyền truy cập trang này</Typography>

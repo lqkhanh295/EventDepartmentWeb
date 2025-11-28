@@ -12,9 +12,10 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import BusinessIcon from '@mui/icons-material/Business';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PhoneIcon from '@mui/icons-material/Phone';
-import BadgeIcon from '@mui/icons-material/Badge';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CategoryIcon from '@mui/icons-material/Category';
 import { PageHeader } from '../components/Common';
 
 const TaxLookupPage = () => {
@@ -43,6 +44,7 @@ const TaxLookupPage = () => {
       
       if (data.code === '00' && data.data) {
         setResult(data.data);
+        console.log('API Response:', data.data); // Debug để xem cấu trúc dữ liệu
       } else {
         setError('Không tìm thấy thông tin doanh nghiệp với mã số thuế này');
       }
@@ -154,44 +156,112 @@ const TaxLookupPage = () => {
             <Typography variant="h6" sx={{ color: '#FFD700', fontWeight: 700 }}>
               Thông tin doanh nghiệp
             </Typography>
-            <Chip
-              label="Đã xác thực"
-              size="small"
-              sx={{
-                background: '#4CAF501A',
-                color: '#4CAF50',
-                fontWeight: 500
-              }}
-            />
           </Box>
 
           <Divider sx={{ borderColor: 'rgba(255, 215, 0, 0.1)', mb: 2 }} />
 
-          <InfoRow
-            icon={<BadgeIcon />}
-            label="Mã số thuế"
-            value={result.id}
-          />
+          {/* Tên công ty */}
           <InfoRow
             icon={<BusinessIcon />}
-            label="Tên doanh nghiệp"
-            value={result.name}
+            label="Tên công ty"
+            value={result.name || result.shortName || result.internationalName}
           />
-          <InfoRow
-            icon={<BusinessIcon />}
-            label="Tên quốc tế"
-            value={result.internationalName}
-          />
-          <InfoRow
-            icon={<BusinessIcon />}
-            label="Tên viết tắt"
-            value={result.shortName}
-          />
-          <InfoRow
-            icon={<LocationOnIcon />}
-            label="Địa chỉ"
-            value={result.address}
-          />
+
+          {/* Xác thực */}
+          <Box sx={{ display: 'flex', gap: 2, py: 1.5, alignItems: 'flex-start' }}>
+            <Box sx={{ color: '#FFD700', mt: 0.3 }}><VerifiedIcon /></Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ color: '#888', display: 'block' }}>
+                Xác thực
+              </Typography>
+              <Chip
+                label={result.verified !== false ? "Đã xác thực" : "Chưa xác thực"}
+                size="small"
+                sx={{
+                  background: result.verified !== false ? '#4CAF501A' : '#f443361A',
+                  color: result.verified !== false ? '#4CAF50' : '#f44336',
+                  fontWeight: 500,
+                  mt: 0.5
+                }}
+              />
+            </Box>
+          </Box>
+
+          {/* Còn hoạt động hay không */}
+          <Box sx={{ display: 'flex', gap: 2, py: 1.5, alignItems: 'flex-start' }}>
+            <Box sx={{ color: '#FFD700', mt: 0.3 }}>
+              {result.status === 'active' || result.active !== false ? 
+                <CheckCircleIcon sx={{ color: '#4CAF50' }} /> : 
+                <CancelIcon sx={{ color: '#f44336' }} />}
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ color: '#888', display: 'block' }}>
+                Trạng thái hoạt động
+              </Typography>
+              <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500, mt: 0.5 }}>
+                {result.status === 'active' || result.active !== false ? 
+                  'Đang hoạt động' : 
+                  result.status === 'inactive' || result.active === false ? 
+                  'Ngừng hoạt động' : 
+                  'Chưa xác định'}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Ngành nghề kinh doanh */}
+          <Box sx={{ display: 'flex', gap: 2, py: 1.5, alignItems: 'flex-start' }}>
+            <Box sx={{ color: '#FFD700', mt: 0.3 }}><CategoryIcon /></Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1 }}>
+                Ngành nghề kinh doanh
+              </Typography>
+              {(() => {
+                // Kiểm tra nhiều field có thể có từ API
+                const businessInfo = result.businessLines || 
+                                    result.businessLine || 
+                                    result.industries || 
+                                    result.industry ||
+                                    result.businessType ||
+                                    result.businessTypes ||
+                                    result.nganhNghe ||
+                                    result.businessActivities ||
+                                    result.activities ||
+                                    result.description;
+                
+                if (businessInfo) {
+                  const linesArray = Array.isArray(businessInfo) ? businessInfo : 
+                                   (typeof businessInfo === 'string' ? businessInfo.split(',').map(s => s.trim()) : [businessInfo]);
+                  const filteredLines = linesArray.filter(Boolean);
+                  
+                  if (filteredLines.length > 0) {
+                    return (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {filteredLines.map((line, idx) => (
+                          <Chip
+                            key={idx}
+                            label={line}
+                            size="small"
+                            sx={{
+                              background: 'rgba(255, 215, 0, 0.1)',
+                              color: '#FFD700',
+                              border: '1px solid rgba(255, 215, 0, 0.3)',
+                              fontWeight: 500
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    );
+                  }
+                }
+                
+                return (
+                  <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
+                    Chưa có thông tin
+                  </Typography>
+                );
+              })()}
+            </Box>
+          </Box>
 
           <Box sx={{ mt: 3, p: 2, background: '#252525', borderRadius: 2 }}>
             <Typography variant="caption" sx={{ color: '#888' }}>
