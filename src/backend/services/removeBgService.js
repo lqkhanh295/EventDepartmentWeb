@@ -6,18 +6,25 @@ const REMOVE_BG_API_URL = 'https://api.remove.bg/v1.0/removebg';
 /**
  * Xóa background từ ảnh sử dụng remove.bg API
  * @param {File} imageFile - File ảnh cần xóa background
- * @param {string} apiKey - API key từ remove.bg
+ * @param {string} apiKey - API key từ remove.bg (có thể null nếu dùng API key từ Firebase)
  * @param {Object} options - Các tùy chọn bổ sung
  * @returns {Promise<Blob>} - Ảnh đã xóa background dưới dạng Blob
  */
-export const removeBackground = async (imageFile, apiKey, options = {}) => {
+export const removeBackground = async (imageFile, apiKey = null, options = {}) => {
   try {
     if (!imageFile) {
       throw new Error('Vui lòng chọn file ảnh');
     }
 
-    if (!apiKey) {
-      throw new Error('Vui lòng nhập API key từ remove.bg');
+    // Nếu không có apiKey, thử lấy từ Firebase
+    let finalApiKey = apiKey;
+    if (!finalApiKey) {
+      const { getRemoveBgApiKey } = await import('./configService');
+      finalApiKey = await getRemoveBgApiKey();
+    }
+
+    if (!finalApiKey) {
+      throw new Error('API key chưa được cấu hình. Vui lòng liên hệ admin để cấu hình API key.');
     }
 
     // Kiểm tra định dạng file

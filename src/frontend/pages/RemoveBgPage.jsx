@@ -18,35 +18,68 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ImageIcon from '@mui/icons-material/Image';
+import SaveIcon from '@mui/icons-material/Save';
 import { PageHeader } from '../components';
+import { useAuth } from '../contexts/AuthContext';
 import { removeBackground, downloadImage, blobToUrl } from '../../backend/services/removeBgService';
+import { getRemoveBgApiKey, setRemoveBgApiKey } from '../../backend/services/configService';
 
 const RemoveBgPage = () => {
+  const { isAdmin } = useAuth();
   const [apiKey, setApiKey] = useState('');
+  const [apiKeyInput, setApiKeyInput] = useState(''); // Input riêng cho admin
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [resultBlob, setResultBlob] = useState(null);
   const [resultUrl, setResultUrl] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingApiKey, setLoadingApiKey] = useState(true);
+  const [savingApiKey, setSavingApiKey] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const fileInputRef = useRef(null);
 
-  // Lấy API key từ localStorage nếu có
+  // Tự động lấy API key từ Firebase khi load trang
   React.useEffect(() => {
-    const savedApiKey = localStorage.getItem('removebg_api_key');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-    }
+    loadApiKey();
   }, []);
 
-  // Lưu API key vào localStorage
-  const handleApiKeyChange = (value) => {
-    setApiKey(value);
-    if (value) {
-      localStorage.setItem('removebg_api_key', value);
-    } else {
-      localStorage.removeItem('removebg_api_key');
+  const loadApiKey = async () => {
+    try {
+      setLoadingApiKey(true);
+      const key = await getRemoveBgApiKey();
+      if (key) {
+        setApiKey(key);
+        if (isAdmin) {
+          setApiKeyInput(key); // Hiển thị cho admin để chỉnh sửa
+        }
+      }
+    } catch (err) {
+      console.error('Error loading API key:', err);
+    } finally {
+      setLoadingApiKey(false);
+    }
+  };
+
+  // Lưu API key vào Firebase (chỉ admin)
+  const handleSaveApiKey = async () => {
+    if (!apiKeyInput.trim()) {
+      setError('Vui lòng nhập API key');
+      return;
+    }
+
+    try {
+      setSavingApiKey(true);
+      setError('');
+      await setRemoveBgApiKey(apiKeyInput.trim());
+      setApiKey(apiKeyInput.trim());
+      setSuccess('Lưu API key thành công!');
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.message || 'Lỗi khi lưu API key');
+    } finally {
+      setSavingApiKey(false);
     }
   };
 
@@ -83,24 +116,21 @@ const RemoveBgPage = () => {
     reader.readAsDataURL(file);
   };
 
-  // Xử lý xóa background
+  // Xử lý xóa background - tự động dùng API key từ Firebase
   const handleRemoveBackground = async () => {
     if (!selectedFile) {
       setError('Vui lòng chọn file ảnh');
       return;
     }
 
-    if (!apiKey) {
-      setError('Vui lòng nhập API key từ remove.bg');
-      return;
-    }
-
+    // Không cần kiểm tra apiKey nữa vì service sẽ tự động lấy từ Firebase
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      const blob = await removeBackground(selectedFile, apiKey, {
+      // Không truyền apiKey, service sẽ tự động lấy từ Firebase
+      const blob = await removeBackground(selectedFile, null, {
         size: 'auto',
         format: 'png'
       });
@@ -151,33 +181,74 @@ const RemoveBgPage = () => {
       />
 
       <Stack spacing={3} sx={{ mt: 3 }}>
-        {/* API Key Input */}
-        <Paper sx={{ p: 3, background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2 }}>
-          <Typography variant="h6" sx={{ color: '#FFFFFF', mb: 2, fontWeight: 600 }}>
-            Cấu hình API Key
-          </Typography>
-          <TextField
-            fullWidth
-            type="password"
-            label="Remove.bg API Key"
-            value={apiKey}
-            onChange={(e) => handleApiKeyChange(e.target.value)}
-            placeholder="Nhập API key từ remove.bg"
-            helperText="Lấy API key miễn phí tại: https://www.remove.bg/api"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                background: '#121212',
-                borderRadius: 1,
-                '& fieldset': { borderColor: '#333333' },
-                '&:hover fieldset': { borderColor: '#FFD700' },
-                '&.Mui-focused fieldset': { borderColor: '#FFD700' }
-              },
-              '& .MuiInputLabel-root': { color: '#B3B3B3' },
-              '& .MuiInputBase-input': { color: '#FFFFFF' },
-              '& .MuiFormHelperText-root': { color: '#888' }
-            }}
-          />
-        </Paper>
+        {/* API Key Input - Chỉ hiển thị cho admin */}
+        {isAdmin && (
+          <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 2 }}>
+            <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, fontWeight: 600 }}>
+              Cấu hình API Key (Chỉ Admin)
+            </Typography>
+            {loadingApiKey ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <CircularProgress size={20} sx={{ color: '#FFD700' }} />
+                <Typography sx={{ color: '#B3B3B3' }}>Đang tải cấu hình...</Typography>
+              </Box>
+            ) : (
+              <Stack spacing={2}>
+                <TextField
+                  fullWidth
+                  type="password"
+                  label="Remove.bg API Key"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder="Nhập API key từ remove.bg"
+                  helperText="Lấy API key miễn phí tại: https://www.remove.bg/api"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      background: '#121212',
+                      borderRadius: 1,
+                      '& fieldset': { borderColor: '#333333' },
+                      '&:hover fieldset': { borderColor: '#FFD700' },
+                      '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                    },
+                    '& .MuiInputLabel-root': { color: '#B3B3B3' },
+                    '& .MuiInputBase-input': { color: '#FFFFFF' },
+                    '& .MuiFormHelperText-root': { color: '#888' }
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  startIcon={savingApiKey ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                  onClick={handleSaveApiKey}
+                  disabled={savingApiKey || !apiKeyInput.trim()}
+                  sx={{
+                    background: '#FFD700',
+                    color: '#000',
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    '&:hover': { background: '#FFC700' },
+                    '&:disabled': { background: '#666', color: '#999' }
+                  }}
+                >
+                  {savingApiKey ? 'Đang lưu...' : 'Lưu API Key'}
+                </Button>
+                {apiKey && (
+                  <Typography variant="caption" sx={{ color: '#4CAF50' }}>
+                    API key đã được cấu hình. Tất cả users có thể sử dụng chức năng này.
+                  </Typography>
+                )}
+              </Stack>
+            )}
+          </Paper>
+        )}
+
+        {/* Thông báo nếu chưa có API key */}
+        {!loadingApiKey && !apiKey && (
+          <Alert severity="warning" sx={{ background: '#5f2120', color: '#fff', border: '1px solid #f44336' }}>
+            {isAdmin 
+              ? 'Chưa có API key. Vui lòng cấu hình API key ở trên để sử dụng chức năng này.'
+              : 'Chức năng này chưa được cấu hình. Vui lòng liên hệ admin.'}
+          </Alert>
+        )}
 
         {/* Upload Section */}
         <Paper sx={{ p: 3, background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2 }}>
@@ -338,18 +409,35 @@ const RemoveBgPage = () => {
             💡 Hướng dẫn
           </Typography>
           <Typography variant="body2" sx={{ color: '#B3B3B3', lineHeight: 1.8 }}>
-            1. Lấy API key miễn phí tại{' '}
-            <a href="https://www.remove.bg/api" target="_blank" rel="noopener noreferrer" style={{ color: '#FFD700' }}>
-              remove.bg/api
-            </a>
-            <br />
-            2. Nhập API key vào ô trên
-            <br />
-            3. Upload ảnh cần xóa background (JPEG, PNG, WebP - tối đa 12MB)
-            <br />
-            4. Click "Xóa Background" và đợi kết quả
-            <br />
-            5. Tải ảnh đã xóa background về máy
+            {isAdmin ? (
+              <>
+                1. (Admin) Lấy API key miễn phí tại{' '}
+                <a href="https://www.remove.bg/api" target="_blank" rel="noopener noreferrer" style={{ color: '#FFD700' }}>
+                  remove.bg/api
+                </a>
+                <br />
+                2. (Admin) Nhập và lưu API key ở phần cấu hình trên
+                <br />
+                3. Upload ảnh cần xóa background (JPEG, PNG, WebP - tối đa 12MB)
+                <br />
+                4. Click "Xóa Background" và đợi kết quả
+                <br />
+                5. Tải ảnh đã xóa background về máy
+              </>
+            ) : (
+              <>
+                1. Upload ảnh cần xóa background (JPEG, PNG, WebP - tối đa 12MB)
+                <br />
+                2. Click "Xóa Background" và đợi kết quả
+                <br />
+                3. Tải ảnh đã xóa background về máy
+                <br />
+                <br />
+                <span style={{ color: '#888', fontSize: '0.85rem' }}>
+                  * API key đã được cấu hình bởi admin. Bạn không cần nhập API key.
+                </span>
+              </>
+            )}
           </Typography>
         </Paper>
       </Stack>
