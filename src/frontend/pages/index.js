@@ -6,5 +6,6 @@ export { default as PaperworkPage } from './PaperworkPage';
 export { default as MembersPage } from './MembersPage';
 export { default as MemberScorePage } from './MemberScorePage';
 export { default as ImportMembersPage } from './ImportMembersPage';
+export { default as RemoveBgPage } from './RemoveBgPage';
 export { default as LoginPage } from './LoginPage';
 

@@ -18,7 +18,7 @@ import { AuthProvider, useAuth } from './frontend/contexts/AuthContext';
 import { Layout } from './frontend/components/Layout';
 
 // Pages
-import { Dashboard, VendorsPage, EventGuidePage, TaxLookupPage, PaperworkPage, MembersPage, MemberScorePage, ImportMembersPage, LoginPage } from './frontend/pages';
+import { Dashboard, VendorsPage, EventGuidePage, TaxLookupPage, PaperworkPage, MembersPage, MemberScorePage, ImportMembersPage, RemoveBgPage, LoginPage } from './frontend/pages';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -30,6 +30,47 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+// Admin Protected Route Component
+const AdminProtectedRoute = ({ children }) => {
+  const { user, loading, isAdmin } = useAuth();
+
+  // Đợi auth load xong
+  if (loading) {
+    return null; // Hoặc loading spinner
+  }
+
+  // Kiểm tra user đã đăng nhập
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Kiểm tra quyền admin - CHẶN NẾU KHÔNG PHẢI ADMIN
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+// Admin Route Component - Chỉ admin mới được truy cập
+const AdminRoute = ({ children }) => {
+  const { user, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return null; // Hoặc loading spinner
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -51,9 +92,31 @@ const AppRoutes = () => {
                 <Route path="/event-guide" element={<EventGuidePage />} />
                 <Route path="/tax-lookup" element={<TaxLookupPage />} />
                 <Route path="/paperwork" element={<PaperworkPage />} />
-                <Route path="/members" element={<MembersPage />} />
-                <Route path="/members/import" element={<ImportMembersPage />} />
-                <Route path="/members/:semester" element={<MemberScorePage />} />
+                <Route path="/remove-bg" element={<RemoveBgPage />} />
+                <Route 
+                  path="/members" 
+                  element={
+                    <AdminProtectedRoute>
+                      <MembersPage />
+                    </AdminProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/members/import" 
+                  element={
+                    <AdminProtectedRoute>
+                      <ImportMembersPage />
+                    </AdminProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/members/:semester" 
+                  element={
+                    <AdminProtectedRoute>
+                      <MemberScorePage />
+                    </AdminProtectedRoute>
+                  } 
+                />
               </Routes>
             </Layout>
           </ProtectedRoute>

@@ -47,7 +47,7 @@ const semesterInfo = {
 const MemberScorePage = () => {
   const { semester } = useParams();
   const navigate = useNavigate();
-  const { isAdminMode } = useAuth();
+  const { isAdminMode, isAdmin, loading: authLoading } = useAuth();
   
   const currentSemester = semesterInfo[semester] || semesterInfo.fall;
   const currentYear = new Date().getFullYear();
@@ -71,9 +71,38 @@ const MemberScorePage = () => {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
   const [sortMode, setSortMode] = useState('default'); // 'default' | 'rank'
 
+  // Kiểm tra quyền admin - chỉ admin mới được xem member
   useEffect(() => {
-    loadData();
-  }, [semester]);
+    if (!authLoading) {
+      if (!isAdmin) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [isAdmin, authLoading, navigate]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (isAdmin) {
+        loadData();
+      } else {
+        // Clear data nếu không phải admin
+        setMembers([]);
+        setProjects([]);
+        setLoading(false);
+      }
+    }
+  }, [semester, isAdmin, authLoading]);
+
+  // CHẶN HOÀN TOÀN - không render gì nếu không phải admin
+  if (authLoading) {
+    return null; // Đang loading auth
+  }
+
+  // Kiểm tra chặt chẽ: nếu không phải admin thì redirect và không render
+  if (!isAdmin) {
+    // Đã có useEffect ở trên để redirect, nhưng đảm bảo không render gì
+    return null; // Không render gì cả
+  }
 
   const loadData = async () => {
     try {

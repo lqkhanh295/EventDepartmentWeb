@@ -23,9 +23,6 @@ const Header = ({ onMenuClick }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Debug: log để kiểm tra
-  console.log('Header - isAdmin:', isAdmin, 'isAdminMode:', isAdminMode, 'user:', user?.email);
-
   return (
     <AppBar 
       position="fixed" 

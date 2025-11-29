@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }) => {
         const normalizedEmail = email.toLowerCase().trim();
         const isAdmin = emailList.some(e => e.toLowerCase().trim() === normalizedEmail);
         
-        console.log('checkAdminEmail - email:', email, 'emailList:', emailList, 'isAdmin:', isAdmin);
         return isAdmin;
       }
       return false;

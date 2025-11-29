@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Drawer,
   List,
@@ -21,6 +22,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SearchIcon from '@mui/icons-material/Search';
 import DescriptionIcon from '@mui/icons-material/Description';
+import ImageIcon from '@mui/icons-material/Image';
 
 const DRAWER_WIDTH = 240;
 
@@ -60,14 +62,22 @@ const menuItems = [
     label: 'Hợp đồng',
     icon: DescriptionIcon,
     path: '/paperwork'
+  },
+  {
+    id: 'remove-bg',
+    label: 'Xóa Background',
+    icon: ImageIcon,
+    path: '/remove-bg'
   }
 ];
 
-const Sidebar = ({ open, onClose, isAdmin }) => {
+const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
+  // Lấy isAdmin từ context - đây là nguồn chính xác nhất
+  const { isAdmin: userIsAdmin, loading: authLoading } = useAuth();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -76,8 +86,10 @@ const Sidebar = ({ open, onClose, isAdmin }) => {
     }
   };
 
-  const bgColor = isAdmin ? '#1a1a0a' : '#121212';
-  const borderColor = isAdmin ? 'rgba(255, 215, 0, 0.2)' : '#2a2a2a';
+  // Dùng userIsAdmin từ context thay vì props
+  // Sidebar màu đen (#121212) cho member, vàng (#1a1a0a) cho admin
+  const bgColor = userIsAdmin ? '#1a1a0a' : '#121212'; // Đen đậm cho member
+  const borderColor = userIsAdmin ? 'rgba(255, 215, 0, 0.2)' : '#2a2a2a'; // Border đen cho member
 
   const drawerContent = (
     <Box
@@ -109,8 +121,27 @@ const Sidebar = ({ open, onClose, isAdmin }) => {
 
       {/* Navigation Items */}
       <List sx={{ px: 2, flex: 1 }}>
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+        {menuItems
+          .filter(item => {
+            // ẨN HOÀN TOÀN menu "Members" nếu không phải admin
+            if (item.id === 'members') {
+              // Luôn ẩn khi đang loading auth (chưa xác định được quyền)
+              if (authLoading === true) {
+                return false;
+              }
+              // CHẶN CHẶT: Chỉ hiển thị nếu userIsAdmin === true (chắc chắn là admin)
+              // Nếu userIsAdmin là false, undefined, null, hoặc bất kỳ giá trị nào khác → ẨN
+              const shouldShow = userIsAdmin === true;
+              if (!shouldShow) {
+                return false; // Ẩn menu Members
+              }
+              return true; // Chỉ hiển thị khi chắc chắn là admin
+            }
+            return true; // Các menu khác hiển thị bình thường
+          })
+          .map((item, idx) => {
+          const isActive = location.pathname === item.path || 
+                          (item.id === 'members' && location.pathname.startsWith('/members'));
           const Icon = item.icon;
           
           return (
@@ -120,7 +151,7 @@ const Sidebar = ({ open, onClose, isAdmin }) => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ 
                   duration: 0.3, 
-                  delay: menuItems.indexOf(item) * 0.04,
+                  delay: idx * 0.04,
                   ease: [0.4, 0, 0.2, 1]
                 }}
                 style={{ width: '100%' }}
