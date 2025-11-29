@@ -48,14 +48,24 @@ const RemoveBgPage = () => {
     try {
       setLoadingApiKey(true);
       const key = await getRemoveBgApiKey();
-      if (key) {
-        setApiKey(key);
+      if (key && key.trim() !== '') {
+        setApiKey(key.trim());
         if (isAdmin) {
-          setApiKeyInput(key); // Hiển thị cho admin để chỉnh sửa
+          setApiKeyInput(key.trim()); // Hiển thị cho admin để chỉnh sửa
+        }
+      } else {
+        // Không có API key
+        setApiKey('');
+        if (isAdmin) {
+          setApiKeyInput('');
         }
       }
     } catch (err) {
       console.error('Error loading API key:', err);
+      setApiKey('');
+      if (isAdmin) {
+        setApiKeyInput('');
+      }
     } finally {
       setLoadingApiKey(false);
     }
@@ -63,21 +73,33 @@ const RemoveBgPage = () => {
 
   // Lưu API key vào Firebase (chỉ admin)
   const handleSaveApiKey = async () => {
-    if (!apiKeyInput.trim()) {
+    const trimmedKey = apiKeyInput.trim();
+    
+    if (!trimmedKey) {
       setError('Vui lòng nhập API key');
+      return;
+    }
+
+    // Validate API key format (remove.bg API keys thường bắt đầu bằng chữ cái và có độ dài > 20)
+    if (trimmedKey.length < 20) {
+      setError('API key không hợp lệ. Vui lòng kiểm tra lại API key từ remove.bg');
       return;
     }
 
     try {
       setSavingApiKey(true);
       setError('');
-      await setRemoveBgApiKey(apiKeyInput.trim());
-      setApiKey(apiKeyInput.trim());
-      setSuccess('Lưu API key thành công!');
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(''), 3000);
+      setSuccess('');
+      
+      await setRemoveBgApiKey(trimmedKey);
+      setApiKey(trimmedKey);
+      setSuccess('Lưu API key thành công! Vui lòng thử lại chức năng xóa background.');
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(''), 5000);
     } catch (err) {
-      setError(err.message || 'Lỗi khi lưu API key');
+      console.error('Error saving API key:', err);
+      setError(err.message || 'Lỗi khi lưu API key. Vui lòng thử lại.');
     } finally {
       setSavingApiKey(false);
     }
@@ -231,9 +253,18 @@ const RemoveBgPage = () => {
                 >
                   {savingApiKey ? 'Đang lưu...' : 'Lưu API Key'}
                 </Button>
-                {apiKey && (
-                  <Typography variant="caption" sx={{ color: '#4CAF50' }}>
-                    API key đã được cấu hình. Tất cả users có thể sử dụng chức năng này.
+                {apiKey ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="caption" sx={{ color: '#4CAF50', fontWeight: 500 }}>
+                      ✓ API key đã được cấu hình ({apiKey.substring(0, 10)}...)
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#888', fontSize: '0.75rem' }}>
+                      - Tất cả users có thể sử dụng
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Typography variant="caption" sx={{ color: '#f44336' }}>
+                    ⚠ Chưa có API key. Vui lòng nhập và lưu API key ở trên.
                   </Typography>
                 )}
               </Stack>

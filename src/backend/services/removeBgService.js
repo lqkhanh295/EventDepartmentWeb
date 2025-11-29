@@ -23,9 +23,17 @@ export const removeBackground = async (imageFile, apiKey = null, options = {}) =
       finalApiKey = await getRemoveBgApiKey();
     }
 
-    if (!finalApiKey) {
+    // Trim và validate API key
+    if (finalApiKey) {
+      finalApiKey = finalApiKey.trim();
+    }
+
+    if (!finalApiKey || finalApiKey === '') {
       throw new Error('API key chưa được cấu hình. Vui lòng liên hệ admin để cấu hình API key.');
     }
+
+    // Log để debug (không log toàn bộ key, chỉ log một phần)
+    console.log('Using API key:', finalApiKey.substring(0, 10) + '...');
 
     // Kiểm tra định dạng file
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -60,16 +68,28 @@ export const removeBackground = async (imageFile, apiKey = null, options = {}) =
     const response = await fetch(REMOVE_BG_API_URL, {
       method: 'POST',
       headers: {
-        'X-Api-Key': apiKey
+        'X-Api-Key': finalApiKey
       },
       body: formData
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.errors?.[0]?.title || 
-                          errorData.error?.message || 
-                          `Lỗi API: ${response.status} ${response.statusText}`;
+      
+      // Xử lý các lỗi phổ biến
+      let errorMessage = errorData.errors?.[0]?.title || 
+                        errorData.error?.message || 
+                        `Lỗi API: ${response.status} ${response.statusText}`;
+      
+      // Thông báo cụ thể cho từng loại lỗi
+      if (response.status === 403 || errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('api key')) {
+        errorMessage = 'API key không hợp lệ. Vui lòng kiểm tra lại API key trong phần cấu hình (chỉ admin).';
+      } else if (response.status === 401) {
+        errorMessage = 'API key không được xác thực. Vui lòng kiểm tra lại API key.';
+      } else if (response.status === 402) {
+        errorMessage = 'Hết quota API. Vui lòng nâng cấp tài khoản remove.bg.';
+      }
+      
       throw new Error(errorMessage);
     }
 

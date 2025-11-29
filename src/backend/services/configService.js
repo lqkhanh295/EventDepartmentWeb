@@ -16,9 +16,17 @@ export const getRemoveBgApiKey = async () => {
     
     if (configSnap.exists()) {
       const data = configSnap.data();
-      return data.removeBgApiKey || null;
+      const apiKey = data.removeBgApiKey;
+      
+      if (apiKey && typeof apiKey === 'string' && apiKey.trim() !== '') {
+        return apiKey.trim();
+      }
+      
+      console.warn('API key exists but is empty or invalid');
+      return null;
     }
     
+    console.warn('Config document does not exist in Firebase');
     return null;
   } catch (error) {
     console.error('Error getting remove.bg API key:', error);
