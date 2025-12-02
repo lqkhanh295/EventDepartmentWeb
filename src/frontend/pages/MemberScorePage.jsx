@@ -26,7 +26,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PeopleIcon from '@mui/icons-material/People';
 import { PageHeader, Loading, EmptyState } from '../components';
-import { useAuth } from '../contexts/AuthContext';
 import {
   getAllMembers,
   getAllProjects,
@@ -47,7 +46,6 @@ const semesterInfo = {
 const MemberScorePage = () => {
   const { semester } = useParams();
   const navigate = useNavigate();
-  const { isAdminMode, isAdmin, loading: authLoading } = useAuth();
   
   const currentSemester = semesterInfo[semester] || semesterInfo.fall;
   const currentYear = new Date().getFullYear();
@@ -71,38 +69,9 @@ const MemberScorePage = () => {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
   const [sortMode, setSortMode] = useState('default'); // 'default' | 'rank'
 
-  // Kiểm tra quyền admin - chỉ admin mới được xem member
   useEffect(() => {
-    if (!authLoading) {
-      if (!isAdmin) {
-        navigate('/', { replace: true });
-      }
-    }
-  }, [isAdmin, authLoading, navigate]);
-
-  useEffect(() => {
-    if (!authLoading) {
-      if (isAdmin) {
-        loadData();
-      } else {
-        // Clear data nếu không phải admin
-        setMembers([]);
-        setProjects([]);
-        setLoading(false);
-      }
-    }
-  }, [semester, isAdmin, authLoading]);
-
-  // CHẶN HOÀN TOÀN - không render gì nếu không phải admin
-  if (authLoading) {
-    return null; // Đang loading auth
-  }
-
-  // Kiểm tra chặt chẽ: nếu không phải admin thì redirect và không render
-  if (!isAdmin) {
-    // Đã có useEffect ở trên để redirect, nhưng đảm bảo không render gì
-    return null; // Không render gì cả
-  }
+    loadData();
+  }, [semester]);
 
   const loadData = async () => {
     try {
@@ -174,7 +143,6 @@ const MemberScorePage = () => {
 
   // Handle edit score
   const handleEditScore = (memberId, projectKey, currentValue, projectSemester = semester) => {
-    if (!isAdminMode) return;
     setEditingCell({ memberId, projectKey, projectSemester });
     setEditValue(currentValue?.toString() || '0');
   };
@@ -362,7 +330,7 @@ const MemberScorePage = () => {
           <span>
             {project.displayName || project.Name || project.key}
           </span>
-          {isAdminMode && semester !== 'year' && (
+          {semester !== 'year' && (
             <IconButton 
               size="small" 
               onClick={() => setDeleteDialog({ open: true, type: 'project', item: project })}
@@ -406,7 +374,7 @@ const MemberScorePage = () => {
           <Box
             onClick={() => handleEditScore(record.id, project.key, score, project.semester || semester)}
             sx={{
-              cursor: isAdminMode ? 'pointer' : 'default',
+              cursor: 'pointer',
               p: 0.75,
               borderRadius: 1,
               background: score > 0 ? 'rgba(76, 175, 80, 0.15)' : 'rgba(244, 67, 54, 0.1)',
@@ -418,10 +386,10 @@ const MemberScorePage = () => {
               textAlign: 'center',
               boxSizing: 'border-box',
               transition: 'all 0.2s ease',
-              '&:hover': isAdminMode ? { 
+              '&:hover': { 
                 background: 'rgba(255, 215, 0, 0.2)',
                 border: '1px solid rgba(255, 215, 0, 0.4)'
-              } : {}
+              }
             }}
           >
             {score}
@@ -451,7 +419,7 @@ const MemberScorePage = () => {
         </Typography>
       )
     },
-    ...(isAdminMode ? [{
+    {
       title: '',
       key: 'actions',
       width: 60,
@@ -465,7 +433,7 @@ const MemberScorePage = () => {
           <DeleteIcon fontSize="small" />
         </IconButton>
       )
-    }] : [])
+    }
   ];
 
   return (
@@ -473,7 +441,7 @@ const MemberScorePage = () => {
       <PageHeader
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => navigate('/members')} sx={{ color: '#888' }}>
+            <IconButton onClick={() => navigate('/eventleader')} sx={{ color: '#888' }}>
               <ArrowBackIcon />
             </IconButton>
             <span>Members - {currentSemester.name} {currentYear}</span>
@@ -482,12 +450,12 @@ const MemberScorePage = () => {
         subtitle={`${members.length} thành viên · ${projects.length} projects`}
         breadcrumbs={[
           { label: 'Trang chủ', path: '/' },
-          { label: 'Members', path: '/members' },
+          { label: 'Event Leader', path: '/eventleader' },
           { label: `${currentSemester.name} ${currentYear}` }
         ]}
-        actionText={isAdminMode ? "Thêm Member" : undefined}
-        actionIcon={isAdminMode ? AddIcon : undefined}
-        onAction={isAdminMode ? () => setMemberDialog({ open: true, data: null }) : undefined}
+        actionText="Thêm Member"
+        actionIcon={AddIcon}
+        onAction={() => setMemberDialog({ open: true, data: null })}
       />
 
       {/* Semester Tabs */}
@@ -539,7 +507,7 @@ const MemberScorePage = () => {
           Xếp hạng
         </Button>
         
-        {isAdminMode && semester !== 'year' && (
+        {semester !== 'year' && (
           <>
             <Button
               variant="outlined"
@@ -557,7 +525,7 @@ const MemberScorePage = () => {
             </Button>
             <Button
               variant="outlined"
-              onClick={() => navigate(`/members/import?semester=${semester}`)}
+              onClick={() => navigate(`/eventleader/import?semester=${semester}`)}
               sx={{
                 borderColor: '#333333',
                 color: '#FFD700',
@@ -580,8 +548,8 @@ const MemberScorePage = () => {
           icon={PeopleIcon}
           title="Chưa có member nào"
           description={`Thêm member đầu tiên cho kỳ ${currentSemester.name}`}
-          actionText={isAdminMode ? "Thêm Member" : undefined}
-          onAction={isAdminMode ? () => setMemberDialog({ open: true, data: null }) : undefined}
+          actionText="Thêm Member"
+          onAction={() => setMemberDialog({ open: true, data: null })}
         />
       ) : (
         <Paper sx={{ background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2, overflow: 'hidden' }}>

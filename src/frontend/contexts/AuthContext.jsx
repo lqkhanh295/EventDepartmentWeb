@@ -1,175 +1,99 @@
-// Auth Context - Quản lý đăng nhập
+// Auth Context - Quản lý authentication và chế độ admin
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signOut, 
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../../backend/firebase/config';
+import { useLocation } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
+// Mock data cho users
+const MOCK_USERS = {
+  admin: {
+    uid: 'mock-admin-001',
+    email: 'admin@csg.com',
+    displayName: 'Admin User',
+    photoURL: null,
+    isAdmin: true
+  },
+  member: {
+    uid: 'mock-member-001',
+    email: 'member@csg.com',
+    displayName: 'Member User',
+    photoURL: null,
+    isAdmin: false
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false); // Trạng thái hiện tại (có thể là admin nhưng đang ở chế độ member)
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const location = useLocation();
 
-  // Kiểm tra email có quyền admin không
-  const checkAdminEmail = async (email) => {
-    try {
-      const docRef = doc(db, 'admin', 'cEoiTO4BLNaEknzTHedr');
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const adminEmailField = data.adminEmail || [];
-        
-        // Xử lý cả trường hợp là array hoặc string
-        let emailList = [];
-        if (Array.isArray(adminEmailField)) {
-          // Nếu là array, xử lý từng phần tử
-          adminEmailField.forEach(item => {
-            if (typeof item === 'string') {
-              // Nếu phần tử là string, có thể chứa nhiều email cách nhau bởi space
-              const emails = item.split(/\s+/).filter(e => e.trim());
-              emailList.push(...emails);
-            } else {
-              emailList.push(item);
-            }
-          });
-        } else if (typeof adminEmailField === 'string') {
-          // Nếu là string, split bởi space hoặc newline
-          emailList = adminEmailField.split(/[\s\n\r]+/).filter(e => e.trim());
-        }
-        
-        const normalizedEmail = email.toLowerCase().trim();
-        const isAdmin = emailList.some(e => e.toLowerCase().trim() === normalizedEmail);
-        
-        return isAdmin;
-      }
-      return false;
-    } catch (err) {
-      console.error('Error checking admin emails:', err);
-      return false;
-    }
-  };
-
-  // Kiểm tra email có trong whitelist không
-  const checkAllowedEmail = async (email) => {
-    try {
-      const docRef = doc(db, 'allowedUsers', 'pYweKqx4GoFn5s0DEjNC');
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const emailArray = data.email || [];
-        
-        // Tất cả email nằm trong 1 string (index 0), cách nhau bởi xuống dòng
-        const emailString = emailArray[0] || '';
-        const emailList = emailString
-          .split(/[\n\r]+/)
-          .map(e => e.toLowerCase().trim())
-          .filter(e => e);
-        
-        return emailList.includes(email.toLowerCase());
-      }
-      return false;
-    } catch (err) {
-      console.error('Error checking allowed emails:', err);
-      return false;
-    }
-  };
-
-  // Đăng nhập Google
-  const loginWithGoogle = async () => {
-    setError('');
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const email = result.user.email;
-
-      // Kiểm tra whitelist
-      const isAllowed = await checkAllowedEmail(email);
-      
-      if (!isAllowed) {
-        await signOut(auth);
-        setError('Email của bạn không có quyền truy cập hệ thống.');
-        return false;
-      }
-
-      return true;
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('Đăng nhập thất bại. Vui lòng thử lại.');
-      return false;
-    }
-  };
-
-  // Đăng xuất
-  const logout = async () => {
-    try {
-      await signOut(auth);
-      setUser(null);
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-  };
-
-  // Theo dõi trạng thái đăng nhập
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const isAllowed = await checkAllowedEmail(firebaseUser.email);
-        if (isAllowed) {
-          const adminStatus = await checkAdminEmail(firebaseUser.email);
-          setIsAdmin(adminStatus);
-          // Nếu là admin, mặc định bật chế độ admin
-          setIsAdminMode(adminStatus);
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL
-          });
-        } else {
-          await signOut(auth);
-          setUser(null);
-          setIsAdmin(false);
-          setIsAdminMode(false);
-        }
-      } else {
-        setUser(null);
-        setIsAdmin(false);
-        setIsAdminMode(false);
-      }
+  // Mock login function
+  const loginWithMock = (userType) => {
+    setLoading(true);
+    // Simulate async login
+    setTimeout(() => {
+      const mockUser = MOCK_USERS[userType];
+      setUser(mockUser);
+      setIsAdminMode(mockUser.isAdmin);
       setLoading(false);
-    });
+    }, 300);
+  };
 
-    return () => unsubscribe();
-  }, []);
+  // Mock Google login (tạm thời dùng mock)
+  const loginWithGoogle = async () => {
+    setLoading(true);
+    // Tạm thời return false để không làm gì
+    // Có thể thay bằng mock login nếu cần
+    setTimeout(() => {
+      setLoading(false);
+    }, 300);
+    return false;
+  };
 
-  // Chuyển đổi giữa chế độ admin và member (chỉ cho phép nếu có quyền admin)
+  // Logout
+  const logout = () => {
+    setUser(null);
+    setIsAdminMode(false);
+  };
+
+  // Toggle admin mode (chỉ cho phép nếu user là admin)
   const toggleAdminMode = () => {
-    if (isAdmin) {
+    if (user?.isAdmin) {
       setIsAdminMode(prev => !prev);
     }
   };
 
+  // Tự động bật chế độ admin khi ở các route admin
+  useEffect(() => {
+    if (user) {
+      const adminRoutes = ['/eventleader'];
+      const isAdminRoute = adminRoutes.some(route => 
+        location.pathname.startsWith(route)
+      );
+      // Chỉ set admin mode nếu user là admin
+      if (user.isAdmin) {
+        setIsAdminMode(user.isAdmin || isAdminRoute);
+      } else {
+        setIsAdminMode(false);
+      }
+    } else {
+      setIsAdminMode(false);
+    }
+  }, [location.pathname, user]);
+
   const value = {
     user,
     loading,
-    error,
-    isAdmin, // Có quyền admin hay không
-    isAdminMode, // Đang ở chế độ admin hay member
-    toggleAdminMode,
+    isAdminMode,
+    isAdmin: user?.isAdmin || false,
     loginWithGoogle,
-    logout
+    loginWithMock,
+    logout,
+    toggleAdminMode,
+    error: ''
   };
 
   return (

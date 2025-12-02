@@ -20,13 +20,11 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import * as XLSX from 'xlsx';
 import { PageHeader } from '../components';
-import { useAuth } from '../contexts/AuthContext';
 import { addMember, getAllMembers, updateMember, getAllProjects, addProject, deleteAllProjects, clearAllScores } from '../../backend/services/memberService';
 
 const ImportMembersPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isAdminMode } = useAuth();
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [projectColumns, setProjectColumns] = useState([]); // Các cột điểm project
@@ -249,20 +247,12 @@ const ImportMembersPage = () => {
     setSnackbar({ open: true, message, severity });
   };
 
-  if (!isAdminMode) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography sx={{ color: '#f44336' }}>Bạn không có quyền truy cập trang này</Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box>
       <PageHeader
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Button onClick={() => navigate('/members')} sx={{ color: '#888', minWidth: 'auto' }}>
+            <Button onClick={() => navigate('/eventleader')} sx={{ color: '#888', minWidth: 'auto' }}>
               <ArrowBackIcon />
             </Button>
             <span>Import Members từ Excel</span>

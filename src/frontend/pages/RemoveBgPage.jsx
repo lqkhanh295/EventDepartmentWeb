@@ -195,7 +195,6 @@ const RemoveBgPage = () => {
     <Box>
       <PageHeader
         title="Xóa Background Ảnh"
-        subtitle="Sử dụng API remove.bg để xóa background tự động"
         breadcrumbs={[
           { label: 'Trang chủ', path: '/' },
           { label: 'Xóa Background' }
@@ -435,9 +434,9 @@ const RemoveBgPage = () => {
         )}
 
         {/* Info Card */}
-        <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 2 }}>
+        <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(12, 12, 12, 0.2)', borderRadius: 2 }}>
           <Typography variant="h6" sx={{ color: '#FFD700', mb: 1, fontWeight: 600 }}>
-            💡 Hướng dẫn
+            Hướng dẫn
           </Typography>
           <Typography variant="body2" sx={{ color: '#B3B3B3', lineHeight: 1.8 }}>
             {isAdmin ? (
@@ -463,10 +462,6 @@ const RemoveBgPage = () => {
                 <br />
                 3. Tải ảnh đã xóa background về máy
                 <br />
-                <br />
-                <span style={{ color: '#888', fontSize: '0.85rem' }}>
-                  * API key đã được cấu hình bởi admin. Bạn không cần nhập API key.
-                </span>
               </>
             )}
           </Typography>
