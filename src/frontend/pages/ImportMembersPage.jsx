@@ -249,7 +249,7 @@ const ImportMembersPage = () => {
       <PageHeader
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Button onClick={() => navigate('/eventleader')} sx={{ color: '#888', minWidth: 'auto' }}>
+            <Button onClick={() => navigate('/members')} sx={{ color: '#888', minWidth: 'auto' }}>
               <ArrowBackIcon />
             </Button>
             <span>Import Members từ Excel</span>

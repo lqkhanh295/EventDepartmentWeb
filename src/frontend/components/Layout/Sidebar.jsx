@@ -207,7 +207,12 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
                     fontWeight: isActive ? 600 : 500,
                     color: isActive ? '#FFFFFF' : '#B3B3B3',
                     fontSize: '0.9rem',
-                    letterSpacing: '0.3px'
+                    letterSpacing: '0.3px',
+                    noWrap: true,
+                    sx: {
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }
                   }}
                 />
                   </ListItemButton>

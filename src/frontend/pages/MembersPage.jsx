@@ -6,8 +6,8 @@ const MembersPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to fall semester by default (vì đã vào /eventleader, tự động có quyền admin)
-    navigate('/eventleader/fall', { replace: true });
+    // Redirect to fall semester by default
+    navigate('/members/fall', { replace: true });
   }, [navigate]);
 
   return null;

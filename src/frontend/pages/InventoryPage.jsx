@@ -17,7 +17,8 @@ import {
   IconButton,
   FormControl,
   Select,
-  MenuItem
+  MenuItem,
+  CircularProgress
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -251,50 +252,50 @@ const InventoryPage = () => {
   };
 
   return (
-    <Box sx={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ minHeight: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', gap: 2 }}>
       <PageHeader
         title="Kho vật phẩm"
-        subtitle="Hiển thị các vật phẩm còn lại trong kho theo CSV"
+        subtitle={`Hiển thị ${remainingRows.length} vật phẩm còn lại trong kho`}
       />
 
-      {/* Thanh tìm kiếm và bộ lọc nằm trên */}
-      <Paper sx={{ p: { xs: 1, sm: 2 }, mb: 2, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
+      {/* Thanh tìm kiếm và bộ lọc */}
+      <Paper sx={{ p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={4} md={3}>
+          <Grid item xs={12} sm={6} md={4}>
             <TextField
               fullWidth
               size="small"
-              placeholder="Tìm theo tên vật phẩm"
+              placeholder="Tìm theo tên"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              InputProps={{ startAdornment: <SearchIcon sx={{ color: '#888', mr: 1 }} /> }}
+              InputProps={{ 
+                startAdornment: <SearchIcon sx={{ color: '#888', mr: 1 }} /> 
+              }}
               sx={{
-                maxWidth: { xs: '100%', sm: 320 },
-                mb: { xs: 1, sm: 0 },
                 '& .MuiOutlinedInput-root': {
                   background: '#252525',
+                  borderRadius: 2,
                   '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                  '&:hover fieldset': { borderColor: '#FFD700' },
+                  '&:hover fieldset': { borderColor: 'rgba(255,215,0,0.4)' },
                   '&.Mui-focused fieldset': { borderColor: '#FFD700' }
                 },
-                '& input': { color: '#fff' }
+                '& input': { color: '#fff', fontSize: '0.9rem' }
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={4} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl 
               fullWidth 
               size="small"
               sx={{
-                mb: { xs: 1, sm: 0 },
                 '& .MuiOutlinedInput-root': {
                   background: '#252525',
                   color: '#fff',
+                  borderRadius: 2,
                   '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                  '&:hover fieldset': { borderColor: '#FFD700' },
+                  '&:hover fieldset': { borderColor: 'rgba(255,215,0,0.4)' },
                   '&.Mui-focused fieldset': { borderColor: '#FFD700' }
                 },
-                '& .MuiInputLabel-root': { color: '#888' },
                 '& .MuiSelect-icon': { color: '#FFD700' }
               }}
             >
@@ -307,8 +308,11 @@ const InventoryPage = () => {
                     sx: {
                       background: '#252525',
                       border: '1px solid rgba(255,215,0,0.2)',
+                      borderRadius: 2,
+                      mt: 0.5,
                       '& .MuiMenuItem-root': {
                         color: '#fff',
+                        fontSize: '0.9rem',
                         '&:hover': { background: 'rgba(255,215,0,0.1)' },
                         '&.Mui-selected': { background: 'rgba(255,215,0,0.2)' }
                       }
@@ -327,59 +331,176 @@ const InventoryPage = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={4} md={7}>
-            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 2 }, alignItems: 'center', flexWrap: 'wrap', flexDirection: { xs: 'column', sm: 'row' } }}>
-              <Chip label={`Đã tải: ${totalLoaded}`} size="small" sx={{ background: '#333', color: '#FFD700', mb: { xs: 1, sm: 0 } }} />
-              <Chip label={`Hiển thị: ${remainingRows.length}`} size="small" sx={{ background: '#333', color: '#4CAF50', mb: { xs: 1, sm: 0 } }} />
-              <Button size="small" variant="text" onClick={() => setShowAll(v => !v)} sx={{ color: '#FFD700', textTransform: 'none', mb: { xs: 1, sm: 0 } }}>
-                {showAll ? 'Chỉ hiển thị còn lại (>0)' : 'Hiển thị tất cả'}
-              </Button>
-              {isAdmin && (
-                <>
-                  <input type="file" accept=".csv,.xlsx" id="inventory-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
-                  <label htmlFor="inventory-upload">
-                    <Button component="span" size="small" variant="outlined" startIcon={<UploadFileIcon />} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', textTransform: 'none', mb: { xs: 1, sm: 0 }, '&:hover': { borderColor: '#FFD700', background: 'rgba(255,215,0,0.05)' } }}>
-                      {fileName || 'Tải CSV/XLSX'}
-                    </Button>
-                  </label>
-                  {fileName && (
-                    <IconButton size="small" onClick={clearData} sx={{ color: '#f44336', mb: { xs: 1, sm: 0 } }}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                  <Button size="small" variant="contained" onClick={addRow} startIcon={<AddIcon />} sx={{ background: '#FFD700', color: '#1a1a1a', fontWeight: 600, textTransform: 'none', mb: { xs: 1, sm: 0 }, '&:hover': { background: '#FFE44D' } }}>
-                    Thêm
+          <Grid item xs={12} md={5}>
+            {isAdmin && (
+              <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+                <input type="file" accept=".csv,.xlsx" id="inventory-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
+                <label htmlFor="inventory-upload">
+                  <Button 
+                    component="span" 
+                    size="small" 
+                    variant="outlined" 
+                    startIcon={<UploadFileIcon />} 
+                    sx={{ 
+                      borderColor: 'rgba(255,215,0,0.3)', 
+                      color: '#FFD700', 
+                      textTransform: 'none',
+                      borderRadius: 2,
+                      px: 2,
+                      '&:hover': { 
+                        borderColor: '#FFD700', 
+                        background: 'rgba(255,215,0,0.1)' 
+                      } 
+                    }}
+                  >
+                    {fileName || 'Tải CSV/XLSX'}
                   </Button>
-                  <Button size="small" variant="outlined" onClick={importToServer} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', textTransform: 'none', mb: { xs: 1, sm: 0 }, '&:hover': { borderColor: '#FFD700' } }}>
-                    Lưu lên kho
-                  </Button>
-                </>
-              )}
-            </Box>
+                </label>
+                {fileName && (
+                  <IconButton 
+                    size="small" 
+                    onClick={clearData} 
+                    sx={{ 
+                      color: '#f44336',
+                      '&:hover': { background: 'rgba(244, 67, 54, 0.1)' }
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                )}
+                <Button 
+                  size="small" 
+                  variant="contained" 
+                  onClick={addRow} 
+                  startIcon={<AddIcon />} 
+                  sx={{ 
+                    background: '#FFD700', 
+                    color: '#1a1a1a', 
+                    fontWeight: 600, 
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    px: 2,
+                    '&:hover': { background: '#FFE44D' } 
+                  }}
+                >
+                  Thêm
+                </Button>
+                <Button 
+                  size="small" 
+                  variant="outlined" 
+                  onClick={importToServer}
+                  disabled={loading || rawRows.length === 0}
+                  sx={{ 
+                    borderColor: 'rgba(255,215,0,0.3)', 
+                    color: '#FFD700', 
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    px: 2,
+                    '&:hover': { 
+                      borderColor: '#FFD700',
+                      background: 'rgba(255,215,0,0.1)'
+                    },
+                    '&.Mui-disabled': {
+                      borderColor: 'rgba(255,215,0,0.1)',
+                      color: 'rgba(255,215,0,0.3)'
+                    }
+                  }}
+                >
+                  {loading ? 'Đang lưu...' : 'Lưu lên kho'}
+                </Button>
+              </Box>
+            )}
           </Grid>
         </Grid>
-        {!!types.length && (
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="caption" sx={{ color: '#888' }}>Hiển thị tất cả hàng</Typography>
+        {remainingRows.length > 0 && (
+          <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(255,215,0,0.1)' }}>
+            <Typography variant="caption" sx={{ color: '#888', fontSize: '0.85rem' }}>
+              Hiển thị {remainingRows.length} / {rawRows.length} vật phẩm
+            </Typography>
           </Box>
         )}
       </Paper>
 
-      {/* Danh sách vật phẩm full trang */}
-      <Paper sx={{ flex: 1, p: { xs: 1, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, fontSize: { xs: '1rem', sm: '1.15rem' } }}>Danh sách vật phẩm còn lại</Typography>
-        <TableContainer component={Box} sx={{ flex: 1, overflow: 'auto', width: '100%' }}>
-          <Table stickyHeader size="small" sx={{ minWidth: { xs: 500, sm: 650 }, fontSize: { xs: '0.85rem', sm: '0.95rem' } }}>
+      {/* Danh sách vật phẩm */}
+      <Paper sx={{ flex: 1, p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h6" sx={{ color: '#FFD700', fontSize: { xs: '1.1rem', sm: '1.25rem' }, fontWeight: 600 }}>
+            Danh sách vật phẩm còn lại
+          </Typography>
+          {loading && (
+            <CircularProgress size={20} sx={{ color: '#FFD700' }} />
+          )}
+        </Box>
+        <TableContainer component={Box} sx={{ flex: 1, overflow: 'auto', width: '100%', borderRadius: 2 }}>
+          <Table stickyHeader size="small" sx={{ minWidth: { xs: 600, sm: 800 } }}>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>Type</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>Item</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }} align="right">Current Qty</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }} align="right">Total Qty</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>Unit</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>P.I.C</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>Note</TableCell>
-                {isAdmin && <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }} align="right">Actions</TableCell>}
+                <TableCell sx={{ 
+                  color: '#FFD700', 
+                  background: '#1a1a1a', 
+                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                  fontWeight: 600,
+                  py: 1.5
+                }}>Type</TableCell>
+                <TableCell sx={{ 
+                  color: '#FFD700', 
+                  background: '#1a1a1a', 
+                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                  fontWeight: 600,
+                  py: 1.5
+                }}>Item</TableCell>
+                <TableCell sx={{ 
+                  color: '#FFD700', 
+                  background: '#1a1a1a', 
+                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                  fontWeight: 600,
+                  py: 1.5
+                }} align="right">Current Qty</TableCell>
+                <TableCell sx={{ 
+                  color: '#FFD700', 
+                  background: '#1a1a1a', 
+                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                  fontWeight: 600,
+                  py: 1.5
+                }} align="right">Total Qty</TableCell>
+                <TableCell sx={{ 
+                  color: '#FFD700', 
+                  background: '#1a1a1a', 
+                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                  fontWeight: 600,
+                  py: 1.5
+                }}>Unit</TableCell>
+                <TableCell sx={{ 
+                  color: '#FFD700', 
+                  background: '#1a1a1a', 
+                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                  fontWeight: 600,
+                  py: 1.5
+                }}>P.I.C</TableCell>
+                <TableCell sx={{ 
+                  color: '#FFD700', 
+                  background: '#1a1a1a', 
+                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                  fontWeight: 600,
+                  py: 1.5
+                }}>Note</TableCell>
+                {isAdmin && (
+                  <TableCell sx={{ 
+                    color: '#FFD700', 
+                    background: '#1a1a1a', 
+                    borderBottom: '2px solid rgba(255,215,0,0.3)', 
+                    fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                    fontWeight: 600,
+                    py: 1.5
+                  }} align="center">Actions</TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -397,10 +518,28 @@ const InventoryPage = () => {
                     };
                     
                     return (
-                      <TableRow key={idx} sx={{ '&:nth-of-type(odd)': { backgroundColor: '#1b1b1b' } }}>
-                        <TableCell sx={{ color: '#eee' }}>
+                      <TableRow 
+                        key={idx} 
+                        sx={{ 
+                          '&:nth-of-type(odd)': { backgroundColor: '#1b1b1b' },
+                          '&:hover': { backgroundColor: '#222' },
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
+                        <TableCell sx={{ color: '#eee', py: 1.5 }}>
                           {isEditing ? (
-                            <TextField size="small" value={draftRow?.['Type'] || ''} onChange={(e) => setDraftRow(prev => ({ ...prev, Type: e.target.value }))} />
+                            <TextField 
+                              size="small" 
+                              value={draftRow?.['Type'] || ''} 
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, Type: e.target.value }))}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  background: '#252525',
+                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
+                                  '& input': { color: '#fff', fontSize: '0.85rem' }
+                                }
+                              }}
+                            />
                           ) : (
                             <Chip 
                               label={r['Type']} 
@@ -409,62 +548,163 @@ const InventoryPage = () => {
                                 background: `${getTypeColor(r['Type'])}22`,
                                 color: getTypeColor(r['Type']),
                                 border: `1px solid ${getTypeColor(r['Type'])}44`,
-                                fontWeight: 600
+                                fontWeight: 600,
+                                fontSize: '0.8rem'
                               }} 
                             />
                           )}
                         </TableCell>
-                        <TableCell sx={{ color: '#eee' }}>
+                        <TableCell sx={{ color: '#eee', py: 1.5, fontWeight: 500 }}>
                           {isEditing ? (
-                            <TextField size="small" value={draftRow?.['Item'] || ''} onChange={(e) => setDraftRow(prev => ({ ...prev, Item: e.target.value }))} />
+                            <TextField 
+                              size="small" 
+                              value={draftRow?.['Item'] || ''} 
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, Item: e.target.value }))}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  background: '#252525',
+                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
+                                  '& input': { color: '#fff', fontSize: '0.85rem' }
+                                }
+                              }}
+                            />
                           ) : r['Item']}
                         </TableCell>
-                        <TableCell sx={{ color: '#eee' }} align="right">
+                        <TableCell sx={{ color: '#eee', py: 1.5 }} align="right">
                           {isEditing ? (
-                            <TextField size="small" value={draftRow?.['Current Quantity'] || ''} onChange={(e) => setDraftRow(prev => ({ ...prev, ['Current Quantity']: e.target.value }))} />
+                            <TextField 
+                              size="small" 
+                              value={draftRow?.['Current Quantity'] || ''} 
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, ['Current Quantity']: e.target.value }))}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  background: '#252525',
+                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
+                                  '& input': { color: '#fff', fontSize: '0.85rem' }
+                                }
+                              }}
+                            />
                           ) : r['Current Quantity']}
                         </TableCell>
-                        <TableCell sx={{ color: '#eee' }} align="right">
+                        <TableCell sx={{ color: '#eee', py: 1.5 }} align="right">
                           {isEditing ? (
-                            <TextField size="small" value={draftRow?.['Total Quantity'] || ''} onChange={(e) => setDraftRow(prev => ({ ...prev, ['Total Quantity']: e.target.value }))} />
+                            <TextField 
+                              size="small" 
+                              value={draftRow?.['Total Quantity'] || ''} 
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, ['Total Quantity']: e.target.value }))}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  background: '#252525',
+                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
+                                  '& input': { color: '#fff', fontSize: '0.85rem' }
+                                }
+                              }}
+                            />
                           ) : r['Total Quantity']}
                         </TableCell>
-                        <TableCell sx={{ color: '#eee' }}>
+                        <TableCell sx={{ color: '#eee', py: 1.5 }}>
                           {isEditing ? (
-                            <TextField size="small" value={draftRow?.['Unit'] || ''} onChange={(e) => setDraftRow(prev => ({ ...prev, Unit: e.target.value }))} />
+                            <TextField 
+                              size="small" 
+                              value={draftRow?.['Unit'] || ''} 
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, Unit: e.target.value }))}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  background: '#252525',
+                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
+                                  '& input': { color: '#fff', fontSize: '0.85rem' }
+                                }
+                              }}
+                            />
                           ) : r['Unit']}
                         </TableCell>
-                        <TableCell sx={{ color: '#eee' }}>
+                        <TableCell sx={{ color: '#eee', py: 1.5 }}>
                           {isEditing ? (
-                            <TextField size="small" value={draftRow?.['P.I.C'] || ''} onChange={(e) => setDraftRow(prev => ({ ...prev, ['P.I.C']: e.target.value }))} />
+                            <TextField 
+                              size="small" 
+                              value={draftRow?.['P.I.C'] || ''} 
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, ['P.I.C']: e.target.value }))}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  background: '#252525',
+                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
+                                  '& input': { color: '#fff', fontSize: '0.85rem' }
+                                }
+                              }}
+                            />
                           ) : r['P.I.C']}
                         </TableCell>
-                        <TableCell sx={{ color: '#eee' }}>
+                        <TableCell sx={{ color: '#ccc', py: 1.5, fontSize: '0.85rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {isEditing ? (
-                            <TextField size="small" value={draftRow?.['Note'] || ''} onChange={(e) => setDraftRow(prev => ({ ...prev, Note: e.target.value }))} />
-                          ) : r['Note']}
+                            <TextField 
+                              size="small" 
+                              value={draftRow?.['Note'] || ''} 
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, Note: e.target.value }))}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  background: '#252525',
+                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
+                                  '& input': { color: '#fff', fontSize: '0.85rem' }
+                                }
+                              }}
+                            />
+                          ) : (r['Note'] || '-')}
                         </TableCell>
                         {isAdmin && (
-                          <TableCell align="right">
-                            {isEditing ? (
-                              <>
-                                <IconButton onClick={saveEdit} sx={{ color: '#4CAF50' }} title="Lưu">
-                                  <SaveIcon />
-                                </IconButton>
-                                <IconButton onClick={() => { setEditingIndex(null); setDraftRow(null); }} sx={{ color: '#f44336' }} title="Hủy">
-                                  <DeleteIcon />
-                                </IconButton>
-                              </>
-                            ) : (
-                              <>
-                                <IconButton onClick={() => startEdit(idx)} sx={{ color: '#FFD700' }} title="Sửa">
-                                  <EditIcon />
-                                </IconButton>
-                                <IconButton onClick={() => removeRow(idx)} sx={{ color: '#f44336' }} title="Xóa">
-                                  <DeleteIcon />
-                                </IconButton>
-                              </>
-                            )}
+                          <TableCell align="center" sx={{ py: 1.5 }}>
+                            <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                              {isEditing ? (
+                                <>
+                                  <IconButton 
+                                    onClick={saveEdit} 
+                                    size="small"
+                                    sx={{ 
+                                      color: '#4CAF50',
+                                      '&:hover': { background: 'rgba(76, 175, 80, 0.1)' }
+                                    }} 
+                                    title="Lưu"
+                                  >
+                                    <SaveIcon fontSize="small" />
+                                  </IconButton>
+                                  <IconButton 
+                                    onClick={() => { setEditingIndex(null); setDraftRow(null); }} 
+                                    size="small"
+                                    sx={{ 
+                                      color: '#f44336',
+                                      '&:hover': { background: 'rgba(244, 67, 54, 0.1)' }
+                                    }} 
+                                    title="Hủy"
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </>
+                              ) : (
+                                <>
+                                  <IconButton 
+                                    onClick={() => startEdit(idx)} 
+                                    size="small"
+                                    sx={{ 
+                                      color: '#FFD700',
+                                      '&:hover': { background: 'rgba(255, 215, 0, 0.1)' }
+                                    }} 
+                                    title="Sửa"
+                                  >
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                  <IconButton 
+                                    onClick={() => removeRow(idx)} 
+                                    size="small"
+                                    sx={{ 
+                                      color: '#f44336',
+                                      '&:hover': { background: 'rgba(244, 67, 54, 0.1)' }
+                                    }} 
+                                    title="Xóa"
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </>
+                              )}
+                            </Box>
                           </TableCell>
                         )}
                       </TableRow>
@@ -472,8 +712,25 @@ const InventoryPage = () => {
                   })}
                   {remainingRows.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={isAdmin ? 8 : 7} sx={{ color: '#888', textAlign: 'center' }}>
-                        Không có dữ liệu hiển thị.{isAdmin ? ' Hãy tải CSV tồn kho.' : ''}
+                      <TableCell 
+                        colSpan={isAdmin ? 8 : 7} 
+                        sx={{ 
+                          color: '#888', 
+                          textAlign: 'center', 
+                          py: 6,
+                          fontSize: '0.95rem'
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="body2" sx={{ color: '#666' }}>
+                            Không có dữ liệu hiển thị
+                          </Typography>
+                          {isAdmin && (
+                            <Typography variant="caption" sx={{ color: '#555' }}>
+                              Hãy tải CSV/XLSX tồn kho để bắt đầu
+                            </Typography>
+                          )}
+                        </Box>
                       </TableCell>
                     </TableRow>
                   )}

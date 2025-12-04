@@ -442,7 +442,7 @@ const MemberScorePage = () => {
       <PageHeader
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => navigate('/eventleader')} sx={{ color: '#888' }}>
+            <IconButton onClick={() => navigate('/members')} sx={{ color: '#888' }}>
               <ArrowBackIcon />
             </IconButton>
             <span>Members - {currentSemester.name} {currentYear}</span>
@@ -451,7 +451,7 @@ const MemberScorePage = () => {
         subtitle={`${members.length} thành viên · ${projects.length} projects`}
         breadcrumbs={[
           { label: 'Trang chủ', path: '/' },
-          { label: 'Event Leader', path: '/eventleader' },
+          { label: 'Members', path: '/members' },
           { label: `${currentSemester.name} ${currentYear}` }
         ]}
         actionText="Thêm Member"
@@ -526,7 +526,7 @@ const MemberScorePage = () => {
             </Button>
             <Button
               variant="outlined"
-              onClick={() => navigate(`/eventleader/import?semester=${semester}`)}
+              onClick={() => navigate(`/members/import?semester=${semester}`)}
               sx={{
                 borderColor: '#333333',
                 color: '#FFD700',

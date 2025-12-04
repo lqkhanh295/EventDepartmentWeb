@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
   // Tự động bật chế độ admin khi ở các route admin
   useEffect(() => {
     if (user) {
-      const adminRoutes = ['/eventleader'];
+      const adminRoutes = ['/members'];
       const isAdminRoute = adminRoutes.some(route => 
         location.pathname.startsWith(route)
       );
