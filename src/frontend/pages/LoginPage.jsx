@@ -1,24 +1,17 @@
 // Trang đăng nhập
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { Box, Typography, Button, CircularProgress, Alert, Divider } from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
+import { Box, Typography, Button, CircularProgress, Alert } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import logoCsg from '../../image/logocsg.png';
 
 const LoginPage = () => {
-  const { user, loading, error, loginWithGoogle, loginWithMock } = useAuth();
+  const { user, loading, error, loginWithMock } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
 
   if (user) {
     return <Navigate to="/" replace />;
   }
-
-  const handleGoogleLogin = async () => {
-    setIsLoggingIn(true);
-    await loginWithGoogle();
-    setIsLoggingIn(false);
-  };
 
   const handleMockLogin = (userType) => {
     setIsLoggingIn(true);
@@ -55,13 +48,14 @@ const LoginPage = () => {
     >
       <Box
         sx={{
-          maxWidth: 360,
+          maxWidth: 400,
           width: '100%',
           textAlign: 'center',
           background: '#121212',
           border: '1px solid rgba(255, 215, 0, 0.2)',
-          borderRadius: 2,
-          p: 4
+          borderRadius: 3,
+          p: 5,
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
         }}
       >
         {/* Logo */}
@@ -70,17 +64,32 @@ const LoginPage = () => {
           src={logoCsg}
           alt="CSG Logo"
           sx={{ 
-            width: 80,
+            width: 100,
             height: 'auto',
-            mb: 4
+            mb: 3
           }}
         />
 
         {/* Title */}
-        <Typography variant="h6" sx={{ color: '#fff', mb: 0.5, fontWeight: 500 }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            color: '#fff', 
+            mb: 1, 
+            fontWeight: 600,
+            letterSpacing: '0.5px'
+          }}
+        >
           Event Department
         </Typography>
-        <Typography variant="body2" sx={{ color: '#666', mb: 4 }}>
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            color: '#888', 
+            mb: 4,
+            fontSize: '0.9rem'
+          }}
+        >
           Đăng nhập để tiếp tục
         </Typography>
 
@@ -102,71 +111,34 @@ const LoginPage = () => {
           </Alert>
         )}
 
-        {/* Google Login Button */}
-        <Button
-          fullWidth
-          variant="contained"
-          size="large"
-          startIcon={isLoggingIn ? <CircularProgress size={18} color="inherit" /> : <GoogleIcon />}
-          onClick={handleGoogleLogin}
-          disabled={isLoggingIn}
-          sx={{
-            py: 1.5,
-            background: '#fff',
-            color: '#121212',
-            fontWeight: 500,
-            fontSize: '0.9rem',
-            textTransform: 'none',
-            borderRadius: 1.5,
-            boxShadow: 'none',
-            mb: 2,
-            '&:hover': {
-              background: '#f5f5f5',
-              boxShadow: 'none'
-            },
-            '&.Mui-disabled': {
-              background: '#2a2a2a',
-              color: '#666'
-            }
-          }}
-        >
-          {isLoggingIn ? 'Đang đăng nhập...' : 'Đăng nhập với Google'}
-        </Button>
-
-        {/* Divider */}
-        <Divider sx={{ my: 3, borderColor: '#333' }}>
-          <Typography variant="caption" sx={{ color: '#666', px: 2 }}>
-            HOẶC
-          </Typography>
-        </Divider>
-
-        {/* Mock Login Buttons */}
-        <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 2, textAlign: 'left' }}>
-          Mock Login (Development):
-        </Typography>
-        
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        {/* Login Buttons */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
           <Button
             fullWidth
             variant="outlined"
-            size="medium"
+            size="large"
             onClick={() => handleMockLogin('admin')}
             disabled={isLoggingIn}
             sx={{
-              py: 1.2,
+              py: 1.8,
               borderColor: '#FFD700',
-              color: '#FFD700',
-              fontWeight: 500,
-              fontSize: '0.85rem',
+              borderWidth: 2,
+              color: '#fff',
+              background: '#121212',
+              fontWeight: 600,
+              fontSize: '0.95rem',
               textTransform: 'none',
-              borderRadius: 1.5,
+              borderRadius: 2,
               '&:hover': {
-                borderColor: '#FFC700',
-                background: 'rgba(255, 215, 0, 0.1)'
+                borderColor: '#FFD700',
+                borderWidth: 2,
+                background: 'rgba(255, 215, 0, 0.1)',
+                boxShadow: '0 4px 12px rgba(255, 215, 0, 0.2)'
               },
               '&.Mui-disabled': {
                 borderColor: '#2a2a2a',
-                color: '#666'
+                color: '#666',
+                background: '#121212'
               }
             }}
           >
@@ -176,24 +148,29 @@ const LoginPage = () => {
           <Button
             fullWidth
             variant="outlined"
-            size="medium"
+            size="large"
             onClick={() => handleMockLogin('member')}
             disabled={isLoggingIn}
             sx={{
-              py: 1.2,
-              borderColor: '#4ECDC4',
-              color: '#4ECDC4',
-              fontWeight: 500,
-              fontSize: '0.85rem',
+              py: 1.8,
+              borderColor: '#FFD700',
+              borderWidth: 2,
+              color: '#fff',
+              background: '#121212',
+              fontWeight: 600,
+              fontSize: '0.95rem',
               textTransform: 'none',
-              borderRadius: 1.5,
+              borderRadius: 2,
               '&:hover': {
-                borderColor: '#4ECDC4',
-                background: 'rgba(78, 205, 196, 0.1)'
+                borderColor: '#FFD700',
+                borderWidth: 2,
+                background: 'rgba(255, 215, 0, 0.1)',
+                boxShadow: '0 4px 12px rgba(255, 215, 0, 0.2)'
               },
               '&.Mui-disabled': {
                 borderColor: '#2a2a2a',
-                color: '#666'
+                color: '#666',
+                background: '#121212'
               }
             }}
           >
@@ -201,10 +178,7 @@ const LoginPage = () => {
           </Button>
         </Box>
 
-        {/* Footer */}
-        <Typography variant="caption" sx={{ color: '#444', display: 'block', mt: 4 }}>
-          Chỉ thành viên Ban Event có quyền truy cập
-        </Typography>
+       
       </Box>
     </Box>
   );

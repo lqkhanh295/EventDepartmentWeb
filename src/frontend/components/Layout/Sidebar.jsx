@@ -21,7 +21,6 @@ import StoreIcon from '@mui/icons-material/Store';
 import PeopleIcon from '@mui/icons-material/People';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SearchIcon from '@mui/icons-material/Search';
-import DescriptionIcon from '@mui/icons-material/Description';
 import ImageIcon from '@mui/icons-material/Image';
 import InventoryIcon from '@mui/icons-material/Inventory2';
 
@@ -200,6 +199,7 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
                     }
                   }}
                 >
+                  <Icon />
                 </ListItemIcon>
                 <ListItemText
                   primary={item.label}
@@ -220,29 +220,6 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
 
       {/* Footer */}
       <Box sx={{ p: 3, pt: 2 }}>
-                  return (
-                    <Drawer
-                      variant={isMobile ? 'temporary' : 'permanent'}
-                      open={open}
-                      onClose={onClose}
-                      ModalProps={{ keepMounted: true }}
-                      sx={{
-                        width: { xs: '100vw', sm: DRAWER_WIDTH },
-                        flexShrink: 0,
-                        '& .MuiDrawer-paper': {
-                          width: { xs: '100vw', sm: DRAWER_WIDTH },
-                          minWidth: { xs: '60vw', sm: DRAWER_WIDTH },
-                          maxWidth: DRAWER_WIDTH,
-                          boxSizing: 'border-box',
-                          background: bgColor,
-                          borderRight: `1px solid ${borderColor}`,
-                          color: '#fff',
-                        }
-                      }}
-                    >
-                      {drawerContent}
-                    </Drawer>
-                  );
         <Typography 
           variant="caption" 
           sx={{ 
