@@ -251,130 +251,165 @@ const InventoryPage = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
       <PageHeader
         title="Kho vật phẩm"
         subtitle="Hiển thị các vật phẩm còn lại trong kho theo CSV"
       />
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} lg={4}>
-          <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
-            <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Chip label="1" size="small" sx={{ background: '#333', color: '#FFD700' }} />
-              {isAdmin ? 'Tải CSV tồn kho' : 'Bộ lọc hiển thị'}
-            </Typography>
-            {isAdmin && (
-              <>
-                <Typography variant="body2" sx={{ color: '#888', mb: 2 }}>
-                  Xuất file CSV từ bảng tồn kho (các cột: {DEFAULT_HEADERS.join(', ')}).
-                </Typography>
-                <Box sx={{ mb: 2 }}>
-                  <input type="file" accept=".csv,.xlsx" id="inventory-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
-                  <label htmlFor="inventory-upload">
-                    <Button component="span" fullWidth variant="outlined" startIcon={<UploadFileIcon />} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', py: 1.5, justifyContent: 'flex-start', '&:hover': { borderColor: '#FFD700', background: 'rgba(255,215,0,0.05)' } }}>
-                      {fileName || 'Chọn file CSV/XLSX'}
-                    </Button>
-                  </label>
-                  {fileName && (
-                    <IconButton size="small" onClick={clearData} sx={{ color: '#f44336', ml: 1 }}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                </Box>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 2 }}>
-                  <Chip label={`Đã tải: ${totalLoaded}`} size="small" sx={{ background: '#333', color: '#FFD700' }} />
-                  <Chip label={`Còn lại: ${remainingRows.length}`} size="small" sx={{ background: '#333', color: '#4CAF50' }} />
-                </Box>
-                <Button variant="contained" onClick={addRow} startIcon={<AddIcon />} sx={{ background: '#FFD700', color: '#1a1a1a', fontWeight: 600, '&:hover': { background: '#FFE44D' } }}>
-                  Thêm vật phẩm
-                </Button>
-                <Button variant="outlined" onClick={importToServer} sx={{ ml: 1, borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', '&:hover': { borderColor: '#FFD700' } }}>
-                  Lưu toàn bộ lên kho (Firebase)
-                </Button>
-              </>
-            )}
-
-            <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Chip label="2" size="small" sx={{ background: '#333', color: '#FFD700' }} />
-              Lọc & Tìm kiếm
-            </Typography>
+      {/* Thanh tìm kiếm và bộ lọc nằm trên */}
+      <Paper sx={{ p: 2, mb: 2, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={3}>
             <TextField
               fullWidth
               size="small"
               placeholder="Tìm theo tên vật phẩm"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              InputProps={{ endAdornment: <SearchIcon sx={{ color: '#888' }} /> }}
+              InputProps={{ startAdornment: <SearchIcon sx={{ color: '#888', mr: 1 }} /> }}
               sx={{
-                mb: 2,
                 '& .MuiOutlinedInput-root': {
                   background: '#252525',
                   '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
                   '&:hover fieldset': { borderColor: '#FFD700' },
                   '&.Mui-focused fieldset': { borderColor: '#FFD700' }
                 },
-                '& .MuiInputLabel-root': { color: '#888' }
+                '& input': { color: '#fff' }
               }}
             />
-            <TextField
-              fullWidth
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <FormControl 
+              fullWidth 
               size="small"
-              placeholder="Lọc theo Type (ví dụ: Decor)"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   background: '#252525',
+                  color: '#fff',
                   '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
                   '&:hover fieldset': { borderColor: '#FFD700' },
                   '&.Mui-focused fieldset': { borderColor: '#FFD700' }
-                }
+                },
+                '& .MuiInputLabel-root': { color: '#888' },
+                '& .MuiSelect-icon': { color: '#FFD700' }
               }}
-            />
-            <Box sx={{ mt: 1 }}>
-              <Button size="small" variant="text" onClick={() => setShowAll(v => !v)} sx={{ color: '#FFD700' }}>
-                {showAll ? 'Chỉ hiển thị còn lại (>0)' : 'Hiển thị tất cả hàng'}
-              </Button>
-            </Box>
-            {!!types.length && (
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="caption" sx={{ color: '#888' }}>Types: {types.join(', ')}</Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} lg={8}>
-          <Paper sx={{ p: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
-            <Typography variant="h6" sx={{ color: '#FFD700', mb: 2 }}>Danh sách vật phẩm còn lại</Typography>
-            <Box sx={{ mb: 1 }}>
-              <Chip label={`Đã tải: ${totalLoaded}`} size="small" sx={{ background: '#333', color: '#FFD700', mr: 1 }} />
+            >
+              <Select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                displayEmpty
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      background: '#252525',
+                      border: '1px solid rgba(255,215,0,0.2)',
+                      '& .MuiMenuItem-root': {
+                        color: '#fff',
+                        '&:hover': { background: 'rgba(255,215,0,0.1)' },
+                        '&.Mui-selected': { background: 'rgba(255,215,0,0.2)' }
+                      }
+                    }
+                  }
+                }}
+              >
+                <MenuItem value="">
+                  <em>Tất cả Type</em>
+                </MenuItem>
+                {types.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={7}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Chip label={`Đã tải: ${totalLoaded}`} size="small" sx={{ background: '#333', color: '#FFD700' }} />
               <Chip label={`Hiển thị: ${remainingRows.length}`} size="small" sx={{ background: '#333', color: '#4CAF50' }} />
+              <Button size="small" variant="text" onClick={() => setShowAll(v => !v)} sx={{ color: '#FFD700', textTransform: 'none' }}>
+                {showAll ? 'Chỉ hiển thị còn lại (>0)' : 'Hiển thị tất cả'}
+              </Button>
+              {isAdmin && (
+                <>
+                  <input type="file" accept=".csv,.xlsx" id="inventory-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
+                  <label htmlFor="inventory-upload">
+                    <Button component="span" size="small" variant="outlined" startIcon={<UploadFileIcon />} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', textTransform: 'none', '&:hover': { borderColor: '#FFD700', background: 'rgba(255,215,0,0.05)' } }}>
+                      {fileName || 'Tải CSV/XLSX'}
+                    </Button>
+                  </label>
+                  {fileName && (
+                    <IconButton size="small" onClick={clearData} sx={{ color: '#f44336' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  <Button size="small" variant="contained" onClick={addRow} startIcon={<AddIcon />} sx={{ background: '#FFD700', color: '#1a1a1a', fontWeight: 600, textTransform: 'none', '&:hover': { background: '#FFE44D' } }}>
+                    Thêm
+                  </Button>
+                  <Button size="small" variant="outlined" onClick={importToServer} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', textTransform: 'none', '&:hover': { borderColor: '#FFD700' } }}>
+                    Lưu lên kho
+                  </Button>
+                </>
+              )}
             </Box>
-            <TableContainer component={Box}>
-              <Table size="small" sx={{ minWidth: 650 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ color: '#bbb' }}>Type</TableCell>
-                    <TableCell sx={{ color: '#bbb' }}>Item</TableCell>
-                    <TableCell sx={{ color: '#bbb' }} align="right">Current Qty</TableCell>
-                    <TableCell sx={{ color: '#bbb' }} align="right">Total Qty</TableCell>
-                    <TableCell sx={{ color: '#bbb' }}>Unit</TableCell>
-                    <TableCell sx={{ color: '#bbb' }}>P.I.C</TableCell>
-                    <TableCell sx={{ color: '#bbb' }}>Note</TableCell>
-                    {isAdmin && <TableCell sx={{ color: '#bbb' }} align="right">Actions</TableCell>}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+          </Grid>
+        </Grid>
+        {!!types.length && (
+          <Box sx={{ mt: 1 }}>
+            <Typography variant="caption" sx={{ color: '#888' }}>Hiển thị tất cả hàng</Typography>
+          </Box>
+        )}
+      </Paper>
+
+      {/* Danh sách vật phẩm full trang */}
+      <Paper sx={{ flex: 1, p: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <Typography variant="h6" sx={{ color: '#FFD700', mb: 2 }}>Danh sách vật phẩm còn lại</Typography>
+        <TableContainer component={Box} sx={{ flex: 1, overflow: 'auto' }}>
+          <Table stickyHeader size="small" sx={{ minWidth: 650 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>Type</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>Item</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }} align="right">Current Qty</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }} align="right">Total Qty</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>Unit</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>P.I.C</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>Note</TableCell>
+                {isAdmin && <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }} align="right">Actions</TableCell>}
+              </TableRow>
+            </TableHead>
+            <TableBody>
                   {remainingRows.map((r, idx) => {
                     const isEditing = isAdmin && editingIndex === idx;
+                    // Màu cho các loại Type
+                    const getTypeColor = (type) => {
+                      const typeColors = {
+                        'Decor': '#FF6B6B',
+                        'Đồ dùng bếp': '#4ECDC4',
+                        'Văn phòng phẩm': '#FFD93D',
+                        'Vật phẩm thường': '#95E1D3',
+                      };
+                      return typeColors[type] || '#A0A0A0';
+                    };
+                    
                     return (
                       <TableRow key={idx} sx={{ '&:nth-of-type(odd)': { backgroundColor: '#1b1b1b' } }}>
                         <TableCell sx={{ color: '#eee' }}>
                           {isEditing ? (
                             <TextField size="small" value={draftRow?.['Type'] || ''} onChange={(e) => setDraftRow(prev => ({ ...prev, Type: e.target.value }))} />
-                          ) : r['Type']}
+                          ) : (
+                            <Chip 
+                              label={r['Type']} 
+                              size="small" 
+                              sx={{ 
+                                background: `${getTypeColor(r['Type'])}22`,
+                                color: getTypeColor(r['Type']),
+                                border: `1px solid ${getTypeColor(r['Type'])}44`,
+                                fontWeight: 600
+                              }} 
+                            />
+                          )}
                         </TableCell>
                         <TableCell sx={{ color: '#eee' }}>
                           {isEditing ? (
@@ -443,8 +478,6 @@ const InventoryPage = () => {
               </Table>
             </TableContainer>
           </Paper>
-        </Grid>
-      </Grid>
     </Box>
   );
 };

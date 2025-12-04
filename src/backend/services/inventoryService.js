@@ -37,7 +37,7 @@ export async function updateInventoryItem(id, updates) {
 }
 
 export async function deleteInventoryItem(id) {
-  const ref = doc(db, INVENTORY_COL, id);
+  const ref = doc(db, INVENTORY_COL, id); 
   await deleteDoc(ref);
 }
 
