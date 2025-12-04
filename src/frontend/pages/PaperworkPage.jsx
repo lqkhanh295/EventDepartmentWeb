@@ -192,7 +192,7 @@ const PaperworkPage = () => {
         {/* Left: Upload & Actions */}
         <Grid item xs={12} lg={4}>
           {/* Upload Files */}
-          <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
+          <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip label="1" size="small" sx={{ background: '#333', color: '#FFD700' }} />
               File Mẫu (Template)
@@ -289,12 +289,12 @@ const PaperworkPage = () => {
                 value={progress} 
                 sx={{ 
                   height: 8, 
-                  borderRadius: 4,
+                  borderRadius: 2,
                   background: '#333',
                   '& .MuiLinearProgress-bar': { 
                     background: progress === 100 
-                      ? 'linear-gradient(90deg, #4CAF50, #8BC34A)' 
-                      : 'linear-gradient(90deg, #FFD700, #FFA000)' 
+                      ? '#4CAF50' 
+                      : '#FFD700' 
                   }
                 }} 
               />
@@ -308,10 +308,10 @@ const PaperworkPage = () => {
               disabled={!contractFile || filledCount === 0}
               sx={{
                 mb: 2,
-                background: 'linear-gradient(135deg, #FFD700 0%, #CCB000 100%)',
+                background: '#FFD700',
                 color: '#1a1a1a',
                 fontWeight: 600,
-                '&:hover': { background: 'linear-gradient(135deg, #FFE44D 0%, #FFD700 100%)' },
+                '&:hover': { background: '#FFE44D' },
                 '&.Mui-disabled': { background: '#333', color: '#666' }
               }}
             >
@@ -339,7 +339,7 @@ const PaperworkPage = () => {
         {/* Right: Form Fields */}
         <Grid item xs={12} lg={8}>
           {/* AI Section */}
-          <Paper sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 3 }}>
+          <Paper sx={{ p: 3, mb: 3, background: '#1a1a1a', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h6" sx={{ color: '#818cf8', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <AutoAwesomeIcon /> AI Tự Động Điền

@@ -10,9 +10,6 @@ import {
   Snackbar,
   LinearProgress,
   Chip,
-  FormControl,
-  Select,
-  MenuItem
 } from '@mui/material';
 import { Upload, Table } from 'antd';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -85,7 +82,7 @@ const ImportMembersPage = () => {
           if (headerValue && headerValue.toString().trim()) {
             const name = headerValue.toString().trim();
             // Giữ nguyên tên làm key (thay thế ký tự đặc biệt bằng _)
-            const key = name.replace(/[\/\\.\#\$\[\]]/g, '_');
+            const key = name.replace(/[/.\\#$[\]]/g, '_');
             projectCols.push({
               index: i,
               name: name,
@@ -363,7 +360,7 @@ const ImportMembersPage = () => {
                 value={progress} 
                 sx={{ 
                   height: 8, 
-                  borderRadius: 4,
+                  borderRadius: 2,
                   background: '#333',
                   '& .MuiLinearProgress-bar': { background: '#4CAF50' }
                 }} 

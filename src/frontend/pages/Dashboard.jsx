@@ -1,5 +1,5 @@
 // Dashboard Page - Trang tổng quan
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useSpring, animated } from 'react-spring';
 import {
@@ -8,20 +8,14 @@ import {
   Card,
   CardContent,
   Typography,
-  useTheme,
-  useMediaQuery
 } from '@mui/material';
-import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
-import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
-import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
-import SyncOutlinedIcon from '@mui/icons-material/SyncOutlined';
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
-import { PageHeader, Loading } from '../components';
+import { Loading } from '../components';
 import WeatherWidget from '../components/Weather/WeatherWidget';
 import { getAllVendors } from '../../backend/services/vendorService';
 import { getAllGuides } from '../../backend/services/guideService';
+import logoCsg from '../../image/logocsg.png';
 
 const StatCard = ({ title, value, onClick, index = 0 }) => {
   const [hovered, setHovered] = useState(false);
@@ -179,18 +173,12 @@ const QuickActionCard = ({ title, description, onClick, index = 0 }) => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     vendors: 0,
     guides: 0
   });
-
-  useEffect(() => {
-    loadStats();
-  }, []);
 
   const mergeVendors = (vendorList) => {
     const merged = {};
@@ -206,7 +194,7 @@ const Dashboard = () => {
     return Object.values(merged);
   };
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       setLoading(true);
       const [vendors, guides] = await Promise.all([
@@ -225,7 +213,11 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
 
   if (loading) {
     return <Loading message="Đang tải dữ liệu..." />;
@@ -251,7 +243,7 @@ const Dashboard = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
             <Box
               component="img"
-              src={require('../../image/logocsg.png')}
+              src={logoCsg}
               alt="Cóc Sài Gòn Logo"
               sx={{
                 height: { xs: 36, sm: 44 },

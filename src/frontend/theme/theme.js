@@ -86,7 +86,7 @@ export const muiTheme = createTheme({
     }
   },
   shape: {
-    borderRadius: 8
+    borderRadius: 2
   },
   components: {
     MuiButton: {
@@ -94,16 +94,12 @@ export const muiTheme = createTheme({
         root: {
           textTransform: 'none',
           fontWeight: 500,
-          borderRadius: 6,
+          borderRadius: 2,
           padding: '8px 16px',
           boxShadow: 'none',
-          transition: 'all 0.2s ease',
+          transition: 'all 0.15s ease',
           '&:hover': {
-            boxShadow: 'none',
-            transform: 'translateY(-1px)'
-          },
-          '&:active': {
-            transform: 'translateY(0)'
+            boxShadow: 'none'
           }
         },
         containedPrimary: {
@@ -118,9 +114,8 @@ export const muiTheme = createTheme({
     MuiIconButton: {
       styleOverrides: {
         root: {
-          transition: 'all 0.2s ease',
+          transition: 'all 0.15s ease',
           '&:hover': {
-            transform: 'scale(1.1)',
             background: 'rgba(255, 215, 0, 0.1)',
             color: '#FFD700'
           }
@@ -130,10 +125,7 @@ export const muiTheme = createTheme({
     MuiFab: {
       styleOverrides: {
         root: {
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            transform: 'scale(1.05)'
-          }
+          transition: 'all 0.15s ease'
         }
       }
     },
@@ -154,10 +146,10 @@ export const muiTheme = createTheme({
       styleOverrides: {
         root: {
           background: colors.background.paper,
-          borderRadius: 8,
+          borderRadius: 2,
           border: `1px solid ${colors.border.main}`,
           boxShadow: 'none',
-          transition: 'border-color 0.2s ease',
+          transition: 'border-color 0.15s ease',
           '&:hover': {
             borderColor: colors.primary.main,
             boxShadow: 'none'
@@ -169,7 +161,7 @@ export const muiTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 6,
+            borderRadius: 2,
             '& fieldset': {
               borderColor: colors.border.main
             },
@@ -187,7 +179,7 @@ export const muiTheme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 4,
+          borderRadius: 2,
           fontWeight: 500,
           fontSize: '0.8rem'
         }
@@ -230,7 +222,7 @@ export const antTheme = {
     colorTextSecondary: colors.text.secondary,
     colorBorder: colors.border.main,
     colorBorderSecondary: colors.border.main,
-    borderRadius: 6,
+    borderRadius: 2,
     fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
     colorSuccess: colors.accent.success,
     colorWarning: colors.accent.warning,

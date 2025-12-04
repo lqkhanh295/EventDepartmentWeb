@@ -7,15 +7,11 @@ import {
   AccordionSummary,
   AccordionDetails,
   Chip,
-  useTheme,
-  useMediaQuery
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 const EventGuidePage = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [expanded, setExpanded] = useState('planning-team');
 
   const handleChange = (panel) => (event, isExpanded) => {
@@ -111,7 +107,7 @@ const EventGuidePage = () => {
       sx={{
         background: '#121212',
         border: '1px solid #2a2a2a',
-        borderRadius: '8px !important',
+        borderRadius: '2px !important',
         mb: 1.5,
         '&:before': { display: 'none' },
         '&.Mui-expanded': {
@@ -555,7 +551,7 @@ const EventGuidePage = () => {
           background: '#1a1a1a',
           border: '1px solid #2a2a2a',
           borderLeft: '3px solid #f59e0b',
-          borderRadius: 1.5,
+          borderRadius: 2,
           p: 2.5,
           mt: 3
         }}
@@ -576,7 +572,7 @@ const EventGuidePage = () => {
           height: 40,
           background: '#1a1a1a',
           border: '1px solid #2a2a2a',
-          borderRadius: 1,
+          borderRadius: 2,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

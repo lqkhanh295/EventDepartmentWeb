@@ -51,12 +51,11 @@ const VendorCard = ({ vendor, onEdit, onDelete }) => {
         flexDirection: 'column',
         background: '#1e1e1e',
         border: '1px solid rgba(255, 215, 0, 0.1)',
-        borderRadius: 3,
-        transition: 'all 0.3s ease',
+        borderRadius: 2,
+        transition: 'all 0.15s ease',
         '&:hover': {
           border: '1px solid rgba(255, 215, 0, 0.3)',
-          transform: 'translateY(-4px)',
-          boxShadow: '0 12px 40px rgba(255, 215, 0, 0.15)'
+          boxShadow: 'none'
         }
       }}
     >

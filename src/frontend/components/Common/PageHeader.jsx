@@ -64,10 +64,8 @@ const PageHeader = ({
           <Typography
             variant="h4"
             sx={{
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #FFD700 0%, #FFE44D 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              fontWeight: 600,
+              color: '#FFD700',
               mb: 0.5
             }}
           >
@@ -89,16 +87,16 @@ const PageHeader = ({
             onClick={onAction}
             startIcon={ActionIcon && <ActionIcon />}
             sx={{
-              background: 'linear-gradient(135deg, #FFD700 0%, #CCB000 100%)',
+              background: '#FFD700',
               color: '#1a1a1a',
               fontWeight: 600,
               px: 3,
               py: 1.2,
               borderRadius: 2,
-              boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
+              boxShadow: 'none',
               '&:hover': {
-                background: 'linear-gradient(135deg, #FFE44D 0%, #FFD700 100%)',
-                boxShadow: '0 6px 20px rgba(255, 215, 0, 0.4)'
+                background: '#FFE44D',
+                boxShadow: 'none'
               }
             }}
           >

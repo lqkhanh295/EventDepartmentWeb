@@ -1,6 +1,6 @@
 // Main Layout Component
 import React, { useState } from 'react';
-import { Box, useTheme, useMediaQuery } from '@mui/material';
+import { Box } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,8 +9,6 @@ const DRAWER_WIDTH = 260;
 
 const Layout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { isAdminMode } = useAuth();
 
   const handleDrawerToggle = () => {

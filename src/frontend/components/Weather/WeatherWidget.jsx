@@ -6,7 +6,7 @@ import {
   Paper,
   CircularProgress
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import CloudIcon from '@mui/icons-material/Cloud';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
@@ -239,11 +239,11 @@ const WeatherWidget = () => {
         pb: 1,
         '&::-webkit-scrollbar': { 
           height: 6,
-          borderRadius: 3
+          borderRadius: 2
         },
         '&::-webkit-scrollbar-track': {
           background: '#121212',
-          borderRadius: 3
+          borderRadius: 2
         },
         '&::-webkit-scrollbar-thumb': {
           background: '#404040',

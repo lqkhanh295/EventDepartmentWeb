@@ -3,8 +3,6 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { Box, Typography, Button, CircularProgress, Alert, Divider } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import PersonIcon from '@mui/icons-material/Person';
 import { useAuth } from '../contexts/AuthContext';
 import logoCsg from '../../image/logocsg.png';
 
@@ -172,7 +170,7 @@ const LoginPage = () => {
               }
             }}
           >
-            Mock Admin
+            Admin
           </Button>
 
           <Button
@@ -199,7 +197,7 @@ const LoginPage = () => {
               }
             }}
           >
-            Mock Member
+            Member
           </Button>
         </Box>
 

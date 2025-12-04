@@ -1,5 +1,5 @@
 // MemberScorePage - Trang chấm điểm Members theo kỳ
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -69,11 +69,7 @@ const MemberScorePage = () => {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
   const [sortMode, setSortMode] = useState('default'); // 'default' | 'rank'
 
-  useEffect(() => {
-    loadData();
-  }, [semester]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -103,11 +99,16 @@ const MemberScorePage = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      showSnackbar('Lỗi khi tải dữ liệu', 'error');
+      setSnackbar({ open: true, message: 'Lỗi khi tải dữ liệu', severity: 'error' });
     } finally {
       setLoading(false);
     }
-  };
+  }, [semester]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
 
   // Lấy điểm của member theo semester hiện tại
   const getScoresBySemester = (member, sem = semester) => {

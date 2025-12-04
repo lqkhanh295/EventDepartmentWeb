@@ -18,7 +18,7 @@ import { AuthProvider, useAuth } from './frontend/contexts/AuthContext';
 import { Layout } from './frontend/components/Layout';
 
 // Pages
-import { Dashboard, VendorsPage, EventGuidePage, TaxLookupPage, PaperworkPage, MembersPage, MemberScorePage, ImportMembersPage, RemoveBgPage, LoginPage } from './frontend/pages';
+import { Dashboard, VendorsPage, EventGuidePage, TaxLookupPage, MembersPage, MemberScorePage, ImportMembersPage, RemoveBgPage, LoginPage, InventoryPage } from './frontend/pages';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -58,23 +58,23 @@ const AdminProtectedRoute = ({ children }) => {
 };
 
 // Admin Route Component - Chỉ admin mới được truy cập
-const AdminRoute = ({ children }) => {
-  const { user, isAdmin, loading } = useAuth();
-
-  if (loading) {
-    return null; // Hoặc loading spinner
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-};
+// const AdminRoute = ({ children }) => {
+//   const { user, isAdmin, loading } = useAuth();
+//
+//   if (loading) {
+//     return null; // Hoặc loading spinner
+//   }
+//
+//   if (!user) {
+//     return <Navigate to="/login" replace />;
+//   }
+//
+//   if (!isAdmin) {
+//     return <Navigate to="/" replace />;
+//   }
+//
+//   return children;
+// };
 
 // App Routes
 const AppRoutes = () => {
@@ -91,8 +91,8 @@ const AppRoutes = () => {
                 <Route path="/vendors" element={<VendorsPage />} />
                 <Route path="/event-guide" element={<EventGuidePage />} />
                 <Route path="/tax-lookup" element={<TaxLookupPage />} />
-                <Route path="/paperwork" element={<PaperworkPage />} />
                 <Route path="/remove-bg" element={<RemoveBgPage />} />
+                <Route path="/inventory" element={<InventoryPage />} />
                 <Route 
                   path="/members" 
                   element={

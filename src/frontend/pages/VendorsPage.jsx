@@ -1,5 +1,5 @@
 // VendorsPage - Trang quản lý Vendors (dạng bảng)
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   TextField,
@@ -54,13 +54,49 @@ const VendorsPage = () => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, vendor: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+  const loadVendors = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getAllVendors();
+      const mergedData = mergeVendors(data);
+      setAllVendors(mergedData);
+      setVendors(mergedData);
+      setEvents(extractEvents(mergedData));
+    } catch (error) {
+      console.error('Error loading vendors:', error);
+      showSnackbar('Lỗi khi tải danh sách vendor', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadVendors();
     
     if (searchParams.get('action') === 'add') {
       setFormOpen(true);
     }
-  }, [searchParams]);
+  }, [searchParams, loadVendors]);
+
+  const handleSearch = useCallback(() => {
+    let filtered = [...allVendors];
+    
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(v => 
+        (v.name || '').toLowerCase().includes(term) ||
+        (v.category || '').toLowerCase().includes(term) ||
+        (v.contact || '').toLowerCase().includes(term) ||
+        (v.event || '').toLowerCase().includes(term)
+      );
+    }
+    
+    if (selectedEvent) {
+      filtered = filtered.filter(v => v.event === selectedEvent);
+    }
+    
+    setVendors(filtered);
+  }, [allVendors, searchTerm, selectedEvent]);
 
   useEffect(() => {
     if (allVendors.length === 0) return; // Chờ data load xong
@@ -70,7 +106,7 @@ const VendorsPage = () => {
     }, 300);
     
     return () => clearTimeout(delaySearch);
-  }, [searchTerm, selectedEvent, allVendors]);
+  }, [allVendors, handleSearch]);
 
   // Gộp các vendor giống nhau (chỉ dựa trên tên + liên hệ + nội dung mua)
   const mergeVendors = (vendorList) => {
@@ -122,45 +158,6 @@ const VendorsPage = () => {
       }
     });
     return Array.from(eventSet).sort();
-  };
-
-  const loadVendors = async () => {
-    try {
-      setLoading(true);
-      const data = await getAllVendors();
-      const mergedData = mergeVendors(data);
-      setAllVendors(mergedData);
-      setVendors(mergedData);
-      setEvents(extractEvents(mergedData));
-    } catch (error) {
-      console.error('Error loading vendors:', error);
-      showSnackbar('Lỗi khi tải danh sách vendor', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = () => {
-    let filtered = [...allVendors];
-    
-    // Lọc theo search term
-    if (searchTerm) {
-      const lowerSearch = searchTerm.toLowerCase();
-      filtered = filtered.filter(vendor => 
-        vendor.name?.toLowerCase().includes(lowerSearch) ||
-        vendor.buyDetail?.toLowerCase().includes(lowerSearch) ||
-        vendor.contact?.toLowerCase().includes(lowerSearch)
-      );
-    }
-    
-    // Lọc theo event
-    if (selectedEvent && selectedEvent !== 'all') {
-      filtered = filtered.filter(vendor => 
-        vendor.events && vendor.events.some(e => e === selectedEvent)
-      );
-    }
-    
-    setVendors(filtered);
   };
 
   const handleAddVendor = async (vendorData) => {
@@ -369,7 +366,7 @@ const VendorsPage = () => {
             background: text ? 'rgba(255, 215, 0, 0.05)' : 'transparent',
             borderLeft: text ? '2px solid rgba(255, 215, 0, 0.3)' : 'none',
             padding: text ? '6px 10px' : '6px 0',
-            borderRadius: '0 4px 4px 0'
+            borderRadius: '0 2px 2px 0'
           }}
         >
           <Typography 
@@ -507,7 +504,7 @@ const VendorsPage = () => {
           sx={{
             background: '#1e1e1e',
             border: '1px solid rgba(255, 215, 0, 0.1)',
-            borderRadius: 3,
+            borderRadius: 2,
             overflow: 'hidden'
           }}
         >

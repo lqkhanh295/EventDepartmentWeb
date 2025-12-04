@@ -64,13 +64,13 @@ const EmptyState = ({
           variant="contained"
           onClick={onAction}
           sx={{
-            background: 'linear-gradient(135deg, #FFD700 0%, #CCB000 100%)',
+            background: '#FFD700',
             color: '#1a1a1a',
             fontWeight: 600,
             px: 4,
             py: 1.5,
             '&:hover': {
-              background: 'linear-gradient(135deg, #FFE44D 0%, #FFD700 100%)'
+              background: '#FFE44D'
             }
           }}
         >

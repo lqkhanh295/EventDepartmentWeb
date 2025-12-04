@@ -1,5 +1,5 @@
 // Remove Background Page - Xóa background từ ảnh sử dụng remove.bg API
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -9,7 +9,6 @@ import {
   Alert,
   CircularProgress,
   Stack,
-  IconButton,
   Card,
   CardContent,
   Divider
@@ -39,37 +38,24 @@ const RemoveBgPage = () => {
   const [success, setSuccess] = useState('');
   const fileInputRef = useRef(null);
 
-  // Tự động lấy API key từ Firebase khi load trang
-  React.useEffect(() => {
-    loadApiKey();
-  }, []);
-
-  const loadApiKey = async () => {
+  const loadApiKey = useCallback(async () => {
     try {
       setLoadingApiKey(true);
       const key = await getRemoveBgApiKey();
-      if (key && key.trim() !== '') {
-        setApiKey(key.trim());
-        if (isAdmin) {
-          setApiKeyInput(key.trim()); // Hiển thị cho admin để chỉnh sửa
-        }
-      } else {
-        // Không có API key
-        setApiKey('');
-        if (isAdmin) {
-          setApiKeyInput('');
-        }
+      if (key) {
+        setApiKey(key);
       }
-    } catch (err) {
-      console.error('Error loading API key:', err);
-      setApiKey('');
-      if (isAdmin) {
-        setApiKeyInput('');
-      }
+    } catch (error) {
+      console.error('Error loading API key:', error);
     } finally {
       setLoadingApiKey(false);
     }
-  };
+  }, []);
+
+  // Tự động lấy API key từ Firebase khi load trang
+  useEffect(() => {
+    loadApiKey();
+  }, [loadApiKey]);
 
   // Lưu API key vào Firebase (chỉ admin)
   const handleSaveApiKey = async () => {

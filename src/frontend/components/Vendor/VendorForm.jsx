@@ -7,7 +7,6 @@ import {
   DialogActions,
   TextField,
   Button,
-  Box,
   Grid,
   MenuItem,
   IconButton,
@@ -109,7 +108,7 @@ const VendorForm = ({ open, onClose, onSubmit, initialData = null }) => {
         sx: {
           background: '#1e1e1e',
           border: '1px solid rgba(255, 215, 0, 0.2)',
-          borderRadius: 3
+          borderRadius: 2
         }
       }}
     >
@@ -126,9 +125,7 @@ const VendorForm = ({ open, onClose, onSubmit, initialData = null }) => {
           variant="h5"
           sx={{
             fontWeight: 700,
-            background: 'linear-gradient(135deg, #FFD700 0%, #FFE44D 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            color: '#FFD700'
           }}
         >
           {isEditMode ? 'Chỉnh sửa Vendor' : 'Thêm Vendor mới'}
@@ -249,12 +246,12 @@ const VendorForm = ({ open, onClose, onSubmit, initialData = null }) => {
           variant="contained"
           onClick={handleSubmit}
           sx={{
-            background: 'linear-gradient(135deg, #FFD700 0%, #CCB000 100%)',
+            background: '#FFD700',
             color: '#1a1a1a',
             fontWeight: 600,
             px: 4,
             '&:hover': {
-              background: 'linear-gradient(135deg, #FFE44D 0%, #FFD700 100%)'
+              background: '#FFE44D'
             }
           }}
         >
