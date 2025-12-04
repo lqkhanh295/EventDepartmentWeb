@@ -58,23 +58,23 @@ const AdminProtectedRoute = ({ children }) => {
 };
 
 // Admin Route Component - Chỉ admin mới được truy cập
-// const AdminRoute = ({ children }) => {
-//   const { user, isAdmin, loading } = useAuth();
-//
-//   if (loading) {
-//     return null; // Hoặc loading spinner
-//   }
-//
-//   if (!user) {
-//     return <Navigate to="/login" replace />;
-//   }
-//
-//   if (!isAdmin) {
-//     return <Navigate to="/" replace />;
-//   }
-//
-//   return children;
-// };
+const AdminRoute = ({ children }) => {
+  const { user, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return null; // Hoặc loading spinner
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
 
 // App Routes
 const AppRoutes = () => {

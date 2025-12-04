@@ -87,12 +87,15 @@ const VendorsPage = () => {
         (v.name || '').toLowerCase().includes(term) ||
         (v.category || '').toLowerCase().includes(term) ||
         (v.contact || '').toLowerCase().includes(term) ||
-        (v.event || '').toLowerCase().includes(term)
+        (v.event || '').toLowerCase().includes(term) ||
+        (v.events && v.events.some(e => e.toLowerCase().includes(term)))
       );
     }
     
-    if (selectedEvent) {
-      filtered = filtered.filter(v => v.event === selectedEvent);
+    if (selectedEvent && selectedEvent !== 'all') {
+      filtered = filtered.filter(v => 
+        v.events && v.events.includes(selectedEvent)
+      );
     }
     
     setVendors(filtered);

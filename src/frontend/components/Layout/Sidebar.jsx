@@ -21,6 +21,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import PeopleIcon from '@mui/icons-material/People';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SearchIcon from '@mui/icons-material/Search';
+import DescriptionIcon from '@mui/icons-material/Description';
 import ImageIcon from '@mui/icons-material/Image';
 import InventoryIcon from '@mui/icons-material/Inventory2';
 
@@ -166,7 +167,7 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
                   <ListItemButton
                     onClick={() => handleNavigation(item.path)}
                     sx={{
-                      borderRadius: 2,
+                      borderRadius: 1,
                       py: 1.5,
                       px: 2,
                       background: isActive 
