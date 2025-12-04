@@ -94,10 +94,24 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
   const bgColor = userIsAdmin ? '#1a1a0a' : '#121212'; // Đen đậm cho member
   const borderColor = userIsAdmin ? 'rgba(255, 215, 0, 0.2)' : '#2a2a2a'; // Border đen cho member
 
+    <Box
+      sx={{
+        height: '100%',
   const drawerContent = (
     <Box
       sx={{
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        pt: { xs: 1, sm: 2 },
+        pb: { xs: 1, sm: 2 },
+        px: { xs: 1, sm: 2 },
+        fontSize: { xs: '0.95rem', sm: '1rem' },
+        width: { xs: '100vw', sm: DRAWER_WIDTH },
+        minWidth: { xs: '60vw', sm: DRAWER_WIDTH },
+        maxWidth: DRAWER_WIDTH,
+        boxSizing: 'border-box',
+      }}
         display: 'flex',
         flexDirection: 'column',
         background: bgColor
@@ -192,7 +206,6 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
                     }
                   }}
                 >
-                  <Icon />
                 </ListItemIcon>
                 <ListItemText
                   primary={item.label}
@@ -213,6 +226,29 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
 
       {/* Footer */}
       <Box sx={{ p: 3, pt: 2 }}>
+                  return (
+                    <Drawer
+                      variant={isMobile ? 'temporary' : 'permanent'}
+                      open={open}
+                      onClose={onClose}
+                      ModalProps={{ keepMounted: true }}
+                      sx={{
+                        width: { xs: '100vw', sm: DRAWER_WIDTH },
+                        flexShrink: 0,
+                        '& .MuiDrawer-paper': {
+                          width: { xs: '100vw', sm: DRAWER_WIDTH },
+                          minWidth: { xs: '60vw', sm: DRAWER_WIDTH },
+                          maxWidth: DRAWER_WIDTH,
+                          boxSizing: 'border-box',
+                          background: bgColor,
+                          borderRight: `1px solid ${borderColor}`,
+                          color: '#fff',
+                        }
+                      }}
+                    >
+                      {drawerContent}
+                    </Drawer>
+                  );
         <Typography 
           variant="caption" 
           sx={{ 

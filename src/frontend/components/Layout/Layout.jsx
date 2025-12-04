@@ -23,17 +23,18 @@ const Layout = ({ children }) => {
     <Box sx={{ display: 'flex', minHeight: '100vh', background: bgColor }}>
       <Header onMenuClick={handleDrawerToggle} />
       <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
-      
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          ml: { md: `${DRAWER_WIDTH}px` },
-          mt: '64px',
-          minHeight: 'calc(100vh - 64px)',
-          p: { xs: 2, sm: 3, md: 4 },
-          background: mainBgColor
+          width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          ml: { xs: 0, md: `${DRAWER_WIDTH}px` },
+          mt: { xs: '56px', sm: '64px' },
+          minHeight: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' },
+          p: { xs: 1, sm: 2, md: 3, lg: 4 },
+          background: mainBgColor,
+          transition: 'all 0.2s',
+          overflowX: 'auto',
         }}
       >
         {children}

@@ -22,7 +22,6 @@ const Header = ({ onMenuClick }) => {
   const { user, logout, isAdmin, isAdminMode, toggleAdminMode } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
   return (
     <AppBar 
       position="fixed" 
@@ -30,29 +29,30 @@ const Header = ({ onMenuClick }) => {
       sx={{ 
         zIndex: (theme) => theme.zIndex.drawer + 1,
         background: isAdminMode ? '#1a1a0a' : '#121212',
-        borderBottom: isAdminMode ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid #2a2a2a'
+        borderBottom: isAdminMode ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid #2a2a2a',
+        height: { xs: 56, sm: 64 },
+        px: { xs: 1, sm: 2 },
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Toolbar sx={{ justifyContent: 'space-between', minHeight: { xs: 56, sm: 64 }, px: { xs: 0.5, sm: 2 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
           {isMobile && (
             <IconButton
               edge="start"
               onClick={onMenuClick}
-              sx={{ color: '#fff' }}
+              sx={{ color: '#fff', fontSize: { xs: 22, sm: 26 } }}
             >
               <MenuOutlinedIcon />
             </IconButton>
           )}
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
             <Box
               component="img"
               src={logoCsg}
               alt="CSG Logo"
               sx={{
-                width: 36,
-                height: 36,
+                width: { xs: 28, sm: 36 },
+                height: { xs: 28, sm: 36 },
                 borderRadius: 1,
                 objectFit: 'contain',
                 transition: 'transform 0.2s ease',
@@ -61,13 +61,12 @@ const Header = ({ onMenuClick }) => {
                 }
               }}
             />
-            
             <Typography
               variant="body1"
               sx={{
                 fontWeight: 600,
                 color: isAdminMode ? '#FFD700' : '#FFFFFF',
-                fontSize: '1rem',
+                fontSize: { xs: '0.95rem', sm: '1rem' },
                 letterSpacing: '0.3px'
               }}
             >
@@ -76,7 +75,7 @@ const Header = ({ onMenuClick }) => {
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
           {/* Switch Admin/Member - chỉ hiển thị nếu có quyền admin */}
           {isAdmin && (
             <FormControlLabel
@@ -101,23 +100,24 @@ const Header = ({ onMenuClick }) => {
                   }}
                 />
               }
-              label={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  {isAdminMode ? (
-                    <>
-                      <AdminPanelSettingsIcon sx={{ fontSize: 16, color: '#FFD700' }} />
-                      <Typography sx={{ color: '#FFD700', fontSize: '0.75rem', fontWeight: 500 }}>
-                        Admin
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <PersonIcon sx={{ fontSize: 16, color: '#B3B3B3' }} />
-                      <Typography sx={{ color: '#B3B3B3', fontSize: '0.75rem', fontWeight: 500 }}>
-                        Member
-                      </Typography>
-                    </>
-                  )}
+              label={<AdminPanelSettingsIcon sx={{ color: isAdminMode ? '#FFD700' : '#fff', fontSize: { xs: 16, sm: 18 }, ml: 1 }} />}
+              sx={{ ml: 1 }}
+            />
+          )}
+          <Tooltip title={user?.displayName || 'Thành viên'}>
+            <IconButton sx={{ color: '#fff', fontSize: { xs: 20, sm: 24 } }}>
+              <PersonIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Đăng xuất">
+            <IconButton sx={{ color: '#fff', fontSize: { xs: 20, sm: 24 } }} onClick={logout}>
+              <LogoutOutlinedIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
                 </Box>
               }
               sx={{ 

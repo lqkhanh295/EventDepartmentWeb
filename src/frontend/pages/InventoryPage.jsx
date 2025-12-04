@@ -258,9 +258,9 @@ const InventoryPage = () => {
       />
 
       {/* Thanh tìm kiếm và bộ lọc nằm trên */}
-      <Paper sx={{ p: 2, mb: 2, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
+      <Paper sx={{ p: { xs: 1, sm: 2 }, mb: 2, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} sm={4} md={3}>
             <TextField
               fullWidth
               size="small"
@@ -269,6 +269,8 @@ const InventoryPage = () => {
               onChange={(e) => setQuery(e.target.value)}
               InputProps={{ startAdornment: <SearchIcon sx={{ color: '#888', mr: 1 }} /> }}
               sx={{
+                maxWidth: { xs: '100%', sm: 320 },
+                mb: { xs: 1, sm: 0 },
                 '& .MuiOutlinedInput-root': {
                   background: '#252525',
                   '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
@@ -279,11 +281,12 @@ const InventoryPage = () => {
               }}
             />
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid item xs={12} sm={4} md={2}>
             <FormControl 
               fullWidth 
               size="small"
               sx={{
+                mb: { xs: 1, sm: 0 },
                 '& .MuiOutlinedInput-root': {
                   background: '#252525',
                   color: '#fff',
@@ -324,30 +327,30 @@ const InventoryPage = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={7}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-              <Chip label={`Đã tải: ${totalLoaded}`} size="small" sx={{ background: '#333', color: '#FFD700' }} />
-              <Chip label={`Hiển thị: ${remainingRows.length}`} size="small" sx={{ background: '#333', color: '#4CAF50' }} />
-              <Button size="small" variant="text" onClick={() => setShowAll(v => !v)} sx={{ color: '#FFD700', textTransform: 'none' }}>
+          <Grid item xs={12} sm={4} md={7}>
+            <Box sx={{ display: 'flex', gap: { xs: 1, sm: 2 }, alignItems: 'center', flexWrap: 'wrap', flexDirection: { xs: 'column', sm: 'row' } }}>
+              <Chip label={`Đã tải: ${totalLoaded}`} size="small" sx={{ background: '#333', color: '#FFD700', mb: { xs: 1, sm: 0 } }} />
+              <Chip label={`Hiển thị: ${remainingRows.length}`} size="small" sx={{ background: '#333', color: '#4CAF50', mb: { xs: 1, sm: 0 } }} />
+              <Button size="small" variant="text" onClick={() => setShowAll(v => !v)} sx={{ color: '#FFD700', textTransform: 'none', mb: { xs: 1, sm: 0 } }}>
                 {showAll ? 'Chỉ hiển thị còn lại (>0)' : 'Hiển thị tất cả'}
               </Button>
               {isAdmin && (
                 <>
                   <input type="file" accept=".csv,.xlsx" id="inventory-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
                   <label htmlFor="inventory-upload">
-                    <Button component="span" size="small" variant="outlined" startIcon={<UploadFileIcon />} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', textTransform: 'none', '&:hover': { borderColor: '#FFD700', background: 'rgba(255,215,0,0.05)' } }}>
+                    <Button component="span" size="small" variant="outlined" startIcon={<UploadFileIcon />} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', textTransform: 'none', mb: { xs: 1, sm: 0 }, '&:hover': { borderColor: '#FFD700', background: 'rgba(255,215,0,0.05)' } }}>
                       {fileName || 'Tải CSV/XLSX'}
                     </Button>
                   </label>
                   {fileName && (
-                    <IconButton size="small" onClick={clearData} sx={{ color: '#f44336' }}>
+                    <IconButton size="small" onClick={clearData} sx={{ color: '#f44336', mb: { xs: 1, sm: 0 } }}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   )}
-                  <Button size="small" variant="contained" onClick={addRow} startIcon={<AddIcon />} sx={{ background: '#FFD700', color: '#1a1a1a', fontWeight: 600, textTransform: 'none', '&:hover': { background: '#FFE44D' } }}>
+                  <Button size="small" variant="contained" onClick={addRow} startIcon={<AddIcon />} sx={{ background: '#FFD700', color: '#1a1a1a', fontWeight: 600, textTransform: 'none', mb: { xs: 1, sm: 0 }, '&:hover': { background: '#FFE44D' } }}>
                     Thêm
                   </Button>
-                  <Button size="small" variant="outlined" onClick={importToServer} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', textTransform: 'none', '&:hover': { borderColor: '#FFD700' } }}>
+                  <Button size="small" variant="outlined" onClick={importToServer} sx={{ borderColor: 'rgba(255,215,0,0.3)', color: '#FFD700', textTransform: 'none', mb: { xs: 1, sm: 0 }, '&:hover': { borderColor: '#FFD700' } }}>
                     Lưu lên kho
                   </Button>
                 </>
@@ -363,20 +366,20 @@ const InventoryPage = () => {
       </Paper>
 
       {/* Danh sách vật phẩm full trang */}
-      <Paper sx={{ flex: 1, p: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="h6" sx={{ color: '#FFD700', mb: 2 }}>Danh sách vật phẩm còn lại</Typography>
-        <TableContainer component={Box} sx={{ flex: 1, overflow: 'auto' }}>
-          <Table stickyHeader size="small" sx={{ minWidth: 650 }}>
+      <Paper sx={{ flex: 1, p: { xs: 1, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, fontSize: { xs: '1rem', sm: '1.15rem' } }}>Danh sách vật phẩm còn lại</Typography>
+        <TableContainer component={Box} sx={{ flex: 1, overflow: 'auto', width: '100%' }}>
+          <Table stickyHeader size="small" sx={{ minWidth: { xs: 500, sm: 650 }, fontSize: { xs: '0.85rem', sm: '0.95rem' } }}>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>Type</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>Item</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }} align="right">Current Qty</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }} align="right">Total Qty</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>Unit</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>P.I.C</TableCell>
-                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }}>Note</TableCell>
-                {isAdmin && <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)' }} align="right">Actions</TableCell>}
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>Type</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>Item</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }} align="right">Current Qty</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }} align="right">Total Qty</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>Unit</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>P.I.C</TableCell>
+                <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }}>Note</TableCell>
+                {isAdmin && <TableCell sx={{ color: '#bbb', background: '#1e1e1e', borderBottom: '2px solid rgba(255,215,0,0.2)', fontSize: { xs: '0.85rem', sm: '1rem' } }} align="right">Actions</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>

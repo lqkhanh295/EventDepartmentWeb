@@ -255,59 +255,62 @@ const VendorsPage = () => {
                   size="small"
                   sx={{
                     height: 20,
-                    fontSize: '0.65rem',
-                    background: 'rgba(78, 205, 196, 0.15)',
-                    color: '#4ECDC4',
-                    border: '1px solid rgba(78, 205, 196, 0.3)'
-                  }}
-                />
-              ))}
-            </Box>
-          )}
-        </Box>
-      )
-    },
-    {
-      title: 'Liên hệ',
-      dataIndex: 'contact',
-      key: 'contact',
-      width: 180,
-      render: (text) => {
-        if (!text) return <Typography sx={{ color: '#666' }}>-</Typography>;
-        
-        const isUrl = text.startsWith('http') || text.startsWith('www.');
-        
-        if (isUrl) {
-          // Rút gọn URL để hiển thị
-          const displayUrl = text.replace(/^https?:\/\//, '').replace(/\/$/, '');
-          return (
-            <Link
-              href={text.startsWith('http') ? text : `https://${text}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                color: '#4ECDC4',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 0.5,
-                textDecoration: 'none',
-                fontSize: '0.85rem',
-                '&:hover': { textDecoration: 'underline', color: '#6EE7DE' }
-              }}
-            >
-              {displayUrl.length > 25 ? displayUrl.substring(0, 25) + '...' : displayUrl}
-              <OpenInNewIcon sx={{ fontSize: 12 }} />
-            </Link>
-          );
-        }
-        
-        return (
-          <Typography sx={{ color: '#b3b3b3', fontSize: '0.85rem' }}>
-            {text}
-          </Typography>
-        );
-      }
-    },
+                    return (
+                      <Box sx={{ minHeight: 'calc(100vh - 64px)', background: '#121212', p: { xs: 1, sm: 2, md: 3 } }}>
+                        <PageHeader title="Danh sách Vendor" subtitle="0 vendor trong hệ thống" />
+                        <Paper sx={{ p: { xs: 1, sm: 2 }, mb: 2, background: '#181818', borderRadius: 3 }}>
+                          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 2 }, alignItems: { sm: 'center' } }}>
+                            <TextField
+                              fullWidth
+                              size="small"
+                              placeholder="Tìm kiếm vendor theo tên, nội dung mua..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              InputProps={{ startAdornment: <SearchIcon sx={{ color: '#888', mr: 1 }} /> }}
+                              sx={{
+                                maxWidth: { xs: '100%', sm: 320 },
+                                mb: { xs: 1, sm: 0 },
+                                '& .MuiOutlinedInput-root': {
+                                  background: '#252525',
+                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
+                                  '&:hover fieldset': { borderColor: '#FFD700' },
+                                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
+                                },
+                                '& input': { color: '#fff' }
+                              }}
+                            />
+                            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 160 }, mb: { xs: 1, sm: 0 } }}>
+                              <Select
+                                value={selectedEvent}
+                                onChange={(e) => setSelectedEvent(e.target.value)}
+                                displayEmpty
+                                sx={{ background: '#252525', color: '#fff', borderColor: 'rgba(255,215,0,0.2)' }}
+                              >
+                                <MenuItem value="all">Tất cả sự kiện</MenuItem>
+                                {events.map((evt, idx) => (
+                                  <MenuItem key={idx} value={evt}>{evt}</MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                            <Button variant="contained" sx={{ background: '#FFD700', color: '#181818', fontWeight: 600, minWidth: { xs: '100%', sm: 120 } }} onClick={() => setFormOpen(true)}>
+                              + Thêm Vendor
+                            </Button>
+                          </Box>
+                        </Paper>
+                        {/* ...existing code... */}
+                        <Box sx={{ width: '100%', overflowX: 'auto', background: '#181818', borderRadius: 2 }}>
+                          <Table
+                            columns={columns}
+                            dataSource={vendors}
+                            loading={loading}
+                            pagination={false}
+                            scroll={{ x: 900 }}
+                            rowKey="id"
+                            style={{ fontSize: { xs: '0.85rem', sm: '0.95rem' } }}
+                          />
+                        </Box>
+                        {/* ...existing code... */}
+                      </Box>
     {
       title: 'Nội dung mua',
       dataIndex: 'buyDetail',
