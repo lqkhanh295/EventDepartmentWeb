@@ -94,9 +94,6 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
   const bgColor = userIsAdmin ? '#1a1a0a' : '#121212'; // Đen đậm cho member
   const borderColor = userIsAdmin ? 'rgba(255, 215, 0, 0.2)' : '#2a2a2a'; // Border đen cho member
 
-    <Box
-      sx={{
-        height: '100%',
   const drawerContent = (
     <Box
       sx={{
@@ -111,9 +108,6 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
         minWidth: { xs: '60vw', sm: DRAWER_WIDTH },
         maxWidth: DRAWER_WIDTH,
         boxSizing: 'border-box',
-      }}
-        display: 'flex',
-        flexDirection: 'column',
         background: bgColor
       }}
     >

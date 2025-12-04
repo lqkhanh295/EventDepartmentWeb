@@ -118,46 +118,6 @@ const Header = ({ onMenuClick }) => {
       </Toolbar>
     </AppBar>
   );
-                </Box>
-              }
-              sx={{ 
-                m: 0,
-                '& .MuiFormControlLabel-label': { ml: 0.5 }
-              }}
-            />
-          )}
-          
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#B3B3B3',
-              display: { xs: 'none', md: 'block' },
-              fontSize: '0.875rem',
-              fontWeight: 500
-            }}
-          >
-            Xin chào, {user?.displayName || 'Guest'}
-          </Typography>
-          <Tooltip title="Đăng xuất">
-            <IconButton
-              onClick={logout}
-              sx={{ 
-                color: '#999',
-                transition: 'all 0.2s ease',
-                '&:hover': { 
-                  color: '#FFD700',
-                  background: 'rgba(255, 215, 0, 0.1)',
-                  transform: 'scale(1.1)'
-                }
-              }}
-            >
-              <LogoutOutlinedIcon sx={{ fontSize: 22 }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Toolbar>
-    </AppBar>
-  );
 };
 
 export default Header;
