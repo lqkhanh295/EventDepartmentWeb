@@ -1,23 +1,37 @@
 // Trang đăng nhập
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { Box, Typography, Button, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Button, CircularProgress, Alert, TextField, InputAdornment, IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import logoCsg from '../../image/logocsg.png';
 
 const LoginPage = () => {
   const { user, loading, error, loginWithMock } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
+  const [adminPassword, setAdminPassword] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [passwordError, setPasswordError] = React.useState('');
 
   if (user) {
     return <Navigate to="/" replace />;
   }
 
   const handleMockLogin = (userType) => {
+    // Kiểm tra mật khẩu cho admin
+    if (userType === 'admin') {
+      if (adminPassword !== 'eventleader') {
+        setPasswordError('Mật khẩu không đúng');
+        return;
+      }
+      setPasswordError('');
+    }
+    
     setIsLoggingIn(true);
     loginWithMock(userType);
     setTimeout(() => {
       setIsLoggingIn(false);
+      setAdminPassword(''); // Reset password after login
     }, 300);
   };
 
@@ -110,6 +124,72 @@ const LoginPage = () => {
             {error}
           </Alert>
         )}
+
+        {/* Password Error */}
+        {passwordError && (
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 3, 
+              background: 'rgba(239, 68, 68, 0.1)',
+              color: '#ef4444',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              '& .MuiAlert-icon': { color: '#ef4444' },
+              textAlign: 'left'
+            }}
+          >
+            {passwordError}
+          </Alert>
+        )}
+
+        {/* Admin Password Input */}
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            type={showPassword ? 'text' : 'password'}
+            label="Mật khẩu Admin"
+            value={adminPassword}
+            onChange={(e) => {
+              setAdminPassword(e.target.value);
+              if (passwordError) setPasswordError('');
+            }}
+            error={!!passwordError}
+            disabled={isLoggingIn}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                    sx={{ color: '#888' }}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                color: '#fff',
+                '& fieldset': {
+                  borderColor: passwordError ? '#ef4444' : 'rgba(255, 215, 0, 0.3)',
+                },
+                '&:hover fieldset': {
+                  borderColor: passwordError ? '#ef4444' : 'rgba(255, 215, 0, 0.5)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: passwordError ? '#ef4444' : '#FFD700',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#888',
+                '&.Mui-focused': {
+                  color: '#FFD700',
+                },
+              },
+            }}
+          />
+        </Box>
 
         {/* Login Buttons */}
         <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>

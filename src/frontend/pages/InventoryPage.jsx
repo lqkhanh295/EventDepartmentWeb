@@ -46,8 +46,6 @@ function parseCSV(text) {
   return { headers, rows };
 }
 
-const DEFAULT_HEADERS = ['Type','Item','Current Quantity','Total Quantity','Unit','Unit Price','P.I.C','Note'];
-
 const InventoryPage = () => {
   const { isAdmin } = useAuth();
   const [fileName, setFileName] = useState('');
@@ -56,10 +54,9 @@ const InventoryPage = () => {
   const [typeFilter, setTypeFilter] = useState('');
   const [editingIndex, setEditingIndex] = useState(null);
   const [draftRow, setDraftRow] = useState(null);
-  const totalLoaded = rawRows.length;
-  const [showAll, setShowAll] = useState(false);
+  const [showAll] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [serverRows, setServerRows] = useState([]);
+  const [, setServerRows] = useState([]);
 
   useEffect(() => {
     const load = async () => {
@@ -130,7 +127,7 @@ const InventoryPage = () => {
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-      // Normalize headers: ensure keys match DEFAULT_HEADERS
+      // Normalize headers to match expected format
       const normalized = rows.map(r => ({
         Type: r.Type ?? r['type'] ?? r['Loại'] ?? '',
         Item: r.Item ?? r['item'] ?? r['Tên vật phẩm'] ?? '',
@@ -231,7 +228,7 @@ const InventoryPage = () => {
     if (!isAdmin || rawRows.length === 0) return;
     setLoading(true);
     try {
-      const count = await bulkImport(rawRows);
+      await bulkImport(rawRows);
       // Reload from server
       const items = await listInventory({ onlyRemaining: !showAll });
       const mapped = items.map(i => ({
@@ -265,7 +262,7 @@ const InventoryPage = () => {
             <TextField
               fullWidth
               size="small"
-              placeholder="Tìm theo tên"
+              placeholder="Tìm theo toio"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               InputProps={{ 
@@ -575,7 +572,7 @@ const InventoryPage = () => {
                             <TextField 
                               size="small" 
                               value={draftRow?.['Current Quantity'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, ['Current Quantity']: e.target.value }))}
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, 'Current Quantity': e.target.value }))}
                               sx={{
                                 '& .MuiOutlinedInput-root': {
                                   background: '#252525',
@@ -591,7 +588,7 @@ const InventoryPage = () => {
                             <TextField 
                               size="small" 
                               value={draftRow?.['Total Quantity'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, ['Total Quantity']: e.target.value }))}
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, 'Total Quantity': e.target.value }))}
                               sx={{
                                 '& .MuiOutlinedInput-root': {
                                   background: '#252525',
@@ -623,7 +620,7 @@ const InventoryPage = () => {
                             <TextField 
                               size="small" 
                               value={draftRow?.['P.I.C'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, ['P.I.C']: e.target.value }))}
+                              onChange={(e) => setDraftRow(prev => ({ ...prev, 'P.I.C': e.target.value }))}
                               sx={{
                                 '& .MuiOutlinedInput-root': {
                                   background: '#252525',
