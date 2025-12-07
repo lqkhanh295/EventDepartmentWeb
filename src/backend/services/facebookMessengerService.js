@@ -22,7 +22,7 @@ export const formatBorrowMessage = (items) => {
   });
 
   let message = `YÊU CẦU MƯỢN VẬT PHẨM\n\n`;
-  message += `Ngày: ${date}\n\n`;
+  message += `Thời gian: ${date}\n\n`;
   message += `Danh sách vật phẩm cần mượn:\n`;
   message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
