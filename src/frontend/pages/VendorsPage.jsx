@@ -12,12 +12,14 @@ import {
   Alert,
   Paper,
   Chip,
+  Link,
   Button
 } from '@mui/material';
 import { Table } from 'antd';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import StoreIcon from '@mui/icons-material/Store';
 import { useSearchParams } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
@@ -263,8 +265,38 @@ const VendorsPage = () => {
             </Box>
           )}
         </Box>
-      )
-    },
+                            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 160 }, mb: { xs: 1, sm: 0 } }}>
+                              <Select
+                                value={selectedEvent}
+                                onChange={(e) => setSelectedEvent(e.target.value)}
+                                displayEmpty
+                                sx={{ background: '#252525', color: '#fff', borderColor: 'rgba(255,215,0,0.2)' }}
+                              >
+                                <MenuItem value="all">Tất cả sự kiện</MenuItem>
+                                {events.map((evt, idx) => (
+                                  <MenuItem key={idx} value={evt}>{evt}</MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                            <Button variant="contained" sx={{ background: '#FFD700', color: '#181818', fontWeight: 600, minWidth: { xs: '100%', sm: 120 } }} onClick={() => setFormOpen(true)}>
+                              + Thêm Vendor
+                            </Button>
+                          </Box>
+                        </Paper>
+                        {/* ...existing code... */}
+                        <Box sx={{ width: '100%', overflowX: 'auto', background: '#181818', borderRadius: 2 }}>
+                          <Table
+                            columns={columns}
+                            dataSource={vendors}
+                            loading={loading}
+                            pagination={false}
+                            scroll={{ x: 900 }}
+                            rowKey="id"
+                            style={{ fontSize: { xs: '0.85rem', sm: '0.95rem' } }}
+                          />
+                        </Box>
+                        {/* ...existing code... */}
+                      </Box>
     {
       title: 'Nội dung mua',
       dataIndex: 'buyDetail',
