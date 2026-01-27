@@ -1,12 +1,12 @@
 // Vendor Service - Quản lý dữ liệu Vendor từ Firestore
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  serverTimestamp 
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -19,7 +19,7 @@ export const getAllVendors = async () => {
     const vendorsRef = collection(db, COLLECTION_NAME);
     // Dùng 'Name' thay vì 'name' để khớp với field trong Firebase
     const snapshot = await getDocs(vendorsRef);
-    
+
     return snapshot.docs.map(doc => {
       const data = doc.data();
       // Mapping từ field Firebase sang field app
@@ -53,22 +53,22 @@ export const getAllVendors = async () => {
 export const searchVendors = async (searchTerm, category = null) => {
   try {
     const vendors = await getAllVendors();
-    
+
     let filtered = vendors;
-    
+
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
-      filtered = filtered.filter(vendor => 
+      filtered = filtered.filter(vendor =>
         vendor.name?.toLowerCase().includes(lowerSearch) ||
         vendor.description?.toLowerCase().includes(lowerSearch) ||
         vendor.services?.some(s => s.toLowerCase().includes(lowerSearch))
       );
     }
-    
+
     if (category && category !== 'all') {
       filtered = filtered.filter(vendor => vendor.category === category);
     }
-    
+
     return filtered;
   } catch (error) {
     console.error('Error searching vendors:', error);
@@ -85,7 +85,7 @@ export const addVendor = async (vendorData) => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    
+
     return { id: docRef.id, ...vendorData };
   } catch (error) {
     console.error('Error adding vendor:', error);
@@ -101,7 +101,7 @@ export const updateVendor = async (vendorId, vendorData) => {
       ...vendorData,
       updatedAt: serverTimestamp()
     });
-    
+
     return { id: vendorId, ...vendorData };
   } catch (error) {
     console.error('Error updating vendor:', error);
@@ -133,3 +133,15 @@ export const getCategories = async () => {
   }
 };
 
+
+
+export const deleteVendorById = async (vendorId) => {
+  try {
+    const vendorRef = doc(db, COLLECTION_NAME, vendorId);
+    await deleteDoc(vendorRef);
+    return vendorId;
+  } catch (error) {
+    console.error('Error deleting vendor by ID:', error);
+    throw error;
+  }
+};

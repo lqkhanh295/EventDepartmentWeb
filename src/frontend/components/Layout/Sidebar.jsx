@@ -112,7 +112,7 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
     >
       {/* Spacer for AppBar */}
       <Box sx={{ height: 64 }} />
-      
+
       {/* Menu Label */}
       <Box sx={{ px: 3, py: 2.5 }}>
         <Typography
@@ -150,91 +150,91 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
             return true; // Các menu khác hiển thị bình thường
           })
           .map((item, idx) => {
-          const isActive = location.pathname === item.path || 
-                          (item.id === 'members' && location.pathname.startsWith('/members'));
-          const Icon = item.icon;
-          
-          return (
-            <ListItem key={item.id} disablePadding sx={{ mb: 0.75, px: 1 }}>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ 
-                  duration: 0.3, 
-                  delay: idx * 0.04,
-                  ease: [0.4, 0, 0.2, 1]
-                }}
-                style={{ width: '100%' }}
-              >
+            const isActive = location.pathname === item.path ||
+              (item.id === 'members' && location.pathname.startsWith('/members'));
+            const Icon = item.icon;
+
+            return (
+              <ListItem key={item.id} disablePadding sx={{ mb: 0.75, px: 1 }}>
                 <motion.div
-                  whileHover={{ x: 4 }}
-                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: idx * 0.04,
+                    ease: [0.4, 0, 0.2, 1]
+                  }}
                   style={{ width: '100%' }}
                 >
-                  <ListItemButton
-                    onClick={() => handleNavigation(item.path)}
-                    sx={{
-                      borderRadius: 1,
-                      py: 1.5,
-                      px: 2,
-                      background: isActive 
-                        ? 'rgba(255, 215, 0, 0.1)' 
-                        : 'transparent',
-                      border: isActive ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid transparent',
-                      '&:hover': {
-                        background: isActive 
-                          ? 'rgba(255, 215, 0, 0.15)' 
-                          : 'rgba(255, 255, 255, 0.05)',
-                        borderColor: isActive ? 'rgba(255, 215, 0, 0.4)' : 'rgba(255, 255, 255, 0.1)'
-                      },
-                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}
+                  <motion.div
+                    whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{ width: '100%' }}
                   >
-                <ListItemIcon
-                  sx={{
-                    color: isActive ? '#FFD700' : '#999',
-                    minWidth: 32,
-                    '& svg': {
-                      fontSize: 18
-                    }
-                  }}
-                >
-                  <Icon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    fontWeight: isActive ? 600 : 500,
-                    color: isActive ? '#FFFFFF' : '#B3B3B3',
-                    fontSize: '0.9rem',
-                    letterSpacing: '0.3px',
-                    noWrap: true,
-                    sx: {
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }
-                  }}
-                />
-                  </ListItemButton>
+                    <ListItemButton
+                      onClick={() => handleNavigation(item.path)}
+                      sx={{
+                        borderRadius: 1,
+                        py: 1.5,
+                        px: 2,
+                        background: isActive
+                          ? 'rgba(255, 215, 0, 0.1)'
+                          : 'transparent',
+                        border: isActive ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid transparent',
+                        '&:hover': {
+                          background: isActive
+                            ? 'rgba(255, 215, 0, 0.15)'
+                            : 'rgba(255, 255, 255, 0.05)',
+                          borderColor: isActive ? 'rgba(255, 215, 0, 0.4)' : 'rgba(255, 255, 255, 0.1)'
+                        },
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          color: isActive ? '#FFD700' : '#999',
+                          minWidth: 32,
+                          '& svg': {
+                            fontSize: 18
+                          }
+                        }}
+                      >
+                        <Icon />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{
+                          fontWeight: isActive ? 600 : 500,
+                          color: isActive ? '#FFFFFF' : '#B3B3B3',
+                          fontSize: '0.9rem',
+                          letterSpacing: '0.3px',
+                          noWrap: true,
+                          sx: {
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }
+                        }}
+                      />
+                    </ListItemButton>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            </ListItem>
-          );
-        })}
+              </ListItem>
+            );
+          })}
       </List>
 
       {/* Footer */}
       <Box sx={{ p: 3, pt: 2 }}>
-        <Typography 
-          variant="caption" 
-          sx={{ 
-            color: '#666', 
+        <Typography
+          variant="caption"
+          sx={{
+            color: '#666',
             fontSize: '0.7rem',
             fontWeight: 500,
             letterSpacing: '0.5px'
           }}
         >
-          v1.0 · Fall 2025
+          v2.0 · Spring 2026
         </Typography>
       </Box>
     </Box>

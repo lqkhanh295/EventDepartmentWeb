@@ -74,29 +74,29 @@ const AppRoutes = () => {
                 <Route path="/tax-lookup" element={<TaxLookupPage />} />
                 <Route path="/remove-bg" element={<RemoveBgPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
-                <Route 
-                  path="/members" 
+                <Route
+                  path="/members"
                   element={
                     <AdminProtectedRoute>
                       <MembersPage />
                     </AdminProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/members/import" 
+                <Route
+                  path="/members/import"
                   element={
                     <AdminProtectedRoute>
                       <ImportMembersPage />
                     </AdminProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/members/:semester" 
+                <Route
+                  path="/members/:semester"
                   element={
                     <AdminProtectedRoute>
                       <MemberScorePage />
                     </AdminProtectedRoute>
-                  } 
+                  }
                 />
               </Routes>
             </Layout>

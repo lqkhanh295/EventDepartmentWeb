@@ -23,10 +23,10 @@ const Header = ({ onMenuClick }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   return (
-    <AppBar 
-      position="fixed" 
+    <AppBar
+      position="fixed"
       elevation={0}
-      sx={{ 
+      sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
         background: isAdminMode ? '#1a1a0a' : '#121212',
         borderBottom: isAdminMode ? '1px solid rgba(255, 215, 0, 0.3)' : '1px solid #2a2a2a',
@@ -49,6 +49,8 @@ const Header = ({ onMenuClick }) => {
             <Box
               component="img"
               src={logoCsg}
+              onClick={() => window.location.href = 'https://www.facebook.com/cocsaigonfuhcm'}
+              style={{ cursor: 'pointer' }}
               alt="CSG Logo"
               sx={{
                 width: { xs: 28, sm: 36 },
@@ -67,7 +69,8 @@ const Header = ({ onMenuClick }) => {
                 fontWeight: 600,
                 color: isAdminMode ? '#FFD700' : '#FFFFFF',
                 fontSize: { xs: '0.95rem', sm: '1rem' },
-                letterSpacing: '0.3px'
+                letterSpacing: '0.3px',
+                fontStyle: 'bold',
               }}
             >
               CSG Event {isAdminMode && '(Admin)'}
@@ -112,36 +115,6 @@ const Header = ({ onMenuClick }) => {
           <Tooltip title="Đăng xuất">
             <IconButton sx={{ color: '#fff', fontSize: { xs: 20, sm: 24 } }} onClick={logout}>
               <LogoutOutlinedIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Toolbar>
-    </AppBar>
-  );
-            variant="body2"
-            sx={{
-              color: '#B3B3B3',
-              display: { xs: 'none', md: 'block' },
-              fontSize: '0.875rem',
-              fontWeight: 500
-            }}
-          >
-            Xin chào, {user?.displayName || 'Guest'}
-          </Typography>
-          <Tooltip title="Đăng xuất">
-            <IconButton
-              onClick={logout}
-              sx={{ 
-                color: '#999',
-                transition: 'all 0.2s ease',
-                '&:hover': { 
-                  color: '#FFD700',
-                  background: 'rgba(255, 215, 0, 0.1)',
-                  transform: 'scale(1.1)'
-                }
-              }}
-            >
-              <LogoutOutlinedIcon sx={{ fontSize: 22 }} />
             </IconButton>
           </Tooltip>
         </Box>

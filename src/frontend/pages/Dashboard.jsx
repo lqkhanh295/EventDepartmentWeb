@@ -296,14 +296,14 @@ const Dashboard = () => {
         <Grid item xs={6} md={3}>
           <StatCard
             title="Nhân sự"
-            value="103"
+            value="130"
             index={1}
           />
         </Grid>
         <Grid item xs={6} md={3}>
           <StatCard
             title="Số dự án còn lại trong kỳ"
-            value="0"
+            value="3"
             index={2}
           />
         </Grid>
@@ -320,7 +320,6 @@ const Dashboard = () => {
       {/* Weather Widget */}
       <Box sx={{ mb: 4 }}>
         <WeatherWidget />
-        onClick={() => window.open('https://www.accuweather.com/vi/vn/ho-chi-minh-city/353981/hourly-weather-forecast/353981', '_blank')}
       </Box>
 
       {/* Quick Actions */}

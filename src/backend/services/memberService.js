@@ -1,12 +1,12 @@
 // Member Service - Quản lý dữ liệu Members từ Firestore
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
   doc,
-  serverTimestamp 
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
@@ -22,7 +22,7 @@ export const getAllProjects = async (semester) => {
     const collectionName = getProjectsCollection(semester);
     const projectsRef = collection(db, collectionName);
     const snapshot = await getDocs(projectsRef);
-    
+
     return snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -67,7 +67,7 @@ export const getAllMembers = async () => {
   try {
     const membersRef = collection(db, MEMBERS_COLLECTION);
     const snapshot = await getDocs(membersRef);
-    
+
     return snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -142,10 +142,10 @@ export const deleteAllProjects = async (semester) => {
     const collectionName = getProjectsCollection(semester);
     const projectsRef = collection(db, collectionName);
     const snapshot = await getDocs(projectsRef);
-    
+
     const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
     await Promise.all(deletePromises);
-    
+
     return snapshot.docs.length;
   } catch (error) {
     console.error('Error deleting all projects:', error);
@@ -158,18 +158,34 @@ export const clearAllScores = async (semester) => {
   try {
     const membersRef = collection(db, MEMBERS_COLLECTION);
     const snapshot = await getDocs(membersRef);
-    
+
     const updatePromises = snapshot.docs.map(docSnap => {
       const data = docSnap.data();
       const newScores = { ...data.scores };
       delete newScores[semester];
       return updateDoc(docSnap.ref, { scores: newScores });
     });
-    
+
     await Promise.all(updatePromises);
     return snapshot.docs.length;
   } catch (error) {
     console.error('Error clearing scores:', error);
+    throw error;
+  }
+};
+
+export const getProjectBySemester = async (semester) => {
+  try {
+    const collectionName = getProjectsCollection(semester);
+    const projectsRef = collection(db, collectionName);
+    const snapshot = await getDocs(projectsRef);
+
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error getting projects:', error);
     throw error;
   }
 };
