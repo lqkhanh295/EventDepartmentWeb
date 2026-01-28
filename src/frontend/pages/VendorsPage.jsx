@@ -12,14 +12,12 @@ import {
   Alert,
   Paper,
   Chip,
-  Link,
   Button
 } from '@mui/material';
 import { Table } from 'antd';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import StoreIcon from '@mui/icons-material/Store';
 import { useSearchParams } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
@@ -42,7 +40,7 @@ import {
 const VendorsPage = () => {
   const [searchParams] = useSearchParams();
   const { isAdminMode } = useAuth();
-  
+
   const [vendors, setVendors] = useState([]);
   const [allVendors, setAllVendors] = useState([]);
   const [events, setEvents] = useState([]);
@@ -72,7 +70,7 @@ const VendorsPage = () => {
 
   useEffect(() => {
     loadVendors();
-    
+
     if (searchParams.get('action') === 'add') {
       setFormOpen(true);
     }
@@ -80,10 +78,10 @@ const VendorsPage = () => {
 
   const handleSearch = useCallback(() => {
     let filtered = [...allVendors];
-    
+
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(v => 
+      filtered = filtered.filter(v =>
         (v.name || '').toLowerCase().includes(term) ||
         (v.category || '').toLowerCase().includes(term) ||
         (v.contact || '').toLowerCase().includes(term) ||
@@ -91,37 +89,37 @@ const VendorsPage = () => {
         (v.events && v.events.some(e => e.toLowerCase().includes(term)))
       );
     }
-    
+
     if (selectedEvent && selectedEvent !== 'all') {
-      filtered = filtered.filter(v => 
+      filtered = filtered.filter(v =>
         v.events && v.events.includes(selectedEvent)
       );
     }
-    
+
     setVendors(filtered);
   }, [allVendors, searchTerm, selectedEvent]);
 
   useEffect(() => {
     if (allVendors.length === 0) return; // Chờ data load xong
-    
+
     const delaySearch = setTimeout(() => {
       handleSearch();
     }, 300);
-    
+
     return () => clearTimeout(delaySearch);
   }, [allVendors, handleSearch]);
 
   // Gộp các vendor giống nhau (chỉ dựa trên tên + liên hệ + nội dung mua)
   const mergeVendors = (vendorList) => {
     const merged = {};
-    
+
     vendorList.forEach(vendor => {
       // Tạo key chỉ từ tên và liên hệ (normalize để so sánh)
       const normalizedName = (vendor.name || '').toLowerCase().trim();
       const normalizedContact = (vendor.contact || '').toLowerCase().trim();
       const normalizedBuyDetail = (vendor.buyDetail || '').toLowerCase().trim();
       const key = `${normalizedName}_${normalizedContact}_${normalizedBuyDetail}`;
-      
+
       if (merged[key]) {
         // Đã tồn tại, thêm event vào mảng
         if (vendor.event) {
@@ -148,7 +146,7 @@ const VendorsPage = () => {
         };
       }
     });
-    
+
     return Object.values(merged);
   };
 
@@ -273,9 +271,9 @@ const VendorsPage = () => {
       key: 'buyDetail',
       width: 160,
       render: (text) => (
-        <Typography 
-          sx={{ 
-            color: '#e0e0e0', 
+        <Typography
+          sx={{
+            color: '#e0e0e0',
             fontSize: '0.9rem',
             maxWidth: 150,
             overflow: 'hidden',
@@ -296,11 +294,11 @@ const VendorsPage = () => {
       align: 'center',
       render: (text) => {
         if (!text) return <Typography sx={{ color: '#666' }}>-</Typography>;
-        
+
         const isNoVat = text.toLowerCase().includes('không');
         // Rút gọn text VAT
         const shortText = text.replace('Không xuất VAT', 'Không VAT').replace('Xuất VAT', 'VAT');
-        
+
         return (
           <Chip
             label={shortText}
@@ -331,9 +329,9 @@ const VendorsPage = () => {
             borderRadius: '0 2px 2px 0'
           }}
         >
-          <Typography 
-            sx={{ 
-              color: text ? '#e0e0e0' : '#666', 
+          <Typography
+            sx={{
+              color: text ? '#e0e0e0' : '#666',
               fontSize: '0.85rem',
               fontStyle: 'italic',
               lineHeight: 1.5,
