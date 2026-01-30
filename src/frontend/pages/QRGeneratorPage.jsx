@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { QRCode, ColorPicker, Input, Button, Card, Space, Typography, Slider, Switch, Segmented, Row, Col } from 'antd';
-import { DownloadOutlined, LinkOutlined, QrcodeOutlined } from '@ant-design/icons';
+import { DownloadOutlined, LinkOutlined } from '@ant-design/icons';
 import { Box } from '@mui/material';
 import { motion } from 'framer-motion';
 
