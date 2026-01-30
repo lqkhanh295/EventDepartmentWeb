@@ -23,6 +23,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SearchIcon from '@mui/icons-material/Search';
 import ImageIcon from '@mui/icons-material/Image';
 import InventoryIcon from '@mui/icons-material/Inventory2';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 
 const DRAWER_WIDTH = 240;
 
@@ -44,6 +45,12 @@ const menuItems = [
     label: 'Members',
     icon: PeopleIcon,
     path: '/members'
+  },
+  {
+    id: 'qr-generator',
+    label: 'Tạo mã QR',
+    icon: QrCode2Icon,
+    path: '/qr-generator'
   },
   {
     id: 'event-guide',
