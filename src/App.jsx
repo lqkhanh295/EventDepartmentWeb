@@ -19,6 +19,7 @@ import { Layout } from './frontend/components/Layout';
 
 // Pages
 import { Dashboard, VendorsPage, EventGuidePage, TaxLookupPage, MembersPage, MemberScorePage, ImportMembersPage, RemoveBgPage, LoginPage, InventoryPage } from './frontend/pages';
+import AnalysisPage from './frontend/pages/AnalysisPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -74,6 +75,7 @@ const AppRoutes = () => {
                 <Route path="/tax-lookup" element={<TaxLookupPage />} />
                 <Route path="/remove-bg" element={<RemoveBgPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
+                <Route path="/analysis" element={<AnalysisPage />} />
                 <Route
                   path="/members"
                   element={

@@ -23,6 +23,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SearchIcon from '@mui/icons-material/Search';
 import ImageIcon from '@mui/icons-material/Image';
 import InventoryIcon from '@mui/icons-material/Inventory2';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 
 const DRAWER_WIDTH = 240;
 
@@ -62,6 +63,12 @@ const menuItems = [
     label: 'Xóa Background',
     icon: ImageIcon,
     path: '/remove-bg'
+  },
+  {
+    id: 'analysis',
+    label: 'Phân tích',
+    icon: AnalyticsIcon,
+    path: '/analysis'
   }
 ];
 

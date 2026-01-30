@@ -8,4 +8,5 @@ export { default as ImportMembersPage } from './ImportMembersPage';
 export { default as RemoveBgPage } from './RemoveBgPage';
 export { default as LoginPage } from './LoginPage';
 export { default as InventoryPage } from './InventoryPage';
+export { default as AnalysisPage } from './AnalysisPage';
 
