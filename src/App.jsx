@@ -1,4 +1,3 @@
-// Main App Component
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
@@ -18,7 +17,7 @@ import { AuthProvider, useAuth } from './frontend/contexts/AuthContext';
 import { Layout } from './frontend/components/Layout';
 
 // Pages
-import { Dashboard, VendorsPage, EventGuidePage, TaxLookupPage, MembersPage, MemberScorePage, ImportMembersPage, RemoveBgPage, LoginPage, InventoryPage, QRGeneratorPage } from './frontend/pages';
+import { Dashboard, VendorsPage, EventGuidePage, TaxLookupPage, MembersPage, MemberScorePage, ImportMembersPage, RemoveBgPage, LoginPage, InventoryPage, QRGeneratorPage, AgendaFormatterPage } from './frontend/pages';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -75,6 +74,7 @@ const AppRoutes = () => {
                 <Route path="/remove-bg" element={<RemoveBgPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
                 <Route path="/qr-generator" element={<QRGeneratorPage />} />
+                <Route path="/agenda-formatter" element={<AgendaFormatterPage />} />
                 <Route
                   path="/members"
                   element={

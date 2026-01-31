@@ -9,4 +9,5 @@ export { default as RemoveBgPage } from './RemoveBgPage';
 export { default as LoginPage } from './LoginPage';
 export { default as InventoryPage } from './InventoryPage';
 export { default as QRGeneratorPage } from './QRGeneratorPage';
+export { default as AgendaFormatterPage } from './AgendaFormatterPage';
 
