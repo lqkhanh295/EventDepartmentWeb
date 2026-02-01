@@ -52,12 +52,13 @@ const menuItems = [
     icon: QrCode2Icon,
     path: '/qr-generator'
   },
-  {
-    id: 'agenda-formatter',
-    label: 'Format Kịch bản',
-    icon: AutoFixHighIcon,
-    path: '/agenda-formatter'
-  },
+  // Tạm ẩn - chức năng đang phát triển
+  // {
+  //   id: 'agenda-formatter',
+  //   label: 'Format Kịch bản',
+  //   icon: AutoFixHighIcon,
+  //   path: '/agenda-formatter'
+  // },
   {
     id: 'event-guide',
     label: 'Event Guide',
