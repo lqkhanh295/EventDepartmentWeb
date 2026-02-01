@@ -203,7 +203,7 @@ const AgendaFormatterPage = () => {
     // Shorten long headers for PDF
     const shortenHeader = (header) => {
         if (!header) return '';
-        const h = String(header).toLowerCase(); s
+        const h = String(header).toLowerCase();
         const original = String(header);
 
         // Common abbreviations
