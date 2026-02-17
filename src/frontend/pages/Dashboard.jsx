@@ -16,6 +16,7 @@ import WeatherWidget from '../components/Weather/WeatherWidget';
 import { getAllVendors } from '../../backend/services/vendorService';
 import { getAllGuides } from '../../backend/services/guideService';
 import logoCsg from '../../image/logocsg.png';
+import TetDecorations from '../components/Common/TetDecorations';
 
 const StatCard = ({ title, value, onClick, index = 0 }) => {
   const [hovered, setHovered] = useState(false);
@@ -224,7 +225,48 @@ const Dashboard = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ position: 'relative' }}>
+      {/* Tet Floating Decorations */}
+      <TetDecorations variant="dashboard" />
+
+      {/* Tet Greeting Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.12), rgba(245, 158, 11, 0.12))',
+            border: '1px solid rgba(220, 38, 38, 0.25)',
+            borderRadius: 2,
+            p: { xs: 2, md: 2.5 },
+            mb: 3,
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              color: '#DC2626',
+              fontWeight: 600,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
+              letterSpacing: '1px'
+            }}
+          >
+            Chúc Mừng Năm Mới — Vạn Sự Như Ý
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{ color: '#F59E0B', letterSpacing: '3px', fontWeight: 500, fontSize: '0.7rem' }}
+          >
+            TẾT ẤT TỴ 2025
+          </Typography>
+        </Box>
+      </motion.div>
+
       {/* Welcome Banner */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

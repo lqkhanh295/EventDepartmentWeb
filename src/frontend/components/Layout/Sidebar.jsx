@@ -239,6 +239,38 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
 
       {/* Footer */}
       <Box sx={{ p: 3, pt: 2 }}>
+        {/* Tet gradient separator */}
+        <Box
+          sx={{
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.4), rgba(245, 158, 11, 0.4), transparent)',
+            mb: 2
+          }}
+        />
+        {/* Tet badge */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mb: 1 }}>
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: '#DC2626',
+              boxShadow: '0 0 6px rgba(220, 38, 38, 0.4)',
+              flexShrink: 0
+            }}
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#DC2626',
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              letterSpacing: '2px'
+            }}
+          >
+            Tết 2025
+          </Typography>
+        </Box>
         <Typography
           variant="caption"
           sx={{

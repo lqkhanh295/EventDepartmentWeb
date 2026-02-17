@@ -5,6 +5,7 @@ import { Box, Typography, Button, CircularProgress, Alert, TextField, InputAdorn
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import logoCsg from '../../image/logocsg.png';
+import TetDecorations from '../components/Common/TetDecorations';
 
 const LoginPage = () => {
   const { user, loading, error, loginWithMock } = useAuth();
@@ -26,7 +27,7 @@ const LoginPage = () => {
       }
       setPasswordError('');
     }
-    
+
     setIsLoggingIn(true);
     loginWithMock(userType);
     setTimeout(() => {
@@ -37,10 +38,10 @@ const LoginPage = () => {
 
   if (loading) {
     return (
-      <Box sx={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
+      <Box sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         background: '#0a0a0a'
       }}>
@@ -54,22 +55,59 @@ const LoginPage = () => {
       sx={{
         minHeight: '100vh',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         background: '#0a0a0a',
-        p: 3
+        p: 3,
+        position: 'relative',
+        overflow: 'hidden'
       }}
     >
+      {/* Tet Floating Decorations */}
+      <TetDecorations variant="login" />
+
+      {/* Tet Greeting */}
+      <Typography
+        variant="h4"
+        sx={{
+          color: '#DC2626',
+          fontWeight: 700,
+          mb: 1,
+          zIndex: 1,
+          textShadow: '0 0 20px rgba(220, 38, 38, 0.3)',
+          letterSpacing: '2px'
+        }}
+      >
+        Chúc Mừng Năm Mới
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{
+          color: '#F59E0B',
+          mb: 3,
+          zIndex: 1,
+          fontWeight: 500,
+          letterSpacing: '4px',
+          textTransform: 'uppercase',
+          fontSize: '0.75rem'
+        }}
+      >
+        Năm Tỵ 2025
+      </Typography>
+
       <Box
         sx={{
           maxWidth: 400,
           width: '100%',
           textAlign: 'center',
           background: '#121212',
-          border: '1px solid rgba(255, 215, 0, 0.2)',
+          border: '1px solid rgba(220, 38, 38, 0.3)',
           borderRadius: 3,
           p: 5,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(220, 38, 38, 0.08)',
+          zIndex: 1,
+          position: 'relative'
         }}
       >
         {/* Logo */}
@@ -77,7 +115,7 @@ const LoginPage = () => {
           component="img"
           src={logoCsg}
           alt="CSG Logo"
-          sx={{ 
+          sx={{
             width: 100,
             height: 'auto',
             mb: 3
@@ -85,21 +123,21 @@ const LoginPage = () => {
         />
 
         {/* Title */}
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            color: '#fff', 
-            mb: 1, 
+        <Typography
+          variant="h5"
+          sx={{
+            color: '#fff',
+            mb: 1,
             fontWeight: 600,
             letterSpacing: '0.5px'
           }}
         >
           Event Department
         </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            color: '#888', 
+        <Typography
+          variant="body2"
+          sx={{
+            color: '#888',
             mb: 4,
             fontSize: '0.9rem'
           }}
@@ -109,10 +147,10 @@ const LoginPage = () => {
 
         {/* Error */}
         {error && (
-          <Alert 
-            severity="error" 
-            sx={{ 
-              mb: 3, 
+          <Alert
+            severity="error"
+            sx={{
+              mb: 3,
               background: 'rgba(239, 68, 68, 0.1)',
               color: '#ef4444',
               border: '1px solid rgba(239, 68, 68, 0.2)',
@@ -127,10 +165,10 @@ const LoginPage = () => {
 
         {/* Password Error */}
         {passwordError && (
-          <Alert 
-            severity="error" 
-            sx={{ 
-              mb: 3, 
+          <Alert
+            severity="error"
+            sx={{
+              mb: 3,
               background: 'rgba(239, 68, 68, 0.1)',
               color: '#ef4444',
               border: '1px solid rgba(239, 68, 68, 0.2)',
@@ -258,7 +296,7 @@ const LoginPage = () => {
           </Button>
         </Box>
 
-       
+
       </Box>
     </Box>
   );
