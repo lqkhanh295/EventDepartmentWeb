@@ -4,44 +4,22 @@ import {
   Box,
   Paper,
   Typography,
-  Chip,
-  Button,
-  Grid,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  FormControl,
-  Select,
-  MenuItem,
   CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Checkbox,
   Alert,
   Snackbar,
   Tabs,
   Tab
 } from '@mui/material';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SearchIcon from '@mui/icons-material/Search';
 import { PageHeader } from '../components/Common';
 import { useAuth } from '../contexts/AuthContext';
-import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
-import AddIcon from '@mui/icons-material/Add';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
+import {
+  BorrowedItemsTable,
+  InventoryToolbar,
+  InventoryTable,
+  BorrowDialog
+} from '../components/Inventory';
 import * as XLSX from 'xlsx';
 import { listInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, bulkImport } from '../../backend/services/inventoryService';
 import { formatBorrowMessage, openFacebookMessenger } from '../../backend/services/facebookMessengerService';
@@ -73,12 +51,12 @@ const InventoryPage = () => {
   const [showAll] = useState(false);
   const [loading, setLoading] = useState(false);
   const [, setServerRows] = useState([]);
-  
+
   // State cho tính năng mượn vật phẩm
   const [borrowItems, setBorrowItems] = useState({}); // {itemIndex: quantity}
   const [borrowDialogOpen, setBorrowDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  
+
   // State cho danh sách vật phẩm đã mượn (chỉ admin)
   const [borrowedItemsList, setBorrowedItemsList] = useState([]);
   const [borrowedItemsLoading, setBorrowedItemsLoading] = useState(false);
@@ -372,11 +350,11 @@ const InventoryPage = () => {
     try {
       setBorrowedItemsLoading(true);
       await returnBorrowedItem(borrowedItem.id, borrowedItem.inventoryId, borrowedItem.quantity);
-      
+
       // Reload danh sách mượn và inventory
       const items = await listBorrowedItems();
       setBorrowedItemsList(items);
-      
+
       // Reload inventory
       const inventoryItems = await listInventory({ onlyRemaining: !showAll });
       const mapped = inventoryItems.map(i => ({
@@ -391,7 +369,7 @@ const InventoryPage = () => {
         _id: i.id
       }));
       setRawRows(mapped);
-      
+
       setSnackbar({
         open: true,
         message: `Đã trả lại ${borrowedItem.quantity} ${borrowedItem.unit} ${borrowedItem.item} vào kho`,
@@ -446,7 +424,7 @@ const InventoryPage = () => {
       type
     }));
     const message = formatBorrowMessage(itemsToBorrow);
-    
+
     try {
       // Cập nhật số lượng trong state local và Firestore
       const updatedRows = [...rawRows];
@@ -454,7 +432,7 @@ const InventoryPage = () => {
 
       for (const borrowItem of itemsToBorrowWithIds) {
         const { rowIndex, quantity, _id } = borrowItem;
-        
+
         if (rowIndex >= 0 && rowIndex < updatedRows.length) {
           const currentQtyNum = Number(String(updatedRows[rowIndex]['Current Quantity'] ?? '0').replace(/[^\d.-]/g, ''));
           const newQty = Math.max(0, currentQtyNum - quantity);
@@ -475,7 +453,7 @@ const InventoryPage = () => {
                 Note: updatedRows[rowIndex]['Note']
               };
               await updateInventoryItem(_id, payload);
-              
+
               // Lưu vào danh sách borrowed_items
               try {
                 await addBorrowedItem({
@@ -579,866 +557,61 @@ const InventoryPage = () => {
               }
             }}
           >
-            <Tab 
-              icon={<Inventory2Icon />} 
+            <Tab
+              icon={<Inventory2Icon />}
               iconPosition="start"
-              label="Kho vật phẩm" 
+              label="Kho vật phẩm"
             />
-            <Tab 
-              icon={<AssignmentReturnedIcon />} 
+            <Tab
+              icon={<AssignmentReturnedIcon />}
               iconPosition="start"
-              label={`Vật phẩm đã mượn (${borrowedItemsList.length})`} 
+              label={`Vật phẩm đã mượn (${borrowedItemsList.length})`}
             />
           </Tabs>
         </Paper>
       )}
 
-      {/* Nội dung tab Vật phẩm đã mượn (chỉ admin) */}
+      {/* Nội dung chính */}
       {isAdmin && showBorrowedTab ? (
-        <Paper sx={{ flex: 1, p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="h6" sx={{ color: '#FFD700', fontSize: { xs: '1.1rem', sm: '1.25rem' }, fontWeight: 600 }}>
-              Danh sách vật phẩm đã mượn
-            </Typography>
-            {borrowedItemsLoading && (
-              <CircularProgress size={20} sx={{ color: '#FFD700' }} />
-            )}
-          </Box>
-          <TableContainer component={Box} sx={{ flex: 1, overflow: 'auto', width: '100%', borderRadius: 2 }}>
-            <Table stickyHeader size="small" sx={{ minWidth: { xs: 600, sm: 800 } }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ color: '#FFD700', background: '#1a1a1a', borderBottom: '2px solid rgba(255,215,0,0.3)', fontSize: { xs: '0.85rem', sm: '0.95rem' }, fontWeight: 600, py: 1.5 }}>Vật phẩm</TableCell>
-                  <TableCell sx={{ color: '#FFD700', background: '#1a1a1a', borderBottom: '2px solid rgba(255,215,0,0.3)', fontSize: { xs: '0.85rem', sm: '0.95rem' }, fontWeight: 600, py: 1.5 }}>Loại</TableCell>
-                  <TableCell sx={{ color: '#FFD700', background: '#1a1a1a', borderBottom: '2px solid rgba(255,215,0,0.3)', fontSize: { xs: '0.85rem', sm: '0.95rem' }, fontWeight: 600, py: 1.5 }} align="right">Số lượng</TableCell>
-                  <TableCell sx={{ color: '#FFD700', background: '#1a1a1a', borderBottom: '2px solid rgba(255,215,0,0.3)', fontSize: { xs: '0.85rem', sm: '0.95rem' }, fontWeight: 600, py: 1.5 }}>Người mượn</TableCell>
-                  <TableCell sx={{ color: '#FFD700', background: '#1a1a1a', borderBottom: '2px solid rgba(255,215,0,0.3)', fontSize: { xs: '0.85rem', sm: '0.95rem' }, fontWeight: 600, py: 1.5 }}>Ngày mượn</TableCell>
-                  <TableCell sx={{ color: '#FFD700', background: '#1a1a1a', borderBottom: '2px solid rgba(255,215,0,0.3)', fontSize: { xs: '0.85rem', sm: '0.95rem' }, fontWeight: 600, py: 1.5 }} align="center">Thao tác</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {borrowedItemsList.map((item) => (
-                  <TableRow 
-                    key={item.id}
-                    sx={{ 
-                      '&:nth-of-type(odd)': { backgroundColor: '#1b1b1b' },
-                      '&:hover': { backgroundColor: '#222' },
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <TableCell sx={{ color: '#eee', py: 1.5, fontWeight: 500 }}>{item.item}</TableCell>
-                    <TableCell sx={{ color: '#eee', py: 1.5 }}>
-                      <Chip 
-                        label={item.type || 'N/A'} 
-                        size="small" 
-                        sx={{ 
-                          background: 'rgba(255, 215, 0, 0.2)',
-                          color: '#FFD700',
-                          border: '1px solid rgba(255, 215, 0, 0.3)',
-                          fontWeight: 600,
-                          fontSize: '0.8rem'
-                        }} 
-                      />
-                    </TableCell>
-                    <TableCell sx={{ color: '#eee', py: 1.5 }} align="right">
-                      <strong style={{ color: '#FFD700' }}>{item.quantity}</strong> {item.unit}
-                    </TableCell>
-                    <TableCell sx={{ color: '#ccc', py: 1.5, fontSize: '0.85rem' }}>{item.borrowedBy || 'N/A'}</TableCell>
-                    <TableCell sx={{ color: '#ccc', py: 1.5, fontSize: '0.85rem' }}>
-                      {item.borrowedAt ? new Date(item.borrowedAt).toLocaleDateString('vi-VN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      }) : 'N/A'}
-                    </TableCell>
-                    <TableCell align="center" sx={{ py: 1.5 }}>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        startIcon={<AssignmentReturnedIcon />}
-                        onClick={() => handleReturnItem(item)}
-                        disabled={borrowedItemsLoading}
-                        sx={{
-                          background: '#FFD700',
-                          color: '#1a1a1a',
-                          fontWeight: 600,
-                          textTransform: 'none',
-                          fontSize: '0.8rem',
-                          '&:hover': { background: '#FFE44D' },
-                          '&.Mui-disabled': {
-                            background: '#333',
-                            color: '#666'
-                          }
-                        }}
-                      >
-                        Trả lại
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {borrowedItemsList.length === 0 && !borrowedItemsLoading && (
-                  <TableRow>
-                    <TableCell 
-                      colSpan={6} 
-                      sx={{ 
-                        color: '#888', 
-                        textAlign: 'center', 
-                        py: 6,
-                        fontSize: '0.95rem'
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="body2" sx={{ color: '#666' }}>
-                          Chưa có vật phẩm nào được mượn
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
+        <BorrowedItemsTable
+          borrowedItemsList={borrowedItemsList}
+          borrowedItemsLoading={borrowedItemsLoading}
+          handleReturnItem={handleReturnItem}
+        />
       ) : (
         <>
-
-      {/* Thanh tìm kiếm và bộ lọc */}
-      <Paper sx={{ p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Tìm theo toio"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              InputProps={{ 
-                startAdornment: <SearchIcon sx={{ color: '#888', mr: 1 }} /> 
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background: '#252525',
-                  borderRadius: 2,
-                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,215,0,0.4)' },
-                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
-                },
-                '& input': { color: '#fff', fontSize: '0.9rem' }
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl 
-              fullWidth 
-              size="small"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background: '#252525',
-                  color: '#fff',
-                  borderRadius: 2,
-                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,215,0,0.4)' },
-                  '&.Mui-focused fieldset': { borderColor: '#FFD700' }
-                },
-                '& .MuiSelect-icon': { color: '#FFD700' }
-              }}
-            >
-              <Select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                displayEmpty
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      background: '#252525',
-                      border: '1px solid rgba(255,215,0,0.2)',
-                      borderRadius: 2,
-                      mt: 0.5,
-                      '& .MuiMenuItem-root': {
-                        color: '#fff',
-                        fontSize: '0.9rem',
-                        '&:hover': { background: 'rgba(255,215,0,0.1)' },
-                        '&.Mui-selected': { background: 'rgba(255,215,0,0.2)' }
-                      }
-                    }
-                  }
-                }}
-              >
-                <MenuItem value="">
-                  <em>Tất cả Type</em>
-                </MenuItem>
-                {types.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={5}>
-            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
-              {/* Button Mượn vật phẩm */}
-              <Button 
-                size="small" 
-                variant="contained" 
-                onClick={handleOpenBorrowDialog}
-                startIcon={<ShoppingCartIcon />}
-                disabled={Object.keys(borrowItems).length === 0}
-                sx={{ 
-                  background: '#FFD700', 
-                  color: '#1a1a1a', 
-                  fontWeight: 600, 
-                  textTransform: 'none',
-                  borderRadius: 2,
-                  px: 2,
-                  '&:hover': { background: '#FFE44D' },
-                  '&.Mui-disabled': {
-                    background: '#333',
-                    color: '#666'
-                  }
-                }}
-              >
-                Mượn vật phẩm ({Object.keys(borrowItems).length})
-              </Button>
-              
-              {isAdmin && (
-                <>
-                  <input type="file" accept=".csv,.xlsx" id="inventory-upload" style={{ display: 'none' }} onChange={handleFileUpload} />
-                  <label htmlFor="inventory-upload">
-                    <Button 
-                      component="span" 
-                      size="small" 
-                      variant="outlined" 
-                      startIcon={<UploadFileIcon />} 
-                      sx={{ 
-                        borderColor: 'rgba(255,215,0,0.3)', 
-                        color: '#FFD700', 
-                        textTransform: 'none',
-                        borderRadius: 2,
-                        px: 2,
-                        '&:hover': { 
-                          borderColor: '#FFD700', 
-                          background: 'rgba(255,215,0,0.1)' 
-                        } 
-                      }}
-                    >
-                      {fileName || 'Tải CSV/XLSX'}
-                    </Button>
-                  </label>
-                  {fileName && (
-                    <IconButton 
-                      size="small" 
-                      onClick={clearData} 
-                      sx={{ 
-                        color: '#f44336',
-                        '&:hover': { background: 'rgba(244, 67, 54, 0.1)' }
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                  <Button 
-                    size="small" 
-                    variant="contained" 
-                    onClick={addRow} 
-                    startIcon={<AddIcon />} 
-                    sx={{ 
-                      background: '#FFD700', 
-                      color: '#1a1a1a', 
-                      fontWeight: 600, 
-                      textTransform: 'none',
-                      borderRadius: 2,
-                      px: 2,
-                      '&:hover': { background: '#FFE44D' } 
-                    }}
-                  >
-                    Thêm
-                  </Button>
-                  <Button 
-                    size="small" 
-                    variant="outlined" 
-                    onClick={importToServer}
-                    disabled={loading || rawRows.length === 0}
-                    sx={{ 
-                      borderColor: 'rgba(255,215,0,0.3)', 
-                      color: '#FFD700', 
-                      textTransform: 'none',
-                      borderRadius: 2,
-                      px: 2,
-                      '&:hover': { 
-                        borderColor: '#FFD700',
-                        background: 'rgba(255,215,0,0.1)'
-                      },
-                      '&.Mui-disabled': {
-                        borderColor: 'rgba(255,215,0,0.1)',
-                        color: 'rgba(255,215,0,0.3)'
-                      }
-                    }}
-                  >
-                    {loading ? 'Đang lưu...' : 'Lưu lên kho'}
-                  </Button>
-                </>
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-        {remainingRows.length > 0 && (
-          <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(255,215,0,0.1)' }}>
-            <Typography variant="caption" sx={{ color: '#888', fontSize: '0.85rem' }}>
-              Hiển thị {remainingRows.length} / {rawRows.length} vật phẩm
-            </Typography>
-          </Box>
-        )}
-      </Paper>
-
-      {/* Danh sách vật phẩm */}
-      <Paper sx={{ flex: 1, p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#FFD700', fontSize: { xs: '1.1rem', sm: '1.25rem' }, fontWeight: 600 }}>
-            Danh sách vật phẩm còn lại
-          </Typography>
-          {loading && (
-            <CircularProgress size={20} sx={{ color: '#FFD700' }} />
-          )}
-        </Box>
-        <TableContainer component={Box} sx={{ flex: 1, overflow: 'auto', width: '100%', borderRadius: 2 }}>
-          <Table stickyHeader size="small" sx={{ minWidth: { xs: 600, sm: 800 } }}>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5,
-                  width: 50
-                }} align="center">Mượn</TableCell>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5
-                }}>Type</TableCell>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5
-                }}>Item</TableCell>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5
-                }} align="right">Current Qty</TableCell>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5
-                }} align="right">Total Qty</TableCell>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5
-                }}>Unit</TableCell>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5
-                }}>P.I.C</TableCell>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5
-                }}>Note</TableCell>
-                <TableCell sx={{ 
-                  color: '#FFD700', 
-                  background: '#1a1a1a', 
-                  borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                  fontWeight: 600,
-                  py: 1.5,
-                  width: 100
-                }} align="center">Số lượng</TableCell>
-                {isAdmin && (
-                  <TableCell sx={{ 
-                    color: '#FFD700', 
-                    background: '#1a1a1a', 
-                    borderBottom: '2px solid rgba(255,215,0,0.3)', 
-                    fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                    fontWeight: 600,
-                    py: 1.5
-                  }} align="center">Actions</TableCell>
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-                  {remainingRows.map((r, idx) => {
-                    const isEditing = isAdmin && editingIndex === idx;
-                    // Màu cho các loại Type
-                    const getTypeColor = (type) => {
-                      const typeColors = {
-                        'Decor': '#FF6B6B',
-                        'Đồ dùng bếp': '#4ECDC4',
-                        'Văn phòng phẩm': '#FFD93D',
-                        'Vật phẩm thường': '#95E1D3',
-                      };
-                      return typeColors[type] || '#A0A0A0';
-                    };
-                    
-                    const isSelected = borrowItems[idx] !== undefined;
-                    const currentQty = Number(String(r['Current Quantity'] ?? '0').replace(/[^\d.-]/g, ''));
-                    
-                    return (
-                      <TableRow 
-                        key={idx} 
-                        sx={{ 
-                          '&:nth-of-type(odd)': { backgroundColor: '#1b1b1b' },
-                          '&:hover': { backgroundColor: '#222' },
-                          transition: 'background-color 0.2s',
-                          ...(isSelected && {
-                            backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                            borderLeft: '3px solid #FFD700'
-                          })
-                        }}
-                      >
-                        <TableCell sx={{ color: '#eee', py: 1.5 }} align="center">
-                          <Checkbox
-                            checked={isSelected}
-                            onChange={(e) => handleBorrowToggle(idx, e.target.checked)}
-                            sx={{
-                              color: '#FFD700',
-                              '&.Mui-checked': {
-                                color: '#FFD700'
-                              }
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ color: '#eee', py: 1.5 }}>
-                          {isEditing ? (
-                            <TextField 
-                              size="small" 
-                              value={draftRow?.['Type'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, Type: e.target.value }))}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  background: '#252525',
-                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                                  '& input': { color: '#fff', fontSize: '0.85rem' }
-                                }
-                              }}
-                            />
-                          ) : (
-                            <Chip 
-                              label={r['Type']} 
-                              size="small" 
-                              sx={{ 
-                                background: `${getTypeColor(r['Type'])}22`,
-                                color: getTypeColor(r['Type']),
-                                border: `1px solid ${getTypeColor(r['Type'])}44`,
-                                fontWeight: 600,
-                                fontSize: '0.8rem'
-                              }} 
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell sx={{ color: '#eee', py: 1.5, fontWeight: 500 }}>
-                          {isEditing ? (
-                            <TextField 
-                              size="small" 
-                              value={draftRow?.['Item'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, Item: e.target.value }))}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  background: '#252525',
-                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                                  '& input': { color: '#fff', fontSize: '0.85rem' }
-                                }
-                              }}
-                            />
-                          ) : r['Item']}
-                        </TableCell>
-                        <TableCell sx={{ color: '#eee', py: 1.5 }} align="right">
-                          {isEditing ? (
-                            <TextField 
-                              size="small" 
-                              value={draftRow?.['Current Quantity'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, 'Current Quantity': e.target.value }))}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  background: '#252525',
-                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                                  '& input': { color: '#fff', fontSize: '0.85rem' }
-                                }
-                              }}
-                            />
-                          ) : r['Current Quantity']}
-                        </TableCell>
-                        <TableCell sx={{ color: '#eee', py: 1.5 }} align="right">
-                          {isEditing ? (
-                            <TextField 
-                              size="small" 
-                              value={draftRow?.['Total Quantity'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, 'Total Quantity': e.target.value }))}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  background: '#252525',
-                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                                  '& input': { color: '#fff', fontSize: '0.85rem' }
-                                }
-                              }}
-                            />
-                          ) : r['Total Quantity']}
-                        </TableCell>
-                        <TableCell sx={{ color: '#eee', py: 1.5 }}>
-                          {isEditing ? (
-                            <TextField 
-                              size="small" 
-                              value={draftRow?.['Unit'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, Unit: e.target.value }))}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  background: '#252525',
-                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                                  '& input': { color: '#fff', fontSize: '0.85rem' }
-                                }
-                              }}
-                            />
-                          ) : r['Unit']}
-                        </TableCell>
-                        <TableCell sx={{ color: '#eee', py: 1.5 }}>
-                          {isEditing ? (
-                            <TextField 
-                              size="small" 
-                              value={draftRow?.['P.I.C'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, 'P.I.C': e.target.value }))}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  background: '#252525',
-                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                                  '& input': { color: '#fff', fontSize: '0.85rem' }
-                                }
-                              }}
-                            />
-                          ) : r['P.I.C']}
-                        </TableCell>
-                        <TableCell sx={{ color: '#ccc', py: 1.5, fontSize: '0.85rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {isEditing ? (
-                            <TextField 
-                              size="small" 
-                              value={draftRow?.['Note'] || ''} 
-                              onChange={(e) => setDraftRow(prev => ({ ...prev, Note: e.target.value }))}
-                              sx={{
-                                '& .MuiOutlinedInput-root': {
-                                  background: '#252525',
-                                  '& fieldset': { borderColor: 'rgba(255,215,0,0.2)' },
-                                  '& input': { color: '#fff', fontSize: '0.85rem' }
-                                }
-                              }}
-                            />
-                          ) : (r['Note'] || '-')}
-                        </TableCell>
-                        <TableCell sx={{ color: '#eee', py: 1.5 }} align="center">
-                          {isSelected ? (
-                            <TextField
-                              type="number"
-                              size="small"
-                              value={borrowItems[idx] || 1}
-                              onChange={(e) => handleBorrowQuantityChange(idx, e.target.value)}
-                              inputProps={{ 
-                                min: 1, 
-                                max: currentQty,
-                                style: { textAlign: 'center', color: '#fff' }
-                              }}
-                              sx={{
-                                width: 80,
-                                '& .MuiOutlinedInput-root': {
-                                  background: '#252525',
-                                  '& fieldset': { borderColor: '#FFD700' },
-                                  '&:hover fieldset': { borderColor: '#FFE44D' },
-                                  '&.Mui-focused fieldset': { borderColor: '#FFE44D' }
-                                }
-                              }}
-                            />
-                          ) : (
-                            <Typography variant="body2" sx={{ color: '#666' }}>-</Typography>
-                          )}
-                        </TableCell>
-                        {isAdmin && (
-                          <TableCell align="center" sx={{ py: 1.5 }}>
-                            <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                              {isEditing ? (
-                                <>
-                                  <IconButton 
-                                    onClick={saveEdit} 
-                                    size="small"
-                                    sx={{ 
-                                      color: '#4CAF50',
-                                      '&:hover': { background: 'rgba(76, 175, 80, 0.1)' }
-                                    }} 
-                                    title="Lưu"
-                                  >
-                                    <SaveIcon fontSize="small" />
-                                  </IconButton>
-                                  <IconButton 
-                                    onClick={() => { setEditingIndex(null); setDraftRow(null); }} 
-                                    size="small"
-                                    sx={{ 
-                                      color: '#f44336',
-                                      '&:hover': { background: 'rgba(244, 67, 54, 0.1)' }
-                                    }} 
-                                    title="Hủy"
-                                  >
-                                    <DeleteIcon fontSize="small" />
-                                  </IconButton>
-                                </>
-                              ) : (
-                                <>
-                                  <IconButton 
-                                    onClick={() => startEdit(idx)} 
-                                    size="small"
-                                    sx={{ 
-                                      color: '#FFD700',
-                                      '&:hover': { background: 'rgba(255, 215, 0, 0.1)' }
-                                    }} 
-                                    title="Sửa"
-                                  >
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                  <IconButton 
-                                    onClick={() => removeRow(idx)} 
-                                    size="small"
-                                    sx={{ 
-                                      color: '#f44336',
-                                      '&:hover': { background: 'rgba(244, 67, 54, 0.1)' }
-                                    }} 
-                                    title="Xóa"
-                                  >
-                                    <DeleteIcon fontSize="small" />
-                                  </IconButton>
-                                </>
-                              )}
-                            </Box>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    );
-                  })}
-                  {remainingRows.length === 0 && (
-                    <TableRow>
-                      <TableCell 
-                        colSpan={isAdmin ? 9 : 8} 
-                        sx={{ 
-                          color: '#888', 
-                          textAlign: 'center', 
-                          py: 6,
-                          fontSize: '0.95rem'
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body2" sx={{ color: '#666' }}>
-                            Không có dữ liệu hiển thị
-                          </Typography>
-                          {isAdmin && (
-                            <Typography variant="caption" sx={{ color: '#555' }}>
-                              Hãy tải CSV/XLSX tồn kho để bắt đầu
-                            </Typography>
-                          )}
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
+          <InventoryToolbar
+            isAdmin={isAdmin}
+            query={query} setQuery={setQuery}
+            typeFilter={typeFilter} setTypeFilter={setTypeFilter}
+            types={types} borrowItems={borrowItems}
+            handleOpenBorrowDialog={handleOpenBorrowDialog}
+            handleFileUpload={handleFileUpload} fileName={fileName}
+            clearData={clearData} addRow={addRow}
+            importToServer={importToServer} loading={loading}
+            rawRows={rawRows} remainingRows={remainingRows}
+          />
+          <InventoryTable
+            isAdmin={isAdmin} loading={loading}
+            remainingRows={remainingRows} rawRows={rawRows}
+            borrowItems={borrowItems} handleBorrowToggle={handleBorrowToggle}
+            editingIndex={editingIndex} draftRow={draftRow} setDraftRow={setDraftRow}
+            handleBorrowQuantityChange={handleBorrowQuantityChange}
+            saveEdit={saveEdit} startEdit={startEdit}
+            removeRow={removeRow} setEditingIndex={setEditingIndex}
+          />
         </>
       )}
 
-      {/* Dialog xác nhận mượn vật phẩm */}
-      <Dialog
+      {/* Dialog xác nhận mượn */}
+      <BorrowDialog
         open={borrowDialogOpen}
         onClose={handleCloseBorrowDialog}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: {
-            background: '#1e1e1e',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
-            borderRadius: 3
-          }
-        }}
-      >
-        <DialogTitle sx={{ color: '#FFD700', borderBottom: '1px solid rgba(255, 215, 0, 0.2)', pb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ShoppingCartIcon />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Xác nhận mượn vật phẩm
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
-          <Alert severity="info" sx={{ mb: 3, background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.3)', color: '#FFE44D' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              <strong>Hướng dẫn:</strong> Sau khi click "Gửi qua Messenger", hệ thống sẽ:
-            </Typography>
-            <Typography variant="body2" component="div" sx={{ pl: 2 }}>
-              1. Sao chép tin nhắn vào clipboard<br/>
-              2. Mở Facebook Messenger<br/>
-              3. Bạn chỉ cần dán (Ctrl+V) và gửi tin nhắn
-            </Typography>
-          </Alert>
-          
-          <Typography variant="subtitle2" sx={{ color: '#FFD700', mb: 2, fontWeight: 600 }}>
-            Danh sách vật phẩm cần mượn:
-          </Typography>
-          
-          <Box sx={{ mb: 3 }}>
-            {selectedBorrowItems.map((item, index) => (
-              <Box 
-                key={index}
-                sx={{ 
-                  p: 2, 
-                  mb: 1.5, 
-                  background: '#252525', 
-                  borderRadius: 2,
-                  border: '1px solid rgba(255, 215, 0, 0.2)'
-                }}
-              >
-                <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500, mb: 0.5 }}>
-                  {index + 1}. {item.item}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#888' }}>
-                  Số lượng: <strong style={{ color: '#FFD700' }}>{item.quantity}</strong> {item.unit}
-                  {item.type && ` • Loại: ${item.type}`}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-
-          <Box sx={{ 
-            p: 2, 
-            background: '#0f172a', 
-            borderRadius: 2,
-            border: '1px solid rgba(255, 215, 0, 0.2)'
-          }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-              <Typography variant="subtitle2" sx={{ color: '#FFD700', fontWeight: 600 }}>
-                Nội dung tin nhắn sẽ gửi:
-              </Typography>
-              <Button
-                size="small"
-                startIcon={<ContentCopyIcon />}
-                onClick={handleCopyMessage}
-                sx={{
-                  color: '#FFD700',
-                  textTransform: 'none',
-                  '&:hover': { background: 'rgba(255, 215, 0, 0.1)' }
-                }}
-              >
-                Copy
-              </Button>
-            </Box>
-            <Box sx={{ 
-              p: 2, 
-              background: '#1a1a1a', 
-              borderRadius: 1,
-              border: '1px solid rgba(255, 215, 0, 0.1)',
-              maxHeight: 300,
-              overflow: 'auto',
-              position: 'relative'
-            }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#ccc', 
-                  whiteSpace: 'pre-wrap',
-                  fontFamily: 'monospace',
-                  fontSize: '0.85rem',
-                  lineHeight: 1.6
-                }}
-              >
-                {formatBorrowMessage(selectedBorrowItems)}
-              </Typography>
-            </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, borderTop: '1px solid rgba(255, 215, 0, 0.2)', flexDirection: 'column', gap: 2, alignItems: 'stretch' }}>
-          <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
-            <Button 
-              onClick={handleCloseBorrowDialog}
-              sx={{ 
-                color: '#888',
-                '&:hover': { background: 'rgba(255,255,255,0.05)' }
-              }}
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={handleConfirmBorrow}
-              variant="contained"
-              startIcon={<FacebookIcon />}
-              sx={{
-                background: '#FFD700',
-                color: '#1a1a1a',
-                fontWeight: 600,
-                '&:hover': { background: '#FFE44D' }
-              }}
-            >
-              Mở Messenger & Sao chép tin nhắn
-            </Button>
-          </Box>
-          <Box sx={{ 
-            p: 2, 
-            background: 'rgba(255, 215, 0, 0.05)', 
-            borderRadius: 2,
-            border: '1px solid rgba(255, 215, 0, 0.2)'
-          }}>
-            <Typography variant="caption" sx={{ color: '#888', display: 'block', mb: 1 }}>
-              Hoặc mở Messenger thủ công:
-            </Typography>
-            <Button
-              fullWidth
-              variant="outlined"
-              size="small"
-              startIcon={<FacebookIcon />}
-              onClick={() => window.open('https://m.me/lqkoi29', '_blank')}
-              sx={{
-                borderColor: 'rgba(255, 215, 0, 0.3)',
-                color: '#FFD700',
-                textTransform: 'none',
-                '&:hover': { 
-                  borderColor: '#FFD700',
-                  background: 'rgba(255, 215, 0, 0.1)'
-                }
-              }}
-            >
-              Mở Messenger: m.me/lqkoi29
-            </Button>
-          </Box>
-        </DialogActions>
-      </Dialog>
+        selectedBorrowItems={selectedBorrowItems}
+        formatBorrowMessage={formatBorrowMessage}
+        handleCopyMessage={handleCopyMessage}
+        handleConfirmBorrow={handleConfirmBorrow}
+      />
 
       {/* Snackbar thông báo */}
       <Snackbar
@@ -1447,13 +620,13 @@ const InventoryPage = () => {
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert 
-          severity={snackbar.severity} 
+        <Alert
+          severity={snackbar.severity}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
-          sx={{ 
-            background: snackbar.severity === 'success' ? '#1e4620' : 
-                       snackbar.severity === 'warning' ? '#5f3d00' : 
-                       '#5f2120', 
+          sx={{
+            background: snackbar.severity === 'success' ? '#1e4620' :
+              snackbar.severity === 'warning' ? '#5f3d00' :
+                '#5f2120',
             color: '#fff',
             '& .MuiAlert-icon': { color: '#fff' }
           }}

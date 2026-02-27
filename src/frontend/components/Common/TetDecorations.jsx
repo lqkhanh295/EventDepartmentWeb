@@ -60,6 +60,7 @@ const TetDecorations = ({ variant = 'dashboard' }) => {
             const delay = Math.random() * 8;
             const duration = 6 + Math.random() * 6;
             const size = 10 + Math.random() * 10;
+            // eslint-disable-next-line no-unused-vars
             const drift = -30 + Math.random() * 60;
             items.push(
                 <Box

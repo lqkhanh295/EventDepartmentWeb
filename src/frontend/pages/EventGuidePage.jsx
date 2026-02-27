@@ -3,13 +3,10 @@ import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Chip,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { PositionCard, ActivityList, SectionAccordion } from '../components/EventGuide';
 
 const EventGuidePage = () => {
   const [expanded, setExpanded] = useState('planning-team');
@@ -22,115 +19,7 @@ const EventGuidePage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Component cho Position Card
-  const PositionCard = ({ title, quantity, duties, requirements }) => (
-    <Box
-      sx={{
-        background: '#1a1a1a',
-        border: '1px solid #2a2a2a',
-        borderRadius: 1.5,
-        p: 2.5,
-        mb: 2
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-        <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500 }}>
-          {title}
-        </Typography>
-        <Typography variant="caption" sx={{ color: '#666' }}>
-          {quantity}
-        </Typography>
-      </Box>
-      {duties && (
-        <Box sx={{ mb: requirements ? 1.5 : 0 }}>
-          <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Nhiệm vụ
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#999', mt: 0.5, lineHeight: 1.6 }}>
-            {duties}
-          </Typography>
-        </Box>
-      )}
-      {requirements && (
-        <Box>
-          <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Yêu cầu
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#666', mt: 0.5 }}>
-            {requirements}
-          </Typography>
-        </Box>
-      )}
-    </Box>
-  );
 
-  // Component cho Activity List
-  const ActivityList = ({ activities }) => (
-    <Box component="ol" sx={{ p: 0, m: 0, listStyle: 'none' }}>
-      {activities.map((activity, idx) => (
-        <Box 
-          component="li" 
-          key={idx} 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'flex-start',
-            py: 0.75
-          }}
-        >
-          <Box 
-            sx={{ 
-              color: '#666', 
-              mr: 1.5, 
-              minWidth: 28, 
-              textAlign: 'right',
-              flexShrink: 0,
-              fontSize: '0.9rem',
-              lineHeight: 1.6
-            }}
-          >
-            {idx + 1}.
-          </Box>
-          <Box
-            sx={{ color: '#999', fontSize: '0.9rem', lineHeight: 1.6 }}
-          >
-            {activity}
-          </Box>
-        </Box>
-      ))}
-    </Box>
-  );
-
-  const SectionAccordion = ({ id, title, color, children }) => (
-    <Accordion
-      expanded={expanded === id}
-      onChange={handleChange(id)}
-      sx={{
-        background: '#121212',
-        border: '1px solid #2a2a2a',
-        borderRadius: '2px !important',
-        mb: 1.5,
-        '&:before': { display: 'none' },
-        '&.Mui-expanded': {
-          borderColor: color
-        }
-      }}
-    >
-      <AccordionSummary 
-        expandIcon={<ExpandMoreIcon sx={{ color: '#666' }} />}
-        sx={{ py: 0.5 }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 3, height: 20, background: color, borderRadius: 1 }} />
-          <Typography variant="body1" sx={{ fontWeight: 500, color: '#fff' }}>
-            {title}
-          </Typography>
-        </Box>
-      </AccordionSummary>
-      <AccordionDetails sx={{ pt: 0, pb: 3 }}>
-        {children}
-      </AccordionDetails>
-    </Accordion>
-  );
 
   return (
     <Box sx={{ pb: 8, maxWidth: 900 }}>
@@ -179,16 +68,16 @@ const EventGuidePage = () => {
       </Typography>
 
       {/* Team Planning */}
-      <SectionAccordion id="planning-team" title="Team Planning" color="#FF6B6B">
+      <SectionAccordion id="planning-team" title="Team Planning" color="#FF6B6B" expanded={expanded} handleChange={handleChange}>
         <Box sx={{ mb: 3 }}>
           <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic', lineHeight: 1.7, mb: 3, pl: 2, borderLeft: '2px solid #2a2a2a' }}>
             Planning hướng tới việc kiến tạo những kế hoạch táo bạo, nơi các thành viên được thỏa sức bùng nổ ý tưởng và biến những khát vọng táo bạo thành hiện thực.
           </Typography>
-          
+
           <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, mb: 2, display: 'block' }}>
             Vị trí
           </Typography>
-          
+
           <PositionCard
             title="Planning Leader"
             quantity="1 thành viên"
@@ -222,7 +111,7 @@ const EventGuidePage = () => {
       </SectionAccordion>
 
       {/* Team Event Production (Planning) */}
-      <SectionAccordion id="event-production-planning" title="Team Event Production" color="#4ECDC4">
+      <SectionAccordion id="event-production-planning" title="Team Event Production" color="#4ECDC4" expanded={expanded} handleChange={handleChange}>
         <Box sx={{ mb: 3 }}>
           <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic', lineHeight: 1.7, mb: 3, pl: 2, borderLeft: '2px solid #2a2a2a' }}>
             Là một phần của dự án, là sự đảm bảo cho thành công. Phối hợp cùng với các team khác để thực hiện dự án. Đảm nhận phần thực hiện kế hoạch, tổ chức sự kiện.
@@ -231,7 +120,7 @@ const EventGuidePage = () => {
           <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, mb: 2, display: 'block' }}>
             Vị trí
           </Typography>
-          
+
           <PositionCard
             title="Event Leader"
             quantity="1 thành viên"
@@ -241,7 +130,7 @@ const EventGuidePage = () => {
           <Box sx={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 1.5, p: 2, mb: 2 }}>
             <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5 }}>Ứng tuyển</Typography>
             <Typography variant="body2" sx={{ color: '#999', mt: 0.5 }}>
-              • Group Messenger Event Production<br/>
+              • Group Messenger Event Production<br />
               • Group Facebook Gia đình Cóc Sài Gòn
             </Typography>
             <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, mt: 1.5, display: 'block' }}>Yêu cầu</Typography>
@@ -259,7 +148,7 @@ const EventGuidePage = () => {
           <Box sx={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 1.5, p: 2, mb: 2 }}>
             <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5 }}>Ứng tuyển</Typography>
             <Typography variant="body2" sx={{ color: '#999', mt: 0.5 }}>
-              • Group Messenger Event Production<br/>
+              • Group Messenger Event Production<br />
               • Group Facebook Gia đình Cóc Sài Gòn
             </Typography>
             <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, mt: 1.5, display: 'block' }}>Yêu cầu</Typography>
@@ -277,7 +166,7 @@ const EventGuidePage = () => {
           <Box sx={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 1.5, p: 2, mb: 2 }}>
             <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5 }}>Ứng tuyển</Typography>
             <Typography variant="body2" sx={{ color: '#999', mt: 0.5 }}>
-              • Group Messenger Event Production<br/>
+              • Group Messenger Event Production<br />
               • Group Facebook Gia đình Cóc Sài Gòn
             </Typography>
             <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, mt: 1.5, display: 'block' }}>Yêu cầu</Typography>
@@ -340,7 +229,7 @@ const EventGuidePage = () => {
             <Typography variant="body2" sx={{ color: '#999', lineHeight: 1.7, mb: 2 }}>
               Checklist vô cùng quan trọng vì nó giúp đảm bảo kiểm soát đầy đủ đồ dùng cần thiết để tổ chức sự kiện, luôn cập nhật Checklist (lưu ý: chính xác giá tiền gốc - không áp khuyến mãi, thời gian đặt - nhận,...).
             </Typography>
-            
+
             <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, mb: 1, display: 'block' }}>
               Checklist Tổng
             </Typography>
@@ -419,7 +308,7 @@ const EventGuidePage = () => {
       </Typography>
 
       {/* Event Production Pre-prod */}
-      <SectionAccordion id="event-preprod" title="Event Production - Hoạt động" color="#4ECDC4">
+      <SectionAccordion id="event-preprod" title="Event Production - Hoạt động" color="#4ECDC4" expanded={expanded} handleChange={handleChange}>
         <ActivityList activities={[
           "Hoàn thiện các công việc ở phase trước",
           "Core Event ước lượng số lượng nhân sự và cơ cấu vai trò nhân sự (ví dụ ngày onsite có bao nhiêu nhân sự kỹ thuật, bao nhiêu nhân sự điều phối, bao nhiêu nhân sự check-in...)",
@@ -428,7 +317,7 @@ const EventGuidePage = () => {
       </SectionAccordion>
 
       {/* Team Paperwork */}
-      <SectionAccordion id="paperwork" title="Team Paperwork" color="#9B59B6">
+      <SectionAccordion id="paperwork" title="Team Paperwork" color="#9B59B6" expanded={expanded} handleChange={handleChange}>
         <Box sx={{ mb: 3 }}>
           <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic', lineHeight: 1.7, mb: 3, pl: 2, borderLeft: '2px solid #2a2a2a' }}>
             Team PaperWork đóng vai trò then chốt trong việc đảm bảo sự minh bạch và trôi chảy của dòng tiền trong dự án. Không chỉ quản lý tài chính, theo dõi ngân sách một cách chặt chẽ mà còn chịu trách nhiệm thực hiện các thủ tục giấy tờ cần thiết để đảm bảo các khoản thanh toán được xử lý đúng hạn. Với sự chính xác và trách nhiệm, team PaperWork góp phần duy trì sự ổn định tài chính, hỗ trợ dự án vận hành suôn sẻ và hiệu quả.
@@ -437,7 +326,7 @@ const EventGuidePage = () => {
           <Typography variant="caption" sx={{ color: '#666', textTransform: 'uppercase', letterSpacing: 0.5, mb: 2, display: 'block' }}>
             Vị trí
           </Typography>
-          
+
           <PositionCard
             title="PaperWork Leader"
             quantity="1 thành viên"
@@ -487,7 +376,7 @@ const EventGuidePage = () => {
       </Typography>
 
       {/* Event Production */}
-      <SectionAccordion id="event-prod" title="Event Production - Hoạt động" color="#4ECDC4">
+      <SectionAccordion id="event-prod" title="Event Production - Hoạt động" color="#4ECDC4" expanded={expanded} handleChange={handleChange}>
         <ActivityList activities={[
           "Hoàn thiện các công việc ở các giai đoạn trước",
           "Đăng tuyển Event Members. Sau đó, lập Group [CSG] Tên dự án - Event Members (bao gồm Project Leader, Project Sub-Leader(s), Project Mentor(s), Event Leader, Event Sub-Leader(s), Event Mentor(s), Event members, Chủ nhiệm, Trưởng Ban Event, Phó Ban Event, Event Production Leader). Nhập thông tin đầy đủ vào Danh sách nhân sự",
@@ -503,7 +392,7 @@ const EventGuidePage = () => {
       </SectionAccordion>
 
       {/* Paperwork Production */}
-      <SectionAccordion id="ppw-prod" title="Paperwork - Hoạt động" color="#9B59B6">
+      <SectionAccordion id="ppw-prod" title="Paperwork - Hoạt động" color="#9B59B6" expanded={expanded} handleChange={handleChange}>
         <ActivityList activities={[
           "Sau khi team Event xác nhận đặt hàng, gửi các file giấy tờ cần thiết cho NCC và nhắc nhở giao chung khi giao hàng",
           "Tiến hành hoàn thiện các giấy tờ theo yêu cầu của Leader PaperWork",
