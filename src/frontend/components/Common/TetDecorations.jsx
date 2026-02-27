@@ -30,16 +30,6 @@ const SparkIcon = ({ size = 10, color = '#F59E0B' }) => (
     </svg>
 );
 
-const BranchIcon = ({ size = 18, color = '#F59E0B' }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-        <path d="M12 22 C12 22 12 2 12 2" stroke="#6B4423" strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="8" cy="6" r="3" fill={color} opacity={0.8} />
-        <circle cx="15" cy="9" r="2.5" fill={color} opacity={0.7} />
-        <circle cx="10" cy="14" r="2" fill={color} opacity={0.6} />
-        <circle cx="14" cy="17" r="2.5" fill={color} opacity={0.75} />
-    </svg>
-);
-
 const CONFIGS = {
     login: {
         petals: 12,
