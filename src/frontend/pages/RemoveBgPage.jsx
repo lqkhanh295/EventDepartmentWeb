@@ -20,8 +20,8 @@ import ImageIcon from '@mui/icons-material/Image';
 import SaveIcon from '@mui/icons-material/Save';
 import { PageHeader } from '../components';
 import { useAuth } from '../contexts/AuthContext';
-import { removeBackground, downloadImage, blobToUrl } from '../../backend/services/removeBgService';
-import { getRemoveBgApiKey, setRemoveBgApiKey } from '../../backend/services/configService';
+import { removeBackground, downloadImage, blobToUrl } from '../../services/services/removeBgService';
+import { getRemoveBgApiKey, setRemoveBgApiKey } from '../../services/services/configService';
 
 const RemoveBgPage = () => {
   const { isAdmin } = useAuth();

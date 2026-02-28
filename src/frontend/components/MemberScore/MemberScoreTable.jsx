@@ -1,6 +1,19 @@
 import React from 'react';
-import { Typography, Box, Chip, IconButton, Paper } from '@mui/material';
-import { Table, Input } from 'antd';
+import {
+    Typography,
+    Box,
+    Chip,
+    IconButton,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TablePagination,
+    TextField
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
@@ -147,13 +160,18 @@ const MemberScoreTable = ({
                 if (isEditing) {
                     return (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Input
+                            <TextField
                                 size="small"
                                 type="number"
                                 value={editValue}
                                 onChange={(e) => setEditValue(e.target.value)}
-                                onPressEnter={handleSaveScore}
-                                style={{ width: 50, textAlign: 'center' }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleSaveScore();
+                                    }
+                                }}
+                                inputProps={{ style: { width: 50, textAlign: 'center', padding: '4px' } }}
                                 autoFocus
                             />
                             <IconButton size="small" onClick={handleSaveScore} sx={{ color: '#4CAF50', p: 0.25 }}>
@@ -241,39 +259,91 @@ const MemberScoreTable = ({
             })
             .map((m, idx) => ({ ...m, key: m.id || idx }))
         : members.map((m, idx) => ({ ...m, key: m.id || idx }));
+    const displayedData = sortedDataSource.slice(
+        (pagination.current - 1) * pagination.pageSize,
+        pagination.current * pagination.pageSize
+    );
+
+    const handleChangePage = (event, newPage) => {
+        setPagination((prev) => ({ ...prev, current: newPage + 1 }));
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setPagination({ current: 1, pageSize: parseInt(event.target.value, 10) });
+    };
 
     return (
         <Paper sx={{ background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2, overflow: 'hidden' }}>
-            <Table
-                columns={columns}
-                dataSource={sortedDataSource}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    showSizeChanger: true,
-                    pageSizeOptions: ['10', '20', '50', '100'],
-                    onChange: (page, pageSize) => setPagination({ current: page, pageSize })
-                }}
-                scroll={{ x: 'max-content', y: 'calc(100vh - 400px)' }}
-                size="small"
-                style={{ background: '#1a1a1a' }}
-                components={{
-                    body: {
-                        cell: (props) => {
-                            const className = props.className || '';
-                            const isFixed = className.includes('ant-table-cell-fix-left') || className.includes('ant-table-cell-fix-right');
-                            return (
-                                <td {...props} style={{
-                                    ...props.style,
-                                    position: isFixed ? 'sticky' : 'relative',
-                                    zIndex: isFixed ? 10 : 1,
-                                    padding: '8px 12px',
-                                    backgroundColor: '#1a1a1a',
-                                    overflow: 'visible',
-                                    whiteSpace: 'nowrap'
-                                }} />
-                            );
-                        }
+            <TableContainer sx={{ maxHeight: 'calc(100vh - 400px)' }}>
+                <Table stickyHeader size="small" style={{ background: '#1a1a1a' }}>
+                    <TableHead>
+                        <TableRow>
+                            {columns.map((col, idx) => (
+                                <TableCell
+                                    key={col.key || idx}
+                                    align={col.align || 'left'}
+                                    sx={{
+                                        backgroundColor: '#000',
+                                        color: '#B3B3B3',
+                                        fontWeight: 600,
+                                        width: col.width,
+                                        minWidth: col.width,
+                                        whiteSpace: 'nowrap',
+                                        position: col.fixed ? 'sticky' : 'static',
+                                        left: col.fixed === 'left' ? (idx === 0 ? 0 : idx === 1 ? 60 : idx === 2 ? 160 : 0) : 'auto',
+                                        right: col.fixed === 'right' ? 0 : 'auto',
+                                        zIndex: col.fixed ? 10 : 1,
+                                        boxShadow: col.fixed === 'left' ? '1px 0 0 rgba(255,255,255,0.1)' : (col.fixed === 'right' ? '-1px 0 0 rgba(255,255,255,0.1)' : 'none')
+                                    }}
+                                >
+                                    {col.title}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {displayedData.map((row, index) => (
+                            <TableRow key={row.key || index} sx={{ '&:last-child td, &:last-child th': { border: 0 }, borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                {columns.map((col, idx) => (
+                                    <TableCell
+                                        key={col.key || idx}
+                                        align={col.align || 'left'}
+                                        sx={{
+                                            whiteSpace: 'nowrap',
+                                            backgroundColor: '#1a1a1a',
+                                            position: col.fixed ? 'sticky' : 'static',
+                                            left: col.fixed === 'left' ? (idx === 0 ? 0 : idx === 1 ? 60 : idx === 2 ? 160 : 0) : 'auto',
+                                            right: col.fixed === 'right' ? 0 : 'auto',
+                                            zIndex: col.fixed ? 5 : 1,
+                                            boxShadow: col.fixed === 'left' ? '1px 0 0 rgba(255,255,255,0.1)' : (col.fixed === 'right' ? '-1px 0 0 rgba(255,255,255,0.1)' : 'none')
+                                        }}
+                                    >
+                                        {col.render ? col.render(row[col.dataIndex], row, index) : row[col.dataIndex]}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <TablePagination
+                component="div"
+                count={sortedDataSource.length}
+                page={pagination.current - 1}
+                onPageChange={handleChangePage}
+                rowsPerPage={pagination.pageSize}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Số hàng:"
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
+                rowsPerPageOptions={[10, 20, 50, 100]}
+                sx={{
+                    color: '#B3B3B3',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                    '.MuiTablePagination-selectLabel, .MuiTablePagination-select, .MuiTablePagination-displayedRows': {
+                        color: '#B3B3B3',
+                    },
+                    '.MuiTablePagination-actions button': {
+                        color: '#FFD700',
                     }
                 }}
             />

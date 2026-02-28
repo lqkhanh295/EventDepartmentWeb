@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
-import { QRCode, ColorPicker, Input, Button, Card, Space, Typography, Slider, Switch, Segmented, Row, Col } from 'antd';
-import { DownloadOutlined, LinkOutlined } from '@ant-design/icons';
-import { Box } from '@mui/material';
+import React, { useState, useRef } from 'react';
+import {
+    Box,
+    Card,
+    CardHeader,
+    CardContent,
+    Typography,
+    TextField,
+    Slider,
+    Switch,
+    Grid,
+    Button,
+    ToggleButton,
+    ToggleButtonGroup,
+    InputAdornment
+} from '@mui/material';
+import { Download as DownloadIcon, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import QRCode from 'react-qr-code';
 
-const { Title, Text } = Typography;
+
 
 const QRGeneratorPage = () => {
     // const { token } = theme.useToken(); // Unused
@@ -18,18 +32,43 @@ const QRGeneratorPage = () => {
     const [errorLevel, setErrorLevel] = useState('M');
     const [downloadName, setDownloadName] = useState('QRCode');
 
-    // Ant Design's QRCode download feature
+    const qrRef = useRef(null);
+
+    // Download feature using react-qr-code
     const downloadQRCode = () => {
-        const canvas = document.getElementById('my-qrcode')?.querySelector('canvas');
-        if (canvas) {
-            const url = canvas.toDataURL();
-            const a = document.createElement('a');
-            a.download = `${downloadName || 'QRCode'}.png`;
-            a.href = url;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
+        const svg = qrRef.current;
+        if (!svg) return;
+
+        // Serialize the SVG to a string
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+
+        img.onload = () => {
+            canvas.width = size + (bordered ? 40 : 0);
+            canvas.height = size + (bordered ? 40 : 0);
+
+            // Draw background if bordered
+            if (bordered) {
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 20, 20);
+            } else {
+                canvas.width = size;
+                canvas.height = size;
+                ctx.drawImage(img, 0, 0);
+            }
+
+            const pngFile = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement("a");
+            downloadLink.download = `${downloadName || 'QRCode'}.png`;
+            downloadLink.href = `${pngFile}`;
+            downloadLink.click();
+        };
+
+        // Add XML declarative text and set src
+        img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
     };
 
     return (
@@ -39,178 +78,226 @@ const QRGeneratorPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <div style={{ marginBottom: 24 }}>
-                    <Title level={2} style={{ color: '#fff', margin: 0 }}>
+                <Box sx={{ mb: 4 }}>
+                    <Typography variant="h4" sx={{ color: '#fff', fontWeight: 'bold' }}>
                         QR Code Generator
-                    </Title>
-                    <Text style={{ color: '#aaa', fontSize: '16px' }}>
+                    </Typography>
+                    <Typography sx={{ color: '#aaa', mt: 1 }}>
                         Tạo và tùy chỉnh mã QR (không quảng cáo ^^)
-                    </Text>
-                </div>
+                    </Typography>
+                </Box>
 
-                <Row gutter={[24, 24]}>
-                    <Col xs={24} lg={14}>
-                        <Card
-                            style={{ background: '#1e1e1e', borderColor: '#333' }}
-                            title={<span style={{ color: '#fff' }}>Tùy chỉnh QR</span>}
-                        >
-                            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                                <div>
-                                    <Text style={{ color: '#ccc', display: 'block', marginBottom: 8 }}>Nội dung / Liên kết</Text>
-                                    <Input
-                                        prefix={<LinkOutlined />}
+                <Grid container spacing={3}>
+                    <Grid item xs={12} lg={7}>
+                        <Card sx={{ background: '#1e1e1e', border: '1px solid #333', borderRadius: 2 }}>
+                            <CardHeader
+                                title={<Typography sx={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>Tùy chỉnh QR</Typography>}
+                                sx={{ borderBottom: '1px solid #333' }}
+                            />
+                            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 3 }}>
+                                <Box>
+                                    <Typography sx={{ color: '#ccc', mb: 1, fontSize: '0.9rem' }}>Nội dung / Liên kết</Typography>
+                                    <TextField
+                                        fullWidth
                                         placeholder="Nhập liên kết hoặc văn bản..."
                                         value={text}
                                         onChange={(e) => setText(e.target.value)}
-                                        size="large"
-                                        maxLength={300}
-                                        style={{ background: '#2a2a2a', border: '1px solid #444', color: '#fff' }}
+                                        size="small"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <LinkIcon sx={{ color: '#888' }} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                background: '#2a2a2a',
+                                                color: '#fff',
+                                                '& fieldset': { borderColor: '#444' },
+                                                '&:hover fieldset': { borderColor: '#666' },
+                                                '&.Mui-focused fieldset': { borderColor: '#FFD700' },
+                                            }
+                                        }}
                                     />
-                                </div>
+                                </Box>
 
-                                <Row gutter={[16, 16]}>
-                                    <Col span={12}>
-                                        <Text style={{ color: '#ccc', display: 'block', marginBottom: 8 }}>Màu mã QR</Text>
-                                        <ColorPicker
-                                            value={color}
-                                            onChange={(c) => setColor(c.toHexString())}
-                                            showText
-                                            style={{ width: '100%' }}
-                                        />
-                                    </Col>
-                                    <Col span={12}>
-                                        <Text style={{ color: '#ccc', display: 'block', marginBottom: 8 }}>Màu nền</Text>
-                                        <ColorPicker
-                                            value={bgColor}
-                                            onChange={(c) => setBgColor(c.toHexString())}
-                                            showText
-                                            style={{ width: '100%' }}
-                                        />
-                                    </Col>
-                                </Row>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography sx={{ color: '#ccc', mb: 1, fontSize: '0.9rem' }}>Màu mã QR</Typography>
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <input
+                                                type="color"
+                                                value={color}
+                                                onChange={(e) => setColor(e.target.value)}
+                                                style={{ width: 40, height: 40, padding: 0, border: 'none', background: 'transparent', cursor: 'pointer' }}
+                                            />
+                                            <TextField
+                                                size="small"
+                                                value={color}
+                                                onChange={(e) => setColor(e.target.value)}
+                                                sx={{ flex: 1, '& .MuiOutlinedInput-root': { background: '#2a2a2a', color: '#fff', '& fieldset': { borderColor: '#444' } } }}
+                                            />
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography sx={{ color: '#ccc', mb: 1, fontSize: '0.9rem' }}>Màu nền</Typography>
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <input
+                                                type="color"
+                                                value={bgColor}
+                                                onChange={(e) => setBgColor(e.target.value)}
+                                                style={{ width: 40, height: 40, padding: 0, border: 'none', background: 'transparent', cursor: 'pointer' }}
+                                            />
+                                            <TextField
+                                                size="small"
+                                                value={bgColor}
+                                                onChange={(e) => setBgColor(e.target.value)}
+                                                sx={{ flex: 1, '& .MuiOutlinedInput-root': { background: '#2a2a2a', color: '#fff', '& fieldset': { borderColor: '#444' } } }}
+                                            />
+                                        </Box>
+                                    </Grid>
+                                </Grid>
 
-                                <div>
-                                    <Text style={{ color: '#ccc', display: 'block', marginBottom: 8 }}>Kích thước: {size}px</Text>
+                                <Box>
+                                    <Typography sx={{ color: '#ccc', mb: 1, fontSize: '0.9rem' }}>Kích thước: {size}px</Typography>
                                     <Slider
                                         min={100}
                                         max={400}
                                         value={size}
-                                        onChange={setSize}
-                                        tooltip={{ formatter: (value) => `${value}px` }}
+                                        onChange={(_, v) => setSize(v)}
+                                        valueLabelDisplay="auto"
+                                        sx={{ color: '#FFD700' }}
                                     />
-                                </div>
+                                </Box>
 
-                                <div>
-                                    <Text style={{ color: '#ccc', display: 'block', marginBottom: 8 }}>Logo URL (Tùy chọn)</Text>
-                                    <Input
-                                        placeholder="Paste link ảnh logo..."
-                                        value={icon}
-                                        onChange={(e) => setIcon(e.target.value)}
-                                        style={{ background: '#2a2a2a', border: '1px solid #444', color: '#fff' }}
-                                    />
-                                </div>
-
-                                {icon && (
-                                    <div>
-                                        <Text style={{ color: '#ccc', display: 'block', marginBottom: 8 }}>Kích thước Logo: {iconSize}px</Text>
-                                        <Slider
-                                            min={10}
-                                            max={size / 2}
-                                            value={iconSize}
-                                            onChange={setIconSize}
-                                            tooltip={{ formatter: (value) => `${value}px` }}
-                                        />
-                                    </div>
-                                )}
-
-                                <Row gutter={[16, 16]} align="middle">
-                                    <Col span={12}>
-                                        <Space>
-                                            <Switch checked={bordered} onChange={setBordered} />
-                                            <Text style={{ color: '#ccc' }}>Có viền</Text>
-                                        </Space>
-                                    </Col>
-                                    <Col span={12}>
-                                        <Text style={{ color: '#ccc', marginRight: 8 }}>Độ phức tạp:</Text>
-                                        <Segmented
-                                            options={['L', 'M', 'Q', 'H']}
-                                            value={errorLevel}
-                                            onChange={setErrorLevel}
-                                        />
-                                    </Col>
-                                </Row>
-                            </Space>
+                                <Grid container spacing={2} alignItems="center">
+                                    <Grid item xs={12} sm={6}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <Switch
+                                                checked={bordered}
+                                                onChange={(e) => setBordered(e.target.checked)}
+                                                sx={{
+                                                    '& .MuiSwitch-switchBase.Mui-checked': { color: '#FFD700' },
+                                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#FFD700' }
+                                                }}
+                                            />
+                                            <Typography sx={{ color: '#ccc', ml: 1 }}>Có viền trắng nền</Typography>
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Typography sx={{ color: '#ccc', fontSize: '0.9rem' }}>Độ phức tạp:</Typography>
+                                            <ToggleButtonGroup
+                                                value={errorLevel}
+                                                exclusive
+                                                onChange={(_, v) => v && setErrorLevel(v)}
+                                                size="small"
+                                                sx={{
+                                                    background: '#2a2a2a',
+                                                    '& .MuiToggleButton-root': {
+                                                        color: '#888',
+                                                        borderColor: '#444',
+                                                        px: 2,
+                                                        py: 0.5
+                                                    },
+                                                    '& .MuiToggleButton-root.Mui-selected': {
+                                                        color: '#fff',
+                                                        background: 'rgba(255, 215, 0, 0.2)',
+                                                        borderColor: '#FFD700'
+                                                    }
+                                                }}
+                                            >
+                                                <ToggleButton value="L">L</ToggleButton>
+                                                <ToggleButton value="M">M</ToggleButton>
+                                                <ToggleButton value="Q">Q</ToggleButton>
+                                                <ToggleButton value="H">H</ToggleButton>
+                                            </ToggleButtonGroup>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
                         </Card>
-                    </Col>
+                    </Grid>
 
-                    <Col xs={24} lg={10}>
+                    <Grid item xs={12} lg={5}>
                         <Card
-                            style={{
+                            sx={{
                                 background: '#1e1e1e',
-                                borderColor: '#333',
+                                border: '1px solid #333',
                                 height: '100%',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'center',
-                                alignItems: 'center'
+                                alignItems: 'center',
+                                minHeight: 400,
+                                borderRadius: 2
                             }}
                         >
-                            <div
-                                id="my-qrcode"
-                                style={{
-                                    padding: '20px',
-                                    background: '#fff',
+                            <Box
+                                sx={{
+                                    padding: bordered ? '20px' : '0px',
+                                    background: bordered ? bgColor : 'transparent',
                                     borderRadius: '16px',
-                                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                                    marginBottom: '24px'
+                                    boxShadow: bordered ? '0 4px 20px rgba(0,0,0,0.3)' : 'none',
+                                    marginBottom: '24px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 <QRCode
-                                    errorLevel={errorLevel}
+                                    id="my-qrcode"
+                                    ref={qrRef}
                                     value={text || '-'}
-                                    color={color}
-                                    bgColor={bgColor}
                                     size={size}
-                                    icon={icon}
-                                    iconSize={iconSize}
-                                    bordered={bordered}
+                                    fgColor={color}
+                                    bgColor={bgColor}
+                                    level={errorLevel}
+                                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                                 />
-                            </div>
+                            </Box>
 
-                            <Space direction="vertical" align="center" style={{ width: '100%' }}>
-                                <Input
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: 2 }}>
+                                <TextField
                                     placeholder="Tên file (tùy chọn)"
                                     value={downloadName}
                                     onChange={(e) => setDownloadName(e.target.value)}
-                                    style={{
-                                        background: '#2a2a2a',
-                                        border: '1px solid #444',
-                                        color: '#fff',
+                                    size="small"
+                                    sx={{
                                         width: '200px',
-                                        marginBottom: '12px',
-                                        textAlign: 'center'
+                                        '& .MuiOutlinedInput-root': {
+                                            background: '#2a2a2a',
+                                            color: '#fff',
+                                            textAlign: 'center',
+                                            '& fieldset': { borderColor: '#444' },
+                                            '& input': { textAlign: 'center' }
+                                        }
                                     }}
                                 />
                                 <Button
-                                    type="primary"
-                                    icon={<DownloadOutlined />}
+                                    variant="contained"
+                                    startIcon={<DownloadIcon />}
                                     onClick={downloadQRCode}
-                                    size="large"
-                                    style={{
+                                    sx={{
                                         background: 'linear-gradient(45deg, #FFD700, #FFA500)',
-                                        borderColor: 'transparent',
-                                        fontWeight: 'bold',
                                         color: '#000',
+                                        fontWeight: 'bold',
                                         width: '200px',
-                                        height: '50px'
+                                        height: '50px',
+                                        textTransform: 'none',
+                                        fontSize: '1rem',
+                                        '&:hover': {
+                                            background: 'linear-gradient(45deg, #FFE44D, #FFB732)',
+                                        }
                                     }}
                                 >
                                     Tải xuống PNG
                                 </Button>
-                            </Space>
+                            </Box>
                         </Card>
-                    </Col>
-                </Row>
+                    </Grid>
+                </Grid>
             </motion.div>
         </Box>
     );

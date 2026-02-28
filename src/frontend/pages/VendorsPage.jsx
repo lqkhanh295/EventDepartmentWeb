@@ -12,9 +12,15 @@ import {
   Alert,
   Paper,
   Chip,
-  Button
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination
 } from '@mui/material';
-import { Table } from 'antd';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -34,7 +40,7 @@ import {
   addVendor,
   updateVendor,
   deleteVendor
-} from '../../backend/services/vendorService';
+} from '../../services/services/vendorService';
 
 
 const VendorsPage = () => {
@@ -51,6 +57,10 @@ const VendorsPage = () => {
   const [editingVendor, setEditingVendor] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, vendor: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  // Table pagination state
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const loadVendors = useCallback(async () => {
     try {
@@ -221,153 +231,15 @@ const VendorsPage = () => {
     setSnackbar({ open: true, message, severity });
   };
 
-  // Cấu hình cột cho bảng - Tối ưu hiển thị
-  const columns = [
-    {
-      title: 'STT',
-      key: 'stt',
-      width: 60,
-      align: 'center',
-      render: (_, __, index) => (
-        <Typography sx={{ color: '#FFD700', fontWeight: 700, fontSize: '0.9rem' }}>
-          {index + 1}
-        </Typography>
-      )
-    },
-    {
-      title: 'Tên cửa hàng/người bán',
-      dataIndex: 'name',
-      key: 'name',
-      width: 240,
-      render: (text, record) => (
-        <Box>
-          <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '0.95rem', mb: 0.5 }}>
-            {text || '-'}
-          </Typography>
-          {record.events && record.events.length > 0 && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {record.events.map((evt, idx) => (
-                <Chip
-                  key={idx}
-                  label={evt}
-                  size="small"
-                  sx={{
-                    height: 20,
-                    fontSize: '0.65rem',
-                    background: 'rgba(78, 205, 196, 0.15)',
-                    color: '#4ECDC4',
-                    border: '1px solid rgba(78, 205, 196, 0.3)'
-                  }}
-                />
-              ))}
-            </Box>
-          )}
-        </Box>
-      )
-    },
-    {
-      title: 'Nội dung mua',
-      dataIndex: 'buyDetail',
-      key: 'buyDetail',
-      width: 160,
-      render: (text) => (
-        <Typography
-          sx={{
-            color: '#e0e0e0',
-            fontSize: '0.9rem',
-            maxWidth: 150,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}
-          title={text}
-        >
-          {text || '-'}
-        </Typography>
-      )
-    },
-    {
-      title: 'VAT',
-      dataIndex: 'vat',
-      key: 'vat',
-      width: 120,
-      align: 'center',
-      render: (text) => {
-        if (!text) return <Typography sx={{ color: '#666' }}>-</Typography>;
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
 
-        const isNoVat = text.toLowerCase().includes('không');
-        // Rút gọn text VAT
-        const shortText = text.replace('Không xuất VAT', 'Không VAT').replace('Xuất VAT', 'VAT');
-
-        return (
-          <Chip
-            label={shortText}
-            size="small"
-            sx={{
-              height: 24,
-              background: isNoVat ? 'rgba(76, 175, 80, 0.15)' : 'rgba(255, 152, 0, 0.15)',
-              color: isNoVat ? '#4CAF50' : '#FF9800',
-              border: `1px solid ${isNoVat ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 152, 0, 0.3)'}`,
-              fontSize: '0.75rem',
-              fontWeight: 500
-            }}
-          />
-        );
-      }
-    },
-    {
-      title: 'Đánh giá',
-      dataIndex: 'feedback',
-      key: 'feedback',
-      width: 220,
-      render: (text) => (
-        <Box
-          sx={{
-            background: text ? 'rgba(255, 215, 0, 0.05)' : 'transparent',
-            borderLeft: text ? '2px solid rgba(255, 215, 0, 0.3)' : 'none',
-            padding: text ? '6px 10px' : '6px 0',
-            borderRadius: '0 2px 2px 0'
-          }}
-        >
-          <Typography
-            sx={{
-              color: text ? '#e0e0e0' : '#666',
-              fontSize: '0.85rem',
-              fontStyle: 'italic',
-              lineHeight: 1.5,
-              wordBreak: 'break-word'
-            }}
-          >
-            {text ? `"${text}"` : '-'}
-          </Typography>
-        </Box>
-      )
-    },
-    ...(isAdminMode ? [{
-      title: 'Thao tác',
-      key: 'actions',
-      width: 100,
-      align: 'center',
-      render: (_, record) => (
-        <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-          <IconButton
-            size="small"
-            onClick={() => handleEditClick(record)}
-            sx={{ color: '#4ECDC4', '&:hover': { background: 'rgba(78, 205, 196, 0.1)' } }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={() => handleDeleteClick(record)}
-            sx={{ color: '#f44336', '&:hover': { background: 'rgba(244, 67, 54, 0.1)' } }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      )
-    }] : [])
-  ];
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+  const displayedVendors = vendors.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Box>
@@ -468,18 +340,157 @@ const VendorsPage = () => {
             overflow: 'hidden'
           }}
         >
-          <Table
-            columns={columns}
-            dataSource={vendors.map((v, idx) => ({ ...v, key: v.id || idx }))}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} vendor`,
-              pageSizeOptions: ['10', '20', '50']
+          <TableContainer>
+            <Table size="small">
+              <TableHead sx={{ background: 'rgba(0,0,0,0.2)' }}>
+                <TableRow>
+                  <TableCell sx={{ color: '#B3B3B3', fontWeight: 600, width: 60, align: 'center' }}>STT</TableCell>
+                  <TableCell sx={{ color: '#B3B3B3', fontWeight: 600, width: 240 }}>Tên cửa hàng/người bán</TableCell>
+                  <TableCell sx={{ color: '#B3B3B3', fontWeight: 600, width: 160 }}>Nội dung mua</TableCell>
+                  <TableCell sx={{ color: '#B3B3B3', fontWeight: 600, width: 120, align: 'center' }}>VAT</TableCell>
+                  <TableCell sx={{ color: '#B3B3B3', fontWeight: 600, width: 220 }}>Đánh giá</TableCell>
+                  {isAdminMode && <TableCell sx={{ color: '#B3B3B3', fontWeight: 600, width: 100, align: 'center' }}>Thao tác</TableCell>}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {displayedVendors.map((record, index) => {
+                  const actualIndex = page * rowsPerPage + index + 1;
+                  const isNoVat = record.vat && record.vat.toLowerCase().includes('không');
+                  const vatShortText = record.vat ? record.vat.replace('Không xuất VAT', 'Không VAT').replace('Xuất VAT', 'VAT') : '';
+
+                  return (
+                    <TableRow key={record.id || index} sx={{ '&:last-child td, &:last-child th': { border: 0 }, borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                      <TableCell align="center">
+                        <Typography sx={{ color: '#FFD700', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {actualIndex}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '0.95rem', mb: 0.5 }}>
+                            {record.name || '-'}
+                          </Typography>
+                          {record.events && record.events.length > 0 && (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                              {record.events.map((evt, idx) => (
+                                <Chip
+                                  key={idx}
+                                  label={evt}
+                                  size="small"
+                                  sx={{
+                                    height: 20,
+                                    fontSize: '0.65rem',
+                                    background: 'rgba(78, 205, 196, 0.15)',
+                                    color: '#4ECDC4',
+                                    border: '1px solid rgba(78, 205, 196, 0.3)'
+                                  }}
+                                />
+                              ))}
+                            </Box>
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          sx={{
+                            color: '#e0e0e0',
+                            fontSize: '0.9rem',
+                            maxWidth: 150,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}
+                          title={record.buyDetail}
+                        >
+                          {record.buyDetail || '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        {!record.vat ? (
+                          <Typography sx={{ color: '#666' }}>-</Typography>
+                        ) : (
+                          <Chip
+                            label={vatShortText}
+                            size="small"
+                            sx={{
+                              height: 24,
+                              background: isNoVat ? 'rgba(76, 175, 80, 0.15)' : 'rgba(255, 152, 0, 0.15)',
+                              color: isNoVat ? '#4CAF50' : '#FF9800',
+                              border: `1px solid ${isNoVat ? 'rgba(76, 175, 80, 0.3)' : 'rgba(255, 152, 0, 0.3)'}`,
+                              fontSize: '0.75rem',
+                              fontWeight: 500
+                            }}
+                          />
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Box
+                          sx={{
+                            background: record.feedback ? 'rgba(255, 215, 0, 0.05)' : 'transparent',
+                            borderLeft: record.feedback ? '2px solid rgba(255, 215, 0, 0.3)' : 'none',
+                            padding: record.feedback ? '6px 10px' : '6px 0',
+                            borderRadius: '0 2px 2px 0'
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              color: record.feedback ? '#e0e0e0' : '#666',
+                              fontSize: '0.85rem',
+                              fontStyle: 'italic',
+                              lineHeight: 1.5,
+                              wordBreak: 'break-word'
+                            }}
+                          >
+                            {record.feedback ? `"${record.feedback}"` : '-'}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      {isAdminMode && (
+                        <TableCell align="center">
+                          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEditClick(record)}
+                              sx={{ color: '#4ECDC4', '&:hover': { background: 'rgba(78, 205, 196, 0.1)' } }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteClick(record)}
+                              sx={{ color: '#f44336', '&:hover': { background: 'rgba(244, 67, 54, 0.1)' } }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            component="div"
+            count={vendors.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Số hàng:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count} vendor`}
+            rowsPerPageOptions={[10, 20, 50]}
+            sx={{
+              color: '#B3B3B3',
+              borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+              '.MuiTablePagination-selectLabel, .MuiTablePagination-select, .MuiTablePagination-displayedRows': {
+                color: '#B3B3B3',
+              },
+              '.MuiTablePagination-actions button': {
+                color: '#FFD700',
+              }
             }}
-            scroll={false}
-            style={{ background: 'transparent' }}
-            tableLayout="fixed"
           />
         </Paper>
       )}

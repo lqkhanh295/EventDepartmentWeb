@@ -23,7 +23,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import * as XLSX from 'xlsx';
 import { PageHeader } from '../components';
-import { addMember, getAllMembers, updateMember, getAllProjects, addProject, deleteAllProjects, clearAllScores } from '../../backend/services/memberService';
+import { addMember, getAllMembers, updateMember, getAllProjects, addProject, deleteAllProjects, clearAllScores } from '../../services/services/memberService';
 
 const ImportMembersPage = () => {
   const navigate = useNavigate();

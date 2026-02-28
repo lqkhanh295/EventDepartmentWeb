@@ -21,9 +21,9 @@ import {
   BorrowDialog
 } from '../components/Inventory';
 import * as XLSX from 'xlsx';
-import { listInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, bulkImport } from '../../backend/services/inventoryService';
-import { formatBorrowMessage, openFacebookMessenger } from '../../backend/services/facebookMessengerService';
-import { listBorrowedItems, addBorrowedItem, returnBorrowedItem } from '../../backend/services/borrowedItemsService';
+import { listInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, bulkImport } from '../../services/services/inventoryService';
+import { formatBorrowMessage, openFacebookMessenger } from '../../services/services/facebookMessengerService';
+import { listBorrowedItems, addBorrowedItem, returnBorrowedItem } from '../../services/services/borrowedItemsService';
 
 // Expected CSV headers: Type,Item,Current Quantity,Total Quantity,Unit,Unit Price,P.I.C,Note
 // Minimal CSV parser (no quoted commas support). Recommend exporting simple CSV from sheet.

@@ -13,8 +13,8 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
 import { Loading } from '../components';
 import WeatherWidget from '../components/Weather/WeatherWidget';
-import { getAllVendors } from '../../backend/services/vendorService';
-import { getAllGuides } from '../../backend/services/guideService';
+import { getAllVendors } from '../../services/services/vendorService';
+import { getAllGuides } from '../../services/services/guideService';
 import logoCsg from '../../image/logocsg.png';
 import TetDecorations from '../components/Common/TetDecorations';
 

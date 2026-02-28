@@ -20,7 +20,7 @@ import {
   deleteMember,
   addProject,
   deleteProject
-} from '../../backend/services/memberService';
+} from '../../services/services/memberService';
 import {
   MemberDialog,
   ProjectDialog,
