@@ -10,8 +10,14 @@ import {
   Snackbar,
   LinearProgress,
   Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination
 } from '@mui/material';
-import { Upload, Table } from 'antd';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -31,6 +37,10 @@ const ImportMembersPage = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [clearing, setClearing] = useState(false);
 
+  // Pagination state for preview table
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   // Xóa toàn bộ data của semester
   const handleClearData = async () => {
     if (!window.confirm(`Bạn có chắc muốn XÓA TOÀN BỘ dữ liệu điểm và projects của kỳ ${semester.toUpperCase()}?\n\nHành động này KHÔNG THỂ hoàn tác!`)) {
@@ -43,7 +53,7 @@ const ImportMembersPage = () => {
         deleteAllProjects(semester),
         clearAllScores(semester)
       ]);
-      
+
       showSnackbar(`Đã xóa ${projectsDeleted} projects và điểm của ${membersCleared} members`, 'success');
     } catch (error) {
       console.error('Error clearing data:', error);
@@ -74,7 +84,7 @@ const ImportMembersPage = () => {
         // Row 1 (index 1) chứa header columns
         // Cấu trúc: STT(0) | MSSV(1) | TÊN(2) | BĐH(3) | SỐ PROJECT(4) | Trung bình(5) | Web(6) | NOTE(7) | Projects(8+)
         const headerRow = jsonData[1];
-        
+
         // Tìm các cột project từ cột I (index 8) trở đi
         const projectCols = [];
         for (let i = 8; i < headerRow.length; i++) {
@@ -134,8 +144,9 @@ const ImportMembersPage = () => {
         }).filter(Boolean);
 
         setData(rows);
+        setPage(0); // Reset page on new data
         showSnackbar(`Đọc được ${rows.length} members, ${projectCols.length} projects từ file`, 'success');
-        
+
         console.log('Projects found:', projectCols.map(p => p.name));
         console.log('Sample data:', rows.slice(0, 3));
       } catch (error) {
@@ -144,7 +155,17 @@ const ImportMembersPage = () => {
       }
     };
     reader.readAsBinaryString(file);
-    return false;
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
   };
 
   // Import vào Firebase
@@ -161,7 +182,7 @@ const ImportMembersPage = () => {
       // 1. Tạo các project chưa tồn tại
       const existingProjects = await getAllProjects(semester);
       const existingProjectKeys = new Set(existingProjects.map(p => p.key));
-      
+
       let projectsCreated = 0;
       for (let i = 0; i < projectColumns.length; i++) {
         const proj = projectColumns[i];
@@ -174,7 +195,7 @@ const ImportMembersPage = () => {
           projectsCreated++;
         }
       }
-      
+
       if (projectsCreated > 0) {
         console.log(`Created ${projectsCreated} new projects`);
       }
@@ -192,7 +213,7 @@ const ImportMembersPage = () => {
 
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
-        
+
         // Tìm member đã tồn tại (theo MSSV hoặc tên)
         const existingByMssv = row.mssv !== '#N/A' ? existingMap.get(row.mssv.toLowerCase()) : null;
         const existingByName = existingMap.get(row.name.toLowerCase());
@@ -244,6 +265,17 @@ const ImportMembersPage = () => {
     setSnackbar({ open: true, message, severity });
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const displayedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
     <Box>
       <PageHeader
@@ -285,8 +317,8 @@ const ImportMembersPage = () => {
             size="small"
             onClick={handleClearData}
             disabled={clearing}
-            sx={{ 
-              borderColor: '#f44336', 
+            sx={{
+              borderColor: '#f44336',
               color: '#f44336',
               '&:hover': { background: 'rgba(244, 67, 54, 0.1)' }
             }}
@@ -313,22 +345,44 @@ const ImportMembersPage = () => {
 
       {/* Upload Area */}
       <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 2 }}>
-        <Upload.Dragger
-          accept=".xlsx,.xls"
-          beforeUpload={handleFileUpload}
-          showUploadList={false}
-          disabled={importing}
+        <Box
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          sx={{
+            border: '2px dashed #444',
+            borderRadius: 2,
+            p: 4,
+            textAlign: 'center',
+            cursor: importing ? 'default' : 'pointer',
+            background: '#2a2a2a',
+            transition: 'background-color 0.2s',
+            '&:hover': importing ? {} : { background: '#333' }
+          }}
+          onClick={() => {
+            if (!importing) {
+              document.getElementById('file-upload').click();
+            }
+          }}
         >
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <CloudUploadIcon sx={{ fontSize: 64, color: '#FFD700', mb: 2 }} />
-            <Typography sx={{ color: '#fff', mb: 1 }}>
-              Kéo thả file Excel vào đây hoặc click để chọn
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#888' }}>
-              Hỗ trợ: .xlsx, .xls
-            </Typography>
-          </Box>
-        </Upload.Dragger>
+          <input
+            id="file-upload"
+            type="file"
+            accept=".xlsx,.xls"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+              }
+            }}
+          />
+          <CloudUploadIcon sx={{ fontSize: 64, color: '#FFD700', mb: 2 }} />
+          <Typography sx={{ color: '#fff', mb: 1 }}>
+            Kéo thả file Excel vào đây hoặc click để chọn
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#888' }}>
+            Hỗ trợ: .xlsx, .xls
+          </Typography>
+        </Box>
       </Paper>
 
       {/* Preview Table */}
@@ -355,15 +409,15 @@ const ImportMembersPage = () => {
 
           {importing && (
             <Box sx={{ mb: 2 }}>
-              <LinearProgress 
-                variant="determinate" 
-                value={progress} 
-                sx={{ 
-                  height: 8, 
+              <LinearProgress
+                variant="determinate"
+                value={progress}
+                sx={{
+                  height: 8,
                   borderRadius: 2,
                   background: '#333',
                   '& .MuiLinearProgress-bar': { background: '#4CAF50' }
-                }} 
+                }}
               />
               <Typography variant="caption" sx={{ color: '#888', mt: 0.5, display: 'block' }}>
                 {Math.round(progress)}% hoàn thành
@@ -371,12 +425,53 @@ const ImportMembersPage = () => {
             </Box>
           )}
 
-          <Table
-            columns={columns}
-            dataSource={data}
-            pagination={{ pageSize: 10 }}
-            scroll={{ x: 'max-content' }}
-            size="small"
+          <TableContainer>
+            <Table size="small">
+              <TableHead sx={{ background: 'rgba(0,0,0,0.2)' }}>
+                <TableRow>
+                  {columns.map((col) => (
+                    <TableCell
+                      key={col.key}
+                      sx={{ color: '#B3B3B3', fontWeight: 600, width: col.width, whiteSpace: 'nowrap' }}
+                    >
+                      {col.title}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {displayedData.map((row, index) => (
+                  <TableRow key={row.key || index} sx={{ '&:last-child td, &:last-child th': { border: 0 }, borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    {columns.map((col) => (
+                      <TableCell key={col.key} sx={{ whiteSpace: 'nowrap' }}>
+                        {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            component="div"
+            count={data.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Số hàng:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
+            rowsPerPageOptions={[10, 20, 50]}
+            sx={{
+              color: '#B3B3B3',
+              borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+              '.MuiTablePagination-selectLabel, .MuiTablePagination-select, .MuiTablePagination-displayedRows': {
+                color: '#B3B3B3',
+              },
+              '.MuiTablePagination-actions button': {
+                color: '#FFD700',
+              }
+            }}
           />
         </Paper>
       )}

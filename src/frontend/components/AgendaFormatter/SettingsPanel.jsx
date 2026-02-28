@@ -1,9 +1,22 @@
 import React from 'react';
-import { Card, Typography, Slider, ColorPicker, Select, Switch, Tooltip } from 'antd';
-import { SettingOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import {
+    Card,
+    CardHeader,
+    CardContent,
+    Typography,
+    Slider,
+    Select,
+    MenuItem,
+    Switch,
+    Tooltip,
+    Box,
+    TextField,
+    InputAdornment
+} from '@mui/material';
+import { Settings as SettingIcon, Info as InfoIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
-const { Text } = Typography;
+
 
 const SettingsPanel = ({ showSettings, settings, setSettings }) => {
     if (!showSettings) return null;
@@ -15,127 +28,187 @@ const SettingsPanel = ({ showSettings, settings, setSettings }) => {
             exit={{ opacity: 0, height: 0 }}
         >
             <Card
-                style={{
+                sx={{
                     background: '#1e1e1e',
-                    borderColor: '#333',
-                    marginTop: 16
+                    border: '1px solid #333',
+                    mt: 2,
+                    borderRadius: 2
                 }}
-                title={<span style={{ color: '#fff' }}><SettingOutlined /> Cài đặt định dạng PDF</span>}
             >
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Cỡ chữ: {settings.fontSize}pt
-                        </Text>
-                        <Slider
-                            min={6}
-                            max={14}
-                            value={settings.fontSize}
-                            onChange={(val) => setSettings({ ...settings, fontSize: val })}
-                        />
-                    </div>
+                <CardHeader
+                    title={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#fff' }}>
+                            <SettingIcon fontSize="small" />
+                            <Typography sx={{ fontSize: '1.1rem', fontWeight: 600 }}>Cài đặt định dạng PDF</Typography>
+                        </Box>
+                    }
+                    sx={{ borderBottom: '1px solid #333', pb: 2 }}
+                />
+                <CardContent sx={{ pt: 3 }}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 3 }}>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'block', mb: 1, fontSize: '0.9rem' }}>
+                                Cỡ chữ: {settings.fontSize}pt
+                            </Typography>
+                            <Slider
+                                min={6}
+                                max={14}
+                                value={settings.fontSize}
+                                onChange={(_, val) => setSettings({ ...settings, fontSize: val })}
+                                valueLabelDisplay="auto"
+                                sx={{ color: '#FFD700' }}
+                            />
+                        </Box>
 
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Padding ô: {settings.cellPadding}mm
-                        </Text>
-                        <Slider
-                            min={0.5}
-                            max={5}
-                            step={0.5}
-                            value={settings.cellPadding}
-                            onChange={(val) => setSettings({ ...settings, cellPadding: val })}
-                        />
-                    </div>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'block', mb: 1, fontSize: '0.9rem' }}>
+                                Padding ô: {settings.cellPadding}mm
+                            </Typography>
+                            <Slider
+                                min={0.5}
+                                max={5}
+                                step={0.5}
+                                value={settings.cellPadding}
+                                onChange={(_, val) => setSettings({ ...settings, cellPadding: val })}
+                                valueLabelDisplay="auto"
+                                sx={{ color: '#FFD700' }}
+                            />
+                        </Box>
 
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Màu header
-                        </Text>
-                        <ColorPicker
-                            value={settings.headerColor}
-                            onChange={(color) => setSettings({ ...settings, headerColor: color.toHexString() })}
-                        />
-                    </div>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'block', mb: 1, fontSize: '0.9rem' }}>
+                                Màu header
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                <input
+                                    type="color"
+                                    value={settings.headerColor}
+                                    onChange={(e) => setSettings({ ...settings, headerColor: e.target.value })}
+                                    style={{ width: 40, height: 40, padding: 0, border: 'none', background: 'transparent', cursor: 'pointer' }}
+                                />
+                                <TextField
+                                    size="small"
+                                    value={settings.headerColor}
+                                    onChange={(e) => setSettings({ ...settings, headerColor: e.target.value })}
+                                    sx={{ flex: 1, '& .MuiOutlinedInput-root': { background: '#2a2a2a', color: '#fff', '& fieldset': { borderColor: '#444' } } }}
+                                />
+                            </Box>
+                        </Box>
 
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Hướng giấy
-                        </Text>
-                        <Select
-                            value={settings.orientation}
-                            onChange={(val) => setSettings({ ...settings, orientation: val })}
-                            style={{ width: '100%' }}
-                            options={[
-                                { value: 'landscape', label: 'Ngang (Landscape)' },
-                                { value: 'portrait', label: 'Dọc (Portrait)' }
-                            ]}
-                        />
-                    </div>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'block', mb: 1, fontSize: '0.9rem' }}>
+                                Hướng giấy
+                            </Typography>
+                            <Select
+                                value={settings.orientation}
+                                onChange={(e) => setSettings({ ...settings, orientation: e.target.value })}
+                                fullWidth
+                                size="small"
+                                sx={{
+                                    background: '#2a2a2a',
+                                    color: '#fff',
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
+                                    '& .MuiSvgIcon-root': { color: '#888' }
+                                }}
+                            >
+                                <MenuItem value="landscape">Ngang (Landscape)</MenuItem>
+                                <MenuItem value="portrait">Dọc (Portrait)</MenuItem>
+                            </Select>
+                        </Box>
 
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Khổ giấy
-                        </Text>
-                        <Select
-                            value={settings.pageSize}
-                            onChange={(val) => setSettings({ ...settings, pageSize: val })}
-                            style={{ width: '100%' }}
-                            options={[
-                                { value: 'a4', label: 'A4' },
-                                { value: 'a3', label: 'A3 (Lớn hơn)' },
-                                { value: 'letter', label: 'Letter' }
-                            ]}
-                        />
-                    </div>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'block', mb: 1, fontSize: '0.9rem' }}>
+                                Khổ giấy
+                            </Typography>
+                            <Select
+                                value={settings.pageSize}
+                                onChange={(e) => setSettings({ ...settings, pageSize: e.target.value })}
+                                fullWidth
+                                size="small"
+                                sx={{
+                                    background: '#2a2a2a',
+                                    color: '#fff',
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#444' },
+                                    '& .MuiSvgIcon-root': { color: '#888' }
+                                }}
+                            >
+                                <MenuItem value="a4">A4</MenuItem>
+                                <MenuItem value="a3">A3 (Lớn hơn)</MenuItem>
+                                <MenuItem value="letter">Letter</MenuItem>
+                            </Select>
+                        </Box>
 
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Tự động nhận diện thời gian
-                            <Tooltip title="Tự động chuyển đổi giá trị số Excel thành định dạng thời gian HH:mm">
-                                <InfoCircleOutlined style={{ marginLeft: 8, color: '#1890ff' }} />
-                            </Tooltip>
-                        </Text>
-                        <Switch
-                            checked={settings.autoDetectTime}
-                            onChange={(val) => setSettings({ ...settings, autoDetectTime: val })}
-                        />
-                    </div>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'flex', alignItems: 'center', mb: 1, fontSize: '0.9rem' }}>
+                                Tự động nhận diện thời gian
+                                <Tooltip title="Tự động chuyển đổi giá trị số Excel thành định dạng thời gian HH:mm" placement="top">
+                                    <InfoIcon sx={{ ml: 1, color: '#4CAF50', fontSize: 16 }} />
+                                </Tooltip>
+                            </Typography>
+                            <Switch
+                                checked={settings.autoDetectTime}
+                                onChange={(e) => setSettings({ ...settings, autoDetectTime: e.target.checked })}
+                                sx={{
+                                    '& .MuiSwitch-switchBase.Mui-checked': { color: '#FFD700' },
+                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#FFD700' }
+                                }}
+                            />
+                        </Box>
 
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Highlight section headers
-                            <Tooltip title="Tự động highlight các dòng như 'PHẦN I', 'BREAK TIME', etc.">
-                                <InfoCircleOutlined style={{ marginLeft: 8, color: '#1890ff' }} />
-                            </Tooltip>
-                        </Text>
-                        <Switch
-                            checked={settings.highlightSections}
-                            onChange={(val) => setSettings({ ...settings, highlightSections: val })}
-                        />
-                    </div>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'flex', alignItems: 'center', mb: 1, fontSize: '0.9rem' }}>
+                                Highlight section headers
+                                <Tooltip title="Tự động highlight các dòng như 'PHẦN I', 'BREAK TIME', etc." placement="top">
+                                    <InfoIcon sx={{ ml: 1, color: '#4CAF50', fontSize: 16 }} />
+                                </Tooltip>
+                            </Typography>
+                            <Switch
+                                checked={settings.highlightSections}
+                                onChange={(e) => setSettings({ ...settings, highlightSections: e.target.checked })}
+                                sx={{
+                                    '& .MuiSwitch-switchBase.Mui-checked': { color: '#FFD700' },
+                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#FFD700' }
+                                }}
+                            />
+                        </Box>
 
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Màu section
-                        </Text>
-                        <ColorPicker
-                            value={settings.sectionColor}
-                            disabled={!settings.highlightSections}
-                            onChange={(color) => setSettings({ ...settings, sectionColor: color.toHexString() })}
-                        />
-                    </div>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'block', mb: 1, fontSize: '0.9rem' }}>
+                                Màu section
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, opacity: settings.highlightSections ? 1 : 0.5, pointerEvents: settings.highlightSections ? 'auto' : 'none' }}>
+                                <input
+                                    type="color"
+                                    value={settings.sectionColor}
+                                    onChange={(e) => setSettings({ ...settings, sectionColor: e.target.value })}
+                                    style={{ width: 40, height: 40, padding: 0, border: 'none', background: 'transparent', cursor: 'pointer' }}
+                                    disabled={!settings.highlightSections}
+                                />
+                                <TextField
+                                    size="small"
+                                    value={settings.sectionColor}
+                                    onChange={(e) => setSettings({ ...settings, sectionColor: e.target.value })}
+                                    disabled={!settings.highlightSections}
+                                    sx={{ flex: 1, '& .MuiOutlinedInput-root': { background: '#2a2a2a', color: '#fff', '& fieldset': { borderColor: '#444' } } }}
+                                />
+                            </Box>
+                        </Box>
 
-                    <div>
-                        <Text style={{ color: '#aaa', display: 'block', marginBottom: 8 }}>
-                            Hiển thị đường kẻ
-                        </Text>
-                        <Switch
-                            checked={settings.showGridLines}
-                            onChange={(val) => setSettings({ ...settings, showGridLines: val })}
-                        />
-                    </div>
-                </div>
+                        <Box>
+                            <Typography sx={{ color: '#aaa', display: 'block', mb: 1, fontSize: '0.9rem' }}>
+                                Hiển thị đường kẻ
+                            </Typography>
+                            <Switch
+                                checked={settings.showGridLines}
+                                onChange={(e) => setSettings({ ...settings, showGridLines: e.target.checked })}
+                                sx={{
+                                    '& .MuiSwitch-switchBase.Mui-checked': { color: '#FFD700' },
+                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#FFD700' }
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                </CardContent>
             </Card>
         </motion.div>
     );

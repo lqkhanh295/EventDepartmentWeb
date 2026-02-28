@@ -1,11 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
-import { ConfigProvider } from 'antd';
 import CssBaseline from '@mui/material/CssBaseline';
 
 // Theme
-import { muiTheme, antTheme } from './frontend/theme/theme';
+import { muiTheme } from './frontend/theme/theme';
 
 // Styles
 import './frontend/styles/global.css';
@@ -111,14 +110,12 @@ const AppRoutes = () => {
 function App() {
   return (
     <ThemeProvider theme={muiTheme}>
-      <ConfigProvider theme={antTheme}>
-        <CssBaseline />
-        <Router>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
-        </Router>
-      </ConfigProvider>
+      <CssBaseline />
+      <Router>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }

@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
-import { Button, Upload, Card, Typography, Space, message, Tooltip } from 'antd';
-import { FileExcelOutlined, FilePdfOutlined, SettingOutlined } from '@ant-design/icons';
-import { Box } from '@mui/material';
+import React, { useState, useRef } from 'react';
+import {
+    Button,
+    Card,
+    Typography,
+    Box,
+    Tooltip,
+    Snackbar,
+    Alert
+} from '@mui/material';
+import {
+    InsertDriveFile as FileExcelIcon,
+    PictureAsPdf as FilePdfIcon,
+    Settings as SettingsIcon
+} from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import * as XLSX from 'xlsx';
 import '../styles/global.css';
@@ -15,8 +26,7 @@ import {
     processAndDownloadPDF
 } from '../components/AgendaFormatter';
 
-const { Title, Text, Paragraph } = Typography;
-const { Dragger } = Upload;
+
 
 const AgendaFormatterPage = () => {
     const [fileList, setFileList] = useState([]);
@@ -25,6 +35,12 @@ const AgendaFormatterPage = () => {
     const [allData, setAllData] = useState([]); // Store full parsed data
     const [isProcessing, setIsProcessing] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const fileInputRef = useRef(null);
+
+    const showMessage = (msg, severity = 'success') => {
+        setSnackbar({ open: true, message: msg, severity });
+    };
 
     // Settings state
     const [settings, setSettings] = useState({
@@ -41,10 +57,10 @@ const AgendaFormatterPage = () => {
 
     // Xử lý upload file
     const handleUpload = (file) => {
-        const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-excel';
+        const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-excel' || file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
         if (!isExcel) {
-            message.error('Chỉ chấp nhận file Excel!');
-            return Upload.LIST_IGNORE;
+            showMessage('Chỉ chấp nhận file Excel!', 'error');
+            return;
         }
 
         const reader = new FileReader();
@@ -89,11 +105,21 @@ const AgendaFormatterPage = () => {
                 setColumns(cols);
                 setPreviewData(rows);
                 setFileList([file]);
-                message.success(`Đã tải file thành công! Nhận diện ${cols.length} cột, ${jsonData.length - headerRowIndex - 1} dòng dữ liệu.`);
+                showMessage(`Đã tải file thành công! Nhận diện ${cols.length} cột, ${jsonData.length - headerRowIndex - 1} dòng dữ liệu.`);
             }
         };
         reader.readAsArrayBuffer(file);
-        return false;
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            handleUpload(e.dataTransfer.files[0]);
+        }
     };
 
     return (
@@ -103,29 +129,31 @@ const AgendaFormatterPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-                    <div>
-                        <Title level={2} style={{ color: '#fff', margin: 0 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+                    <Box>
+                        <Typography variant="h4" sx={{ color: '#fff', fontWeight: 'bold' }}>
                             Agenda Formatter
-                        </Title>
-                        <Paragraph style={{ color: '#aaa', fontSize: '16px' }}>
+                        </Typography>
+                        <Typography sx={{ color: '#aaa', mt: 1 }}>
                             Tự động định dạng kịch bản từ Excel và xuất ra PDF chuẩn. Hỗ trợ không giới hạn số cột.
-                        </Paragraph>
-                    </div>
+                        </Typography>
+                    </Box>
                     <Tooltip title="Cài đặt định dạng">
                         <Button
-                            icon={<SettingOutlined />}
+                            variant="contained"
+                            startIcon={<SettingsIcon />}
                             onClick={() => setShowSettings(!showSettings)}
-                            style={{
+                            sx={{
                                 background: showSettings ? '#1890ff' : '#333',
-                                borderColor: '#555',
-                                color: '#fff'
+                                color: '#fff',
+                                textTransform: 'none',
+                                '&:hover': { background: showSettings ? '#40a9ff' : '#444' }
                             }}
                         >
                             Cài đặt
                         </Button>
                     </Tooltip>
-                </div>
+                </Box>
 
                 {/* Settings Panel Component */}
                 <SettingsPanel
@@ -135,70 +163,91 @@ const AgendaFormatterPage = () => {
                 />
 
                 <Card
-                    style={{
+                    sx={{
                         background: '#1e1e1e',
-                        borderColor: '#333',
-                        marginTop: 24,
-                        color: '#fff'
+                        border: '1px solid #333',
+                        mt: 3,
+                        color: '#fff',
+                        borderRadius: 2,
+                        p: 3
                     }}
                 >
-                    <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                        <Dragger
-                            accept=".xlsx, .xls"
-                            beforeUpload={handleUpload}
-                            showUploadList={false}
-                            style={{
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <Box
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onClick={() => fileInputRef.current?.click()}
+                            sx={{
                                 background: '#2a2a2a',
-                                border: '1px dashed #444',
-                                padding: '32px'
+                                border: '2px dashed #444',
+                                borderRadius: 2,
+                                p: 4,
+                                textAlign: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s',
+                                '&:hover': { borderColor: '#4caf50', background: '#333' }
                             }}
                         >
-                            <p className="ant-upload-drag-icon">
-                                <FileExcelOutlined style={{ color: '#4caf50', fontSize: 48 }} />
-                            </p>
-                            <p className="ant-upload-text" style={{ color: '#fff' }}>
+                            <input
+                                type="file"
+                                accept=".xlsx, .xls"
+                                style={{ display: 'none' }}
+                                ref={fileInputRef}
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files.length > 0) {
+                                        handleUpload(e.target.files[0]);
+                                    }
+                                    e.target.value = null; // Reset input
+                                }}
+                            />
+                            <FileExcelIcon sx={{ color: '#4caf50', fontSize: 64, mb: 2 }} />
+                            <Typography sx={{ color: '#fff', fontSize: '1.1rem', mb: 1 }}>
                                 Kéo thả hoặc click để chọn file Excel kịch bản
-                            </p>
-                            <p className="ant-upload-hint" style={{ color: '#888' }}>
+                            </Typography>
+                            <Typography sx={{ color: '#888', fontSize: '0.9rem' }}>
                                 Hỗ trợ định dạng .xlsx, .xls - Không giới hạn số cột
-                            </p>
-                        </Dragger>
+                            </Typography>
+                        </Box>
 
                         {fileList.length > 0 && (
-                            <div style={{ textAlign: 'center' }}>
-                                <Text style={{ color: '#4caf50', fontSize: 16 }}>
+                            <Box sx={{ textAlign: 'center' }}>
+                                <Typography sx={{ color: '#4caf50', fontSize: '1rem', fontWeight: 500 }}>
                                     File đã chọn: {fileList[0].name}
-                                </Text>
-                                <br />
-                                <Text style={{ color: '#888', fontSize: 14 }}>
+                                </Typography>
+                                <Typography sx={{ color: '#888', fontSize: '0.9rem', mt: 0.5 }}>
                                     {columns.length} cột • {previewData.length > 0 ? `${allData.length - 1} dòng dữ liệu` : ''}
-                                </Text>
-                            </div>
+                                </Typography>
+                            </Box>
                         )}
 
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                             <Button
-                                type="primary"
-                                icon={<FilePdfOutlined />}
+                                variant="contained"
+                                startIcon={<FilePdfIcon />}
                                 size="large"
-                                onClick={() => processAndDownloadPDF(fileList, settings, setIsProcessing, message)}
-                                loading={isProcessing}
-                                disabled={fileList.length === 0}
-                                style={{
+                                onClick={() => processAndDownloadPDF(fileList, settings, setIsProcessing, { success: (msg) => showMessage(msg), error: (msg) => showMessage(msg, 'error') })}
+                                disabled={fileList.length === 0 || isProcessing}
+                                sx={{
                                     height: 50,
-                                    paddingLeft: 32,
-                                    paddingRight: 32,
-                                    fontSize: 18,
+                                    px: 4,
+                                    fontSize: '1.1rem',
                                     background: 'linear-gradient(45deg, #FFD700, #FFA500)',
-                                    border: 'none',
+                                    color: '#000',
                                     fontWeight: 'bold',
-                                    color: '#000'
+                                    textTransform: 'none',
+                                    '&:hover': {
+                                        background: 'linear-gradient(45deg, #FFE44D, #FFB732)',
+                                    },
+                                    '&.Mui-disabled': {
+                                        background: '#555',
+                                        color: '#888'
+                                    }
                                 }}
                             >
                                 {isProcessing ? 'Đang xử lý...' : 'Định dạng & Tải PDF'}
                             </Button>
-                        </div>
-                    </Space>
+                        </Box>
+                    </Box>
                 </Card>
 
                 {/* Preview Table Component */}
@@ -206,6 +255,16 @@ const AgendaFormatterPage = () => {
                     previewData={previewData}
                     columns={columns}
                 />
+                <Snackbar
+                    open={snackbar.open}
+                    autoHideDuration={4000}
+                    onClose={() => setSnackbar({ ...snackbar, open: false })}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                >
+                    <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+                        {snackbar.message}
+                    </Alert>
+                </Snackbar>
             </motion.div>
         </Box>
     );
