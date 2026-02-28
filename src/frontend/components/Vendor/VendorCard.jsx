@@ -86,7 +86,7 @@ const VendorCard = ({ vendor, onEdit, onDelete }) => {
               }}
             />
           </Box>
-          
+
           {rating && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <StarIcon sx={{ color: '#FFD700', fontSize: 18 }} />
@@ -166,14 +166,14 @@ const VendorCard = ({ vendor, onEdit, onDelete }) => {
               </Typography>
             </Box>
           )}
-          
+
           {email && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
               <EmailIcon sx={{ color: '#2196F3', fontSize: 16 }} />
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#b3b3b3', 
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#b3b3b3',
                   fontSize: '0.85rem',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
@@ -183,14 +183,14 @@ const VendorCard = ({ vendor, onEdit, onDelete }) => {
               </Typography>
             </Box>
           )}
-          
+
           {address && (
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
               <LocationOnIcon sx={{ color: '#FF9800', fontSize: 16, mt: 0.2 }} />
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#b3b3b3', 
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#b3b3b3',
                   fontSize: '0.85rem',
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
@@ -214,7 +214,7 @@ const VendorCard = ({ vendor, onEdit, onDelete }) => {
             }}
           >
             <Typography variant="caption" sx={{ color: '#888' }}>
-              Mức giá: 
+              Mức giá:
             </Typography>
             <Typography
               variant="body2"
@@ -266,5 +266,5 @@ const VendorCard = ({ vendor, onEdit, onDelete }) => {
   );
 };
 
-export default VendorCard;
+export default React.memo(VendorCard);
 

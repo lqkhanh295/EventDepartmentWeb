@@ -351,4 +351,4 @@ const MemberScoreTable = ({
     );
 };
 
-export default MemberScoreTable;
+export default React.memo(MemberScoreTable);
