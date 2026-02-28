@@ -1,6 +1,6 @@
 // Auth Context - Quản lý authentication và chế độ admin
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       const adminRoutes = ['/members'];
-      const isAdminRoute = adminRoutes.some(route => 
+      const isAdminRoute = adminRoutes.some(route =>
         location.pathname.startsWith(route)
       );
       // Chỉ set admin mode nếu user là admin
@@ -101,5 +101,42 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+// Protected Route Component
+export const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return null; // Hoặc loading spinner
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+// Admin Protected Route Component
+export const AdminProtectedRoute = ({ children }) => {
+  const { user, loading, isAdmin } = useAuth();
+
+  // Đợi auth load xong
+  if (loading) {
+    return null; // Hoặc loading spinner
+  }
+
+  // Kiểm tra user đã đăng nhập
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Kiểm tra quyền admin - CHẶN NẾU KHÔNG PHẢI ADMIN
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
