@@ -6,7 +6,7 @@ import {
   Chip,
 } from '@mui/material';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { PositionCard, ActivityList, SectionAccordion } from '../components/EventGuide';
+import { PositionCard, ActivityList, SectionAccordion } from '../components';
 
 const EventGuidePage = () => {
   const [expanded, setExpanded] = useState('planning-team');

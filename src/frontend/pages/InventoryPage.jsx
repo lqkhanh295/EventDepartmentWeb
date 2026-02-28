@@ -10,7 +10,7 @@ import {
   Tabs,
   Tab
 } from '@mui/material';
-import { PageHeader } from '../components/Common';
+import { PageHeader } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
 import Inventory2Icon from '@mui/icons-material/Inventory2';

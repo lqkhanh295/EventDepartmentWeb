@@ -16,7 +16,7 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CategoryIcon from '@mui/icons-material/Category';
-import { PageHeader } from '../components/Common';
+import { PageHeader } from '../components';
 
 const TaxLookupPage = () => {
   const [taxCode, setTaxCode] = useState('');
