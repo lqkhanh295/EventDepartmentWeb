@@ -12,15 +12,8 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { PageHeader } from '../components';
-import {
-  getAllMembers,
-  getAllProjects,
-  addMember,
-  updateMemberScore,
-  deleteMember,
-  addProject,
-  deleteProject
-} from '../../services/services/memberService';
+import { useMembers } from '../hooks/useMembers';
+import { useSnackbar } from '../hooks/useSnackbar';
 import {
   MemberDialog,
   ProjectDialog,
@@ -42,9 +35,19 @@ const MemberScorePage = () => {
   const currentSemester = semesterInfo[semester] || semesterInfo.fall;
   const currentYear = new Date().getFullYear();
 
-  const [members, setMembers] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    members,
+    setMembers,
+    projects,
+    loading,
+    fetchData,
+    addMember,
+    updateMemberScore,
+    deleteMember,
+    addProject,
+    deleteProject
+  } = useMembers();
+
   const [editingCell, setEditingCell] = useState(null);
   const [editValue, setEditValue] = useState('');
 
@@ -57,45 +60,17 @@ const MemberScorePage = () => {
   const [memberForm, setMemberForm] = useState({ mssv: '', name: '', isBDH: false, note: '' });
   const [projectForm, setProjectForm] = useState({ Name: '', key: '', order: 1 });
 
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const { snackbar, showSnackbar, hideSnackbar } = useSnackbar();
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
   const [sortMode, setSortMode] = useState('default'); // 'default' | 'rank'
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true);
-
-      if (semester === 'year') {
-        // Load tất cả projects từ 3 kỳ
-        const [membersData, springProjects, summerProjects, fallProjects] = await Promise.all([
-          getAllMembers(),
-          getAllProjects('spring'),
-          getAllProjects('summer'),
-          getAllProjects('fall')
-        ]);
-        setMembers(membersData);
-        // Gộp tất cả projects với prefix kỳ
-        const allProjects = [
-          ...springProjects.map(p => ({ ...p, semester: 'spring', displayName: `[Sp] ${p.Name || p.key}` })),
-          ...summerProjects.map(p => ({ ...p, semester: 'summer', displayName: `[Su] ${p.Name || p.key}` })),
-          ...fallProjects.map(p => ({ ...p, semester: 'fall', displayName: `[Fa] ${p.Name || p.key}` }))
-        ];
-        setProjects(allProjects);
-      } else {
-        const [membersData, projectsData] = await Promise.all([
-          getAllMembers(),
-          getAllProjects(semester)
-        ]);
-        setMembers(membersData);
-        setProjects(projectsData);
-      }
+      await fetchData(semester);
     } catch (error) {
-      console.error('Error loading data:', error);
-      setSnackbar({ open: true, message: 'Lỗi khi tải dữ liệu', severity: 'error' });
-    } finally {
-      setLoading(false);
+      showSnackbar('Lỗi khi tải dữ liệu', 'error');
     }
-  }, [semester]);
+  }, [semester, fetchData, showSnackbar]);
 
   useEffect(() => {
     loadData();
@@ -207,9 +182,7 @@ const MemberScorePage = () => {
     }
   };
 
-  const showSnackbar = (message, severity) => {
-    setSnackbar({ open: true, message, severity });
-  };
+
 
   return (
     <Box>
@@ -367,11 +340,11 @@ const MemberScorePage = () => {
       {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        autoHideDuration={4000}
+        onClose={hideSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert severity={snackbar.severity} sx={{ background: snackbar.severity === 'success' ? '#1e4620' : '#5f2120', color: '#fff' }}>
+        <Alert severity={snackbar.severity} onClose={hideSnackbar} sx={{ background: snackbar.severity === 'success' ? '#1e4620' : '#5f2120', color: '#fff' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

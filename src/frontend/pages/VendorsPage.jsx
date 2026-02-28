@@ -35,28 +35,24 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { PageHeader, Loading, EmptyState, VendorForm } from '../components';
 import { useAuth } from '../contexts/AuthContext';
-import {
-  getAllVendors,
-  addVendor,
-  updateVendor,
-  deleteVendor
-} from '../../services/services/vendorService';
+import { useVendors } from '../hooks/useVendors';
+import { useSnackbar } from '../hooks/useSnackbar';
 
 
 const VendorsPage = () => {
   const [searchParams] = useSearchParams();
   const { isAdminMode } = useAuth();
 
+  const { vendors: allVendorsData, loading, fetchVendors, addVendor: apiAddVendor, updateVendor: apiUpdateVendor, deleteVendor: apiDeleteVendor } = useVendors();
   const [vendors, setVendors] = useState([]);
   const [allVendors, setAllVendors] = useState([]);
   const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEvent, setSelectedEvent] = useState('all');
   const [formOpen, setFormOpen] = useState(false);
   const [editingVendor, setEditingVendor] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, vendor: null });
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const { snackbar, showSnackbar, hideSnackbar } = useSnackbar();
 
   // Table pagination state
   const [page, setPage] = useState(0);
@@ -64,8 +60,7 @@ const VendorsPage = () => {
 
   const loadVendors = useCallback(async () => {
     try {
-      setLoading(true);
-      const data = await getAllVendors();
+      const data = await fetchVendors();
       const mergedData = mergeVendors(data);
       setAllVendors(mergedData);
       setVendors(mergedData);
@@ -73,10 +68,8 @@ const VendorsPage = () => {
     } catch (error) {
       console.error('Error loading vendors:', error);
       showSnackbar('Lỗi khi tải danh sách vendor', 'error');
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  }, [fetchVendors]);
 
   useEffect(() => {
     loadVendors();
@@ -173,7 +166,7 @@ const VendorsPage = () => {
 
   const handleAddVendor = async (vendorData) => {
     try {
-      await addVendor(vendorData);
+      await apiAddVendor(vendorData);
       showSnackbar('Thêm vendor thành công!', 'success');
       loadVendors();
     } catch (error) {
@@ -184,7 +177,7 @@ const VendorsPage = () => {
 
   const handleUpdateVendor = async (vendorData) => {
     try {
-      await updateVendor(editingVendor.id, vendorData);
+      await apiUpdateVendor(editingVendor.id, vendorData);
       showSnackbar('Cập nhật vendor thành công!', 'success');
       loadVendors();
     } catch (error) {
@@ -195,7 +188,7 @@ const VendorsPage = () => {
 
   const handleDeleteVendor = async () => {
     try {
-      await deleteVendor(deleteDialog.vendor.id);
+      await apiDeleteVendor(deleteDialog.vendor.id);
       showSnackbar('Xóa vendor thành công!', 'success');
       setDeleteDialog({ open: false, vendor: null });
       loadVendors();
@@ -225,10 +218,6 @@ const VendorsPage = () => {
 
   const handleDeleteClick = (vendor) => {
     setDeleteDialog({ open: true, vendor });
-  };
-
-  const showSnackbar = (message, severity) => {
-    setSnackbar({ open: true, message, severity });
   };
 
   const handleChangePage = (event, newPage) => {
@@ -531,11 +520,11 @@ const VendorsPage = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        onClose={hideSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          onClose={hideSnackbar}
           severity={snackbar.severity}
           sx={{
             background: snackbar.severity === 'success' ? '#1e4620' : '#5f2120',
