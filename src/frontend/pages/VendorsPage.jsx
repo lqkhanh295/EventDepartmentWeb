@@ -43,7 +43,7 @@ const VendorsPage = () => {
   const [searchParams] = useSearchParams();
   const { isAdminMode } = useAuth();
 
-  const { vendors: allVendorsData, loading, fetchVendors, addVendor: apiAddVendor, updateVendor: apiUpdateVendor, deleteVendor: apiDeleteVendor } = useVendors();
+  const { loading, fetchVendors, addVendor: apiAddVendor, updateVendor: apiUpdateVendor, deleteVendor: apiDeleteVendor } = useVendors();
   const [vendors, setVendors] = useState([]);
   const [allVendors, setAllVendors] = useState([]);
   const [events, setEvents] = useState([]);
@@ -69,7 +69,7 @@ const VendorsPage = () => {
       console.error('Error loading vendors:', error);
       showSnackbar('Lỗi khi tải danh sách vendor', 'error');
     }
-  }, [fetchVendors]);
+  }, [fetchVendors, showSnackbar]);
 
   useEffect(() => {
     loadVendors();

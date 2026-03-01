@@ -10,8 +10,7 @@ import {
     Switch,
     Tooltip,
     Box,
-    TextField,
-    InputAdornment
+    TextField
 } from '@mui/material';
 import { Settings as SettingIcon, Info as InfoIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';

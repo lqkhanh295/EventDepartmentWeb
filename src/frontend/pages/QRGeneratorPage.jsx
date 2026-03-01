@@ -24,8 +24,6 @@ const QRGeneratorPage = () => {
     // const { token } = theme.useToken(); // Unused
     const [text, setText] = useState('https://vote.cocsaigon.club');
     const [size, setSize] = useState(250);
-    const [icon, setIcon] = useState('');
-    const [iconSize, setIconSize] = useState(40);
     const [color, setColor] = useState('#000000');
     const [bgColor, setBgColor] = useState('#FFFFFF');
     const [bordered, setBordered] = useState(true);
