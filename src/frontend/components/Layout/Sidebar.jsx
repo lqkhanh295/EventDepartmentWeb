@@ -24,6 +24,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ImageIcon from '@mui/icons-material/Image';
 import InventoryIcon from '@mui/icons-material/Inventory2';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 // import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'; // Tạm ẩn
 
 const DRAWER_WIDTH = 240;
@@ -76,6 +77,12 @@ const menuItems = [
     label: 'Xóa Background',
     icon: ImageIcon,
     path: '/remove-bg'
+  },
+  {
+    id: 'lighting',
+    label: 'Lighting Designer',
+    icon: LightbulbIcon,
+    path: '/lighting'
   }
 ];
 
@@ -147,8 +154,8 @@ const Sidebar = ({ open, onClose, isAdmin: isAdminProp }) => {
       <List sx={{ px: 2, flex: 1 }}>
         {menuItems
           .filter(item => {
-            // ẨN HOÀN TOÀN menu "Members" nếu không phải admin
-            if (item.id === 'members') {
+            // ẨN HOÀN TOÀN menu "Members" và "Lighting" nếu không phải admin
+            if (item.id === 'members' || item.id === 'lighting') {
               // Luôn ẩn khi đang loading auth (chưa xác định được quyền)
               if (authLoading === true) {
                 return false;

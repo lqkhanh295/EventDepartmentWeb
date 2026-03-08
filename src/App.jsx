@@ -29,6 +29,7 @@ const LoginPage = lazy(() => import('./frontend/pages').then(module => ({ defaul
 const InventoryPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.InventoryPage })));
 const QRGeneratorPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.QRGeneratorPage })));
 const AgendaFormatterPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.AgendaFormatterPage })));
+const LightingDesignerPage = lazy(() => import('./frontend/pages/LightingDesigner/LightingDesignerPage'));
 
 // App Routes
 const AppRoutes = () => {
@@ -50,6 +51,14 @@ const AppRoutes = () => {
                   <Route path="/inventory" element={<InventoryPage />} />
                   <Route path="/qr-generator" element={<QRGeneratorPage />} />
                   <Route path="/agenda-formatter" element={<AgendaFormatterPage />} />
+                  <Route
+                    path="/lighting"
+                    element={
+                      <AdminProtectedRoute>
+                        <LightingDesignerPage />
+                      </AdminProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/members"
                     element={
