@@ -25,6 +25,8 @@ import ImageIcon from '@mui/icons-material/Image';
 import InventoryIcon from '@mui/icons-material/Inventory2';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import DescriptionIcon from '@mui/icons-material/Description';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 // import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'; // Tạm ẩn
 
 const DRAWER_WIDTH = 240;
@@ -41,6 +43,12 @@ const menuItems = [
     label: 'Vendor',
     icon: StoreIcon,
     path: '/vendors'
+  },
+  {
+    id: 'contracts',
+    label: 'Hợp Đồng',
+    icon: DescriptionIcon,
+    path: '/contracts'
   },
   {
     id: 'members',
@@ -77,6 +85,12 @@ const menuItems = [
     label: 'Xóa Background',
     icon: ImageIcon,
     path: '/remove-bg'
+  },
+  {
+    id: 'video-downloader',
+    label: 'Tải Video',
+    icon: VideoLibraryIcon,
+    path: '/video-downloader'
   },
   {
     id: 'lighting',

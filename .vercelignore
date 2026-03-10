@@ -1,0 +1,6 @@
+# Exclude the standalone Express server — Vercel only uses /api/ serverless functions
+server/
+
+# Exclude extra build artifacts
+my-app/
+autodoc-legal-generator/node_modules/

@@ -63,7 +63,6 @@ const LoginPage = () => {
         overflow: 'hidden'
       }}
     >
-      {/* Tet Floating Decorations */}
 
       <Box
         sx={{
@@ -106,12 +105,12 @@ const LoginPage = () => {
         <Typography
           variant="body2"
           sx={{
-            color: '#888',
+            color: '#f5dc01',
             mb: 4,
             fontSize: '0.9rem'
           }}
         >
-          Đăng nhập để tiếp tục
+          EVENT LÀ NHÀ!!!!
         </Typography>
 
         {/* Error */}

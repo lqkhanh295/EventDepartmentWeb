@@ -10,5 +10,7 @@ export { default as LoginPage } from './LoginPage';
 export { default as InventoryPage } from './InventoryPage';
 export { default as QRGeneratorPage } from './QRGeneratorPage';
 export { default as AgendaFormatterPage } from './AgendaFormatterPage';
+export { default as ContractsPage } from './ContractsPage';
+export { default as VideoDownloaderPage } from './VideoDownloaderPage';
 // LightingDesignerPage is imported directly in App.jsx to avoid HMR circular dependency
 

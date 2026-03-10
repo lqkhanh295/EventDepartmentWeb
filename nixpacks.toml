@@ -1,0 +1,17 @@
+# Nixpacks build configuration for Railway
+# Adds yt-dlp and ffmpeg so the video downloader works in production
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "yt-dlp", "ffmpeg"]
+
+[phases.install]
+cmds = ["npm ci --prefer-offline"]
+
+[phases.build]
+cmds = [
+  "npm run build",
+  "cd server && npm ci --prefer-offline"
+]
+
+[start]
+cmd = "node server/server.js"

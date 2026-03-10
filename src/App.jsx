@@ -29,6 +29,8 @@ const LoginPage = lazy(() => import('./frontend/pages').then(module => ({ defaul
 const InventoryPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.InventoryPage })));
 const QRGeneratorPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.QRGeneratorPage })));
 const AgendaFormatterPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.AgendaFormatterPage })));
+const ContractsPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.ContractsPage })));
+const VideoDownloaderPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.VideoDownloaderPage })));
 const LightingDesignerPage = lazy(() => import('./frontend/pages/LightingDesigner/LightingDesignerPage'));
 
 // App Routes
@@ -51,6 +53,8 @@ const AppRoutes = () => {
                   <Route path="/inventory" element={<InventoryPage />} />
                   <Route path="/qr-generator" element={<QRGeneratorPage />} />
                   <Route path="/agenda-formatter" element={<AgendaFormatterPage />} />
+                  <Route path="/contracts" element={<ContractsPage />} />
+                  <Route path="/video-downloader" element={<VideoDownloaderPage />} />
                   <Route
                     path="/lighting"
                     element={
