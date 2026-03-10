@@ -10,22 +10,27 @@
     "@fontsource/vt323": "^5.2.7",
     "@mui/icons-material": "^5.14.18",
     "@mui/material": "^5.14.18",
+    "@react-three/drei": "^9.106.0",
+    "@react-three/fiber": "^8.16.8",
     "@xenova/transformers": "^2.17.2",
     "docxtemplater": "^3.67.5",
     "file-saver": "^2.0.5",
     "firebase": "^10.14.1",
-    "framer-motion": "^12.23.24",
+    "framer-motion": "^11.18.2",
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.7",
+    "konva": "^8.4.3",
     "mammoth": "^1.6.0",
     "pdfjs-dist": "^5.4.394",
     "pizzip": "^3.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-konva": "^18.2.10",
     "react-qr-code": "^2.0.18",
     "react-router-dom": "^6.20.0",
     "react-scripts": "5.0.1",
     "react-spring": "^9.7.3",
+    "three": "^0.165.0",
     "xlsx": "^0.18.5"
   },
   "scripts": {
@@ -56,5 +61,6 @@
   },
   "devDependencies": {
     "cross-env": "^10.1.0"
-  }
+  },
+  "proxy": "http://localhost:3002"
 }

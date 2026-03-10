@@ -5,7 +5,6 @@ import { Box, Typography, Button, CircularProgress, Alert, TextField, InputAdorn
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import logoCsg from '../../image/logocsg.png';
-import TetDecorations from '../components/Common/TetDecorations';
 
 const LoginPage = () => {
   const { user, loading, error, loginWithMock } = useAuth();
@@ -22,7 +21,7 @@ const LoginPage = () => {
     // Kiểm tra mật khẩu cho admin
     if (userType === 'admin') {
       if (adminPassword !== 'eventleader') {
-        setPasswordError('Mật khẩu không đúng');
+        setPasswordError('Nhập đúng pass đi😒😒');
         return;
       }
       setPasswordError('');
@@ -64,37 +63,6 @@ const LoginPage = () => {
         overflow: 'hidden'
       }}
     >
-      {/* Tet Floating Decorations */}
-      <TetDecorations variant="login" />
-
-      {/* Tet Greeting */}
-      <Typography
-        variant="h4"
-        sx={{
-          color: '#DC2626',
-          fontWeight: 700,
-          mb: 1,
-          zIndex: 1,
-          textShadow: '0 0 20px rgba(220, 38, 38, 0.3)',
-          letterSpacing: '2px'
-        }}
-      >
-        Chúc Mừng Năm Mới
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#F59E0B',
-          mb: 3,
-          zIndex: 1,
-          fontWeight: 500,
-          letterSpacing: '4px',
-          textTransform: 'uppercase',
-          fontSize: '0.75rem'
-        }}
-      >
-        Năm Tỵ 2025
-      </Typography>
 
       <Box
         sx={{
@@ -137,12 +105,12 @@ const LoginPage = () => {
         <Typography
           variant="body2"
           sx={{
-            color: '#888',
+            color: '#f5dc01',
             mb: 4,
             fontSize: '0.9rem'
           }}
         >
-          Đăng nhập để tiếp tục
+          EVENT LÀ NHÀ!!!!
         </Typography>
 
         {/* Error */}
