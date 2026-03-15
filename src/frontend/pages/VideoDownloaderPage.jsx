@@ -40,6 +40,39 @@ const formatDuration = (secs) => {
     : `${m}:${String(s).padStart(2, '0')}`;
 };
 
+const parseApiPayload = async (resp) => {
+  const raw = await resp.text();
+  if (!raw) return { data: null, raw: '' };
+
+  const contentType = (resp.headers.get('Content-Type') || '').toLowerCase();
+  if (contentType.includes('application/json')) {
+    try {
+      return { data: JSON.parse(raw), raw };
+    } catch {
+      return { data: null, raw };
+    }
+  }
+
+  try {
+    return { data: JSON.parse(raw), raw };
+  } catch {
+    return { data: null, raw };
+  }
+};
+
+const getApiErrorMessage = (resp, parsed, fallback) => {
+  const bodyError = parsed?.data?.error || parsed?.data?.message;
+  if (typeof bodyError === 'string' && bodyError.trim()) return bodyError;
+
+  const raw = (parsed?.raw || '').trim();
+  if (/proxy error/i.test(raw)) {
+    return 'Không kết nối được backend API. Hãy chạy server bằng "cd server && npm start" rồi thử lại.';
+  }
+
+  if (raw) return raw.slice(0, 220);
+  return `${fallback} (HTTP ${resp.status})`;
+};
+
 const VideoDownloaderPage = () => {
   const [url, setUrl] = useState('');
   const [videoInfo, setVideoInfo] = useState(null);
@@ -61,8 +94,17 @@ const VideoDownloaderPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim() }),
       });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Không thể lấy thông tin video');
+
+      const parsed = await parseApiPayload(resp);
+      if (!resp.ok) {
+        throw new Error(getApiErrorMessage(resp, parsed, 'Không thể lấy thông tin video'));
+      }
+
+      const data = parsed.data;
+      if (!data || typeof data !== 'object') {
+        throw new Error('API trả về dữ liệu không hợp lệ');
+      }
+
       setVideoInfo(data);
       if (data.availableQualities?.length) {
         setQuality(String(data.availableQualities[0]));
@@ -96,8 +138,8 @@ const VideoDownloaderPage = () => {
       const params = new URLSearchParams({ url: url.trim(), type, quality });
       const resp = await fetch(`/api/video/download?${params}`);
       if (!resp.ok) {
-        const data = await resp.json().catch(() => ({}));
-        throw new Error(data.error || `Lỗi server HTTP ${resp.status}`);
+        const parsed = await parseApiPayload(resp);
+        throw new Error(getApiErrorMessage(resp, parsed, 'Lỗi tải file từ server'));
       }
 
       const contentLength = Number(resp.headers.get('Content-Length') || 0);

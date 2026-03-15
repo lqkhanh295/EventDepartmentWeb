@@ -96,7 +96,10 @@ Event Department Web là ứng dụng web quản lý toàn diện dành cho Ban 
 
 4. **Chạy ứng dụng**
    ```bash
-   # Windows
+   # Chạy cả frontend + backend cùng lúc (khuyến nghị)
+   npm run dev
+
+   # Chỉ chạy frontend
    npm start
 
    # Unix/Mac
@@ -163,7 +166,10 @@ src/
 
 ## 🔧 Scripts
 
+- `npm run dev` - Chạy đồng thời frontend (3000) và backend API (3002)
 - `npm start` - Chạy ứng dụng development server (Windows)
+- `npm run start:frontend` - Chạy frontend (tự động dùng lại instance đang chạy ở cổng 3000)
+- `npm run start:backend` - Chạy backend API server (tự động dùng lại instance đang chạy ở cổng 3002)
 - `npm run start:unix` - Chạy ứng dụng development server (Unix/Mac)
 - `npm run build` - Build ứng dụng cho production
 - `npm test` - Chạy tests

@@ -77,7 +77,7 @@ console.log(
 const { pushToMagicQ, pingMagicQ } = require('./magicq');
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3003;
 
 // Allow requests from React dev server and Railway production domain
 const allowedOrigins = [
@@ -336,7 +336,7 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`✅  Server running on http://localhost:${PORT}`);
     console.log(`   POST /api/magicq/push-patch — push patch CSV + UDP command`);
     console.log(`   POST /api/magicq/ping        — test UDP connectivity`);
@@ -344,4 +344,13 @@ app.listen(PORT, () => {
     if (process.env.NODE_ENV === 'production') {
         console.log('   Serving React build from /build/');
     }
+});
+
+server.on('error', (err) => {
+    if (err && err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use. The server is likely already running.`);
+        console.error('   Stop the existing process on this port, then run "npm start" again.');
+        process.exit(1);
+    }
+    throw err;
 });
