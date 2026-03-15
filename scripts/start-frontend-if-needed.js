@@ -32,11 +32,9 @@ function isPortOpen(port, host, timeoutMs = 700) {
     process.exit(0);
   }
 
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const child = spawn(npmCmd, ['start'], {
+  const child = spawn('npm', ['start'], {
     stdio: 'inherit',
-    shell: false,
-    windowsHide: false,
+    shell: true,
   });
 
   child.on('exit', (code, signal) => {

@@ -305,6 +305,13 @@ const INVIDIOUS_INSTANCES = [
     'https://iv.ggtyler.dev',
 ];
 
+const PIPED_INSTANCES = [
+    'https://pipedapi.kavin.rocks',
+    'https://pipedapi.adminforge.de',
+    'https://piped-api.garudalinux.org',
+    'https://pipedapi.in.projectsegfau.lt',
+];
+
 async function fetchInfoFromInvidious(videoId) {
     for (const instance of INVIDIOUS_INSTANCES) {
         try {
@@ -336,39 +343,72 @@ async function fetchInfoFromInvidious(videoId) {
     return null;
 }
 
-async function getInvidiousItag(videoId, type, quality) {
-    for (const instance of INVIDIOUS_INSTANCES) {
+async function getInvidiousStreamUrl(videoId, type, quality) {
+    // Try Piped API first (more reliable)
+    for (const instance of PIPED_INSTANCES) {
         try {
             const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 8000);
+            const timer = setTimeout(() => ctrl.abort(), 10000);
             const resp = await fetch(
-                `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=title,adaptiveFormats,formatStreams`,
-                { signal: ctrl.signal }
+                `${instance}/streams/${encodeURIComponent(videoId)}`,
+                { signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0' } }
             );
             clearTimeout(timer);
             if (!resp.ok) continue;
             const data = await resp.json();
-            if (!data) continue;
+            if (!data?.title) continue;
+            const title = data.title || '';
             if (type === 'mp3') {
-                const audio = (data.adaptiveFormats || [])
-                    .filter(f => f.type?.startsWith('audio/'))
+                const audioStreams = (data.audioStreams || [])
+                    .filter(f => f.url)
                     .sort((a, b) => (parseInt(b.bitrate) || 0) - (parseInt(a.bitrate) || 0));
-                if (audio[0]?.itag) return { itag: audio[0].itag, title: data.title || '', instance };
+                if (audioStreams[0]?.url) return { url: audioStreams[0].url, title, ext: 'm4a', contentType: 'audio/mp4' };
+            } else {
+                const h = quality && quality !== 'best' ? parseInt(quality) : 9999;
+                const videoStreams = (data.videoStreams || [])
+                    .filter(f => f.url && !f.videoOnly)
+                    .map(f => ({ ...f, _h: parseInt(f.quality) || 0 }))
+                    .filter(f => f._h > 0)
+                    .sort((a, b) => b._h - a._h);
+                const best = videoStreams.find(f => f._h <= h) || videoStreams[videoStreams.length - 1];
+                if (best?.url) return { url: best.url, title, ext: 'mp4', contentType: 'video/mp4' };
+            }
+        } catch (e) {
+            console.warn(`[piped] ${instance}: ${e.message}`);
+        }
+    }
+    // Fall back to Invidious
+    for (const instance of INVIDIOUS_INSTANCES) {
+        try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 10000);
+            const resp = await fetch(
+                `${instance}/api/v1/videos/${encodeURIComponent(videoId)}`,
+                { signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0' } }
+            );
+            clearTimeout(timer);
+            if (!resp.ok) continue;
+            const data = await resp.json();
+            if (!data?.title) continue;
+            const title = data.title || '';
+            if (type === 'mp3') {
+                const audioStreams = (data.adaptiveFormats || [])
+                    .filter(f => f.type?.startsWith('audio/') && f.url)
+                    .sort((a, b) => (parseInt(b.bitrate) || 0) - (parseInt(a.bitrate) || 0));
+                if (audioStreams[0]?.url) return { url: audioStreams[0].url, title, ext: 'm4a', contentType: 'audio/mp4' };
             } else {
                 const h = quality && quality !== 'best' ? parseInt(quality) : 9999;
                 const muxed = (data.formatStreams || [])
+                    .filter(f => f.url)
                     .map(f => ({ ...f, _h: parseInt(f.qualityLabel) || 0 }))
-                    .filter(f => f._h <= h && f._h > 0)
+                    .filter(f => f._h > 0)
                     .sort((a, b) => b._h - a._h);
-                if (muxed[0]?.itag) return { itag: muxed[0].itag, title: data.title || '', instance };
-                const vid = (data.adaptiveFormats || [])
-                    .filter(f => f.type?.startsWith('video/mp4'))
-                    .map(f => ({ ...f, _h: parseInt(f.qualityLabel) || 0 }))
-                    .filter(f => f._h <= h && f._h > 0)
-                    .sort((a, b) => b._h - a._h);
-                if (vid[0]?.itag) return { itag: vid[0].itag, title: data.title || '', instance };
+                const best = muxed.find(f => f._h <= h) || muxed[muxed.length - 1];
+                if (best?.url) return { url: best.url, title, ext: 'mp4', contentType: 'video/mp4' };
             }
-        } catch { /* try next */ }
+        } catch (e) {
+            console.warn(`[invidious] ${instance}: ${e.message}`);
+        }
     }
     return null;
 }
@@ -400,23 +440,17 @@ function pipeHttpStream(streamUrl, res, contentType, filename) {
 }
 
 async function pipeFromInvidious(videoId, type, quality, titleHint, res) {
-    const result = await getInvidiousItag(videoId, type, quality);
+    const result = await getInvidiousStreamUrl(videoId, type, quality);
     if (!result) return false;
-    const { itag, title, instance } = result;
-    const ext = type === 'mp3' ? 'mp3' : 'mp4';
-    const contentType = type === 'mp3' ? 'audio/mpeg' : 'video/mp4';
+    const { url, title, ext, contentType } = result;
     const safeName = (title || titleHint || 'video').replace(/[\\/:*?"<>|]/g, '_').trim().slice(0, 120) + '.' + ext;
-    for (const inst of [instance, ...INVIDIOUS_INSTANCES.filter(i => i !== instance)]) {
-        if (res.headersSent) break;
-        try {
-            const streamUrl = `${inst}/latest_version?id=${encodeURIComponent(videoId)}&itag=${encodeURIComponent(String(itag))}&local=true`;
-            await pipeHttpStream(streamUrl, res, contentType, safeName);
-            return true;
-        } catch (e) {
-            console.warn(`[invidious-dl] ${inst}: ${e.message}`);
-        }
+    try {
+        await pipeHttpStream(url, res, contentType, safeName);
+        return true;
+    } catch (e) {
+        console.warn(`[invidious-dl] stream failed: ${e.message}`);
+        return false;
     }
-    return false;
 }
 
 // POST /api/video/info — lấy tiêu đề, thumbnail, thời lượng
@@ -522,6 +556,9 @@ app.get('/api/video/download', async (req, res) => {
     const args = ['--no-playlist', '--no-warnings', '-o', `${tmpBase}.%(ext)s`];
     // Pass ffmpeg location so yt-dlp can merge video+audio even if not in PATH
     if (FFMPEG_DIR) args.push('--ffmpeg-location', FFMPEG_DIR);
+    if (isYouTubeUrl(url)) {
+        args.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
+    }
     if (type === 'mp3') {
         args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
     } else {
