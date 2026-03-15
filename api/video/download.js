@@ -3,6 +3,8 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const https = require('https');
+const http = require('http');
 
 const ALLOWED_VIDEO_HOSTS = new Set([
     'youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be', 'music.youtube.com',
@@ -10,10 +12,33 @@ const ALLOWED_VIDEO_HOSTS = new Set([
 ]);
 
 const YT_DLP_COOKIES_PATH = process.env.YTDLP_COOKIES_PATH || process.env.YT_DLP_COOKIES_PATH || '';
+const YT_DLP_COOKIES_B64 = process.env.YTDLP_COOKIES_B64 || process.env.YT_DLP_COOKIES_B64 || '';
+const YT_DLP_COOKIES_CONTENT = process.env.YTDLP_COOKIES_CONTENT || process.env.YT_DLP_COOKIES_CONTENT || '';
+
+let CACHED_COOKIES_FILE = null;
+function resolveCookiesFile() {
+    if (CACHED_COOKIES_FILE) return CACHED_COOKIES_FILE;
+
+    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
+        CACHED_COOKIES_FILE = YT_DLP_COOKIES_PATH;
+        return CACHED_COOKIES_FILE;
+    }
+
+    const cookieText = YT_DLP_COOKIES_CONTENT
+        ? YT_DLP_COOKIES_CONTENT
+        : (YT_DLP_COOKIES_B64 ? Buffer.from(YT_DLP_COOKIES_B64, 'base64').toString('utf8') : '');
+    if (!cookieText.trim()) return null;
+
+    const filePath = path.join(os.tmpdir(), 'yt-dlp-cookies.txt');
+    fs.writeFileSync(filePath, cookieText, { encoding: 'utf8' });
+    CACHED_COOKIES_FILE = filePath;
+    return CACHED_COOKIES_FILE;
+}
 
 function appendYtDlpAuthArgs(args) {
-    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
-        args.push('--cookies', YT_DLP_COOKIES_PATH);
+    const cookiesFile = resolveCookiesFile();
+    if (cookiesFile) {
+        args.push('--cookies', cookiesFile);
     }
     return args;
 }
@@ -84,6 +109,105 @@ function resolveFfmpeg() {
 const sanitizeFilename = (s) =>
     s.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim().slice(0, 120);
 
+// ─── Invidious fallback (no auth needed) ─────────────────────────────────────
+function extractYouTubeVideoId(url) {
+    try {
+        const parsed = new URL(url);
+        if (parsed.hostname === 'youtu.be') return parsed.pathname.replace('/', '').trim() || null;
+        return parsed.searchParams.get('v');
+    } catch { return null; }
+}
+
+const INVIDIOUS_INSTANCES = [
+    'https://inv.nadeko.net',
+    'https://invidious.privacyredirect.com',
+    'https://yewtu.be',
+    'https://iv.ggtyler.dev',
+];
+
+async function getInvidiousItag(videoId, type, quality) {
+    for (const instance of INVIDIOUS_INSTANCES) {
+        try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 8000);
+            const resp = await fetch(
+                `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=title,adaptiveFormats,formatStreams`,
+                { signal: ctrl.signal }
+            );
+            clearTimeout(timer);
+            if (!resp.ok) continue;
+            const data = await resp.json();
+            if (!data) continue;
+            if (type === 'mp3') {
+                const audio = (data.adaptiveFormats || [])
+                    .filter(f => f.type?.startsWith('audio/'))
+                    .sort((a, b) => (parseInt(b.bitrate) || 0) - (parseInt(a.bitrate) || 0));
+                if (audio[0]?.itag) return { itag: audio[0].itag, title: data.title || '', instance };
+            } else {
+                const h = quality && quality !== 'best' ? parseInt(quality) : 9999;
+                const muxed = (data.formatStreams || [])
+                    .map(f => ({ ...f, _h: parseInt(f.qualityLabel) || 0 }))
+                    .filter(f => f._h <= h && f._h > 0)
+                    .sort((a, b) => b._h - a._h);
+                if (muxed[0]?.itag) return { itag: muxed[0].itag, title: data.title || '', instance };
+                const vid = (data.adaptiveFormats || [])
+                    .filter(f => f.type?.startsWith('video/mp4'))
+                    .map(f => ({ ...f, _h: parseInt(f.qualityLabel) || 0 }))
+                    .filter(f => f._h <= h && f._h > 0)
+                    .sort((a, b) => b._h - a._h);
+                if (vid[0]?.itag) return { itag: vid[0].itag, title: data.title || '', instance };
+            }
+        } catch { /* try next */ }
+    }
+    return null;
+}
+
+function pipeHttpStream(streamUrl, res, contentType, filename) {
+    return new Promise((resolve, reject) => {
+        const followRedirects = (url, depth) => {
+            if (depth > 5) { reject(new Error('Too many redirects')); return; }
+            let u;
+            try { u = new URL(url); } catch (e) { reject(e); return; }
+            const lib = u.protocol === 'https:' ? https : http;
+            lib.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+                if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+                    r.resume(); followRedirects(r.headers.location, depth + 1); return;
+                }
+                if (r.statusCode !== 200) { r.resume(); reject(new Error(`HTTP ${r.statusCode}`)); return; }
+                if (!res.headersSent) {
+                    res.setHeader('Content-Type', contentType);
+                    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+                    if (r.headers['content-length']) res.setHeader('Content-Length', r.headers['content-length']);
+                }
+                r.pipe(res);
+                r.on('end', resolve);
+                r.on('error', reject);
+            }).on('error', reject);
+        };
+        followRedirects(streamUrl, 0);
+    });
+}
+
+async function pipeFromInvidious(videoId, type, quality, titleHint, res) {
+    const result = await getInvidiousItag(videoId, type, quality);
+    if (!result) return false;
+    const { itag, title, instance } = result;
+    const ext = type === 'mp3' ? 'mp3' : 'mp4';
+    const contentType = type === 'mp3' ? 'audio/mpeg' : 'video/mp4';
+    const safeName = sanitizeFilename(title || titleHint || 'video') + '.' + ext;
+    for (const inst of [instance, ...INVIDIOUS_INSTANCES.filter(i => i !== instance)]) {
+        if (res.headersSent) break;
+        try {
+            const streamUrl = `${inst}/latest_version?id=${encodeURIComponent(videoId)}&itag=${encodeURIComponent(String(itag))}&local=true`;
+            await pipeHttpStream(streamUrl, res, contentType, safeName);
+            return true;
+        } catch (e) {
+            console.warn(`[invidious-dl] ${inst}: ${e.message}`);
+        }
+    }
+    return false;
+}
+
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -106,7 +230,7 @@ module.exports = async function handler(req, res) {
     const resolveTitle = () => new Promise((resolve) => {
         const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
         if (isYouTubeUrl(url)) {
-            titleArgs.push('--extractor-args', 'youtube:player_client=android,web');
+            titleArgs.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
         }
         appendYtDlpAuthArgs(titleArgs);
         titleArgs.push(url.trim());
@@ -159,12 +283,19 @@ module.exports = async function handler(req, res) {
     const child = spawn(YT_DLP, args, { env: spawnEnv });
     child.stderr.on('data', d => { stderrBuf.push(d.toString()); });
     child.on('error', err => sendError(err.message));
-    child.on('close', code => {
+    child.on('close', async (code) => {
         if (responded) return;
         if (code !== 0) {
             const stderrText = stderrBuf.join('');
-            if (isBotCheckError(stderrText)) {
-                return sendError('YouTube requires authenticated cookies. Set env var YTDLP_COOKIES_PATH to your cookies.txt file and redeploy.', 403);
+            if (isBotCheckError(stderrText) && isYouTubeUrl(url)) {
+                const videoId = extractYouTubeVideoId(url);
+                if (videoId) {
+                    responded = true;
+                    cleanup();
+                    const ok = await pipeFromInvidious(videoId, type, quality, videoTitle, res);
+                    if (!ok && !res.headersSent) res.status(503).json({ error: 'Không thể tải video. Thử lại sau.' });
+                    return;
+                }
             }
             const errLine = stderrText.split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
             return sendError(errLine);

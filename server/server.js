@@ -15,6 +15,8 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { spawn, execSync } = require('child_process');
+const https = require('https');
+const http = require('http');
 
 // ─── Resolve yt-dlp path ────────────────────────────────────────────────────
 function resolveYtDlp() {
@@ -44,17 +46,40 @@ function resolveYtDlp() {
 const YT_DLP = resolveYtDlp();
 console.log(YT_DLP ? `✅  yt-dlp found: ${YT_DLP}` : '⚠️  yt-dlp not found — video download will be unavailable');
 const YT_DLP_COOKIES_PATH = process.env.YTDLP_COOKIES_PATH || process.env.YT_DLP_COOKIES_PATH || '';
-if (YT_DLP_COOKIES_PATH) {
-    if (fs.existsSync(YT_DLP_COOKIES_PATH)) {
-        console.log(`✅  yt-dlp cookies loaded: ${YT_DLP_COOKIES_PATH}`);
-    } else {
-        console.warn(`⚠️  yt-dlp cookies path not found: ${YT_DLP_COOKIES_PATH}`);
+const YT_DLP_COOKIES_B64 = process.env.YTDLP_COOKIES_B64 || process.env.YT_DLP_COOKIES_B64 || '';
+const YT_DLP_COOKIES_CONTENT = process.env.YTDLP_COOKIES_CONTENT || process.env.YT_DLP_COOKIES_CONTENT || '';
+
+let CACHED_COOKIES_FILE = null;
+function resolveCookiesFile() {
+    if (CACHED_COOKIES_FILE) return CACHED_COOKIES_FILE;
+
+    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
+        CACHED_COOKIES_FILE = YT_DLP_COOKIES_PATH;
+        return CACHED_COOKIES_FILE;
     }
+
+    const cookieText = YT_DLP_COOKIES_CONTENT
+        ? YT_DLP_COOKIES_CONTENT
+        : (YT_DLP_COOKIES_B64 ? Buffer.from(YT_DLP_COOKIES_B64, 'base64').toString('utf8') : '');
+    if (!cookieText.trim()) return null;
+
+    const filePath = path.join(os.tmpdir(), 'yt-dlp-cookies.txt');
+    fs.writeFileSync(filePath, cookieText, { encoding: 'utf8' });
+    CACHED_COOKIES_FILE = filePath;
+    return CACHED_COOKIES_FILE;
+}
+
+const RESOLVED_COOKIES_FILE = resolveCookiesFile();
+if (RESOLVED_COOKIES_FILE) {
+    console.log(`✅  yt-dlp cookies loaded: ${RESOLVED_COOKIES_FILE}`);
+} else if (YT_DLP_COOKIES_PATH) {
+    console.warn(`⚠️  yt-dlp cookies path not found: ${YT_DLP_COOKIES_PATH}`);
 }
 
 function appendYtDlpAuthArgs(args) {
-    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
-        args.push('--cookies', YT_DLP_COOKIES_PATH);
+    const cookiesFile = resolveCookiesFile();
+    if (cookiesFile) {
+        args.push('--cookies', cookiesFile);
     }
     return args;
 }
@@ -244,7 +269,7 @@ function normalizeVideoUrl(url) {
 function buildInfoArgs(url) {
     const args = ['--no-playlist', '--dump-single-json', '--no-download', '--no-warnings'];
     if (isYouTubeUrl(url)) {
-        args.push('--extractor-args', 'youtube:player_client=android,web');
+        args.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
     }
     appendYtDlpAuthArgs(args);
     args.push(url);
@@ -270,6 +295,128 @@ async function fetchYouTubeOEmbed(url) {
     } catch {
         return null;
     }
+}
+
+// ─── Invidious fallback (no auth needed) ─────────────────────────────────────
+const INVIDIOUS_INSTANCES = [
+    'https://inv.nadeko.net',
+    'https://invidious.privacyredirect.com',
+    'https://yewtu.be',
+    'https://iv.ggtyler.dev',
+];
+
+async function fetchInfoFromInvidious(videoId) {
+    for (const instance of INVIDIOUS_INSTANCES) {
+        try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 8000);
+            const resp = await fetch(
+                `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=title,author,lengthSeconds,videoThumbnails,adaptiveFormats,formatStreams`,
+                { signal: ctrl.signal }
+            );
+            clearTimeout(timer);
+            if (!resp.ok) continue;
+            const data = await resp.json();
+            if (!data?.title) continue;
+            const qualitySet = new Set();
+            for (const f of (data.formatStreams || [])) {
+                const q = parseInt(f.qualityLabel); if (!isNaN(q) && q > 0) qualitySet.add(q);
+            }
+            for (const f of (data.adaptiveFormats || [])) {
+                if (!f.type?.startsWith('video/')) continue;
+                const q = parseInt(f.qualityLabel); if (!isNaN(q) && q > 0) qualitySet.add(q);
+            }
+            const availableQualities = [...qualitySet].sort((a, b) => b - a).slice(0, 6);
+            const thumbs = data.videoThumbnails || [];
+            const thumb = thumbs.find(t => t.quality === 'high') || thumbs.find(t => t.quality === 'medium') || thumbs[0];
+            const thumbnail = thumb ? (thumb.url.startsWith('http') ? thumb.url : `https://i.ytimg.com${thumb.url}`) : '';
+            return { title: data.title, thumbnail, duration: data.lengthSeconds || 0, uploader: data.author || '', availableQualities };
+        } catch { /* try next */ }
+    }
+    return null;
+}
+
+async function getInvidiousItag(videoId, type, quality) {
+    for (const instance of INVIDIOUS_INSTANCES) {
+        try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 8000);
+            const resp = await fetch(
+                `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=title,adaptiveFormats,formatStreams`,
+                { signal: ctrl.signal }
+            );
+            clearTimeout(timer);
+            if (!resp.ok) continue;
+            const data = await resp.json();
+            if (!data) continue;
+            if (type === 'mp3') {
+                const audio = (data.adaptiveFormats || [])
+                    .filter(f => f.type?.startsWith('audio/'))
+                    .sort((a, b) => (parseInt(b.bitrate) || 0) - (parseInt(a.bitrate) || 0));
+                if (audio[0]?.itag) return { itag: audio[0].itag, title: data.title || '', instance };
+            } else {
+                const h = quality && quality !== 'best' ? parseInt(quality) : 9999;
+                const muxed = (data.formatStreams || [])
+                    .map(f => ({ ...f, _h: parseInt(f.qualityLabel) || 0 }))
+                    .filter(f => f._h <= h && f._h > 0)
+                    .sort((a, b) => b._h - a._h);
+                if (muxed[0]?.itag) return { itag: muxed[0].itag, title: data.title || '', instance };
+                const vid = (data.adaptiveFormats || [])
+                    .filter(f => f.type?.startsWith('video/mp4'))
+                    .map(f => ({ ...f, _h: parseInt(f.qualityLabel) || 0 }))
+                    .filter(f => f._h <= h && f._h > 0)
+                    .sort((a, b) => b._h - a._h);
+                if (vid[0]?.itag) return { itag: vid[0].itag, title: data.title || '', instance };
+            }
+        } catch { /* try next */ }
+    }
+    return null;
+}
+
+function pipeHttpStream(streamUrl, res, contentType, filename) {
+    return new Promise((resolve, reject) => {
+        const followRedirects = (url, depth) => {
+            if (depth > 5) { reject(new Error('Too many redirects')); return; }
+            let u;
+            try { u = new URL(url); } catch (e) { reject(e); return; }
+            const lib = u.protocol === 'https:' ? https : http;
+            lib.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (r) => {
+                if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+                    r.resume(); followRedirects(r.headers.location, depth + 1); return;
+                }
+                if (r.statusCode !== 200) { r.resume(); reject(new Error(`HTTP ${r.statusCode}`)); return; }
+                if (!res.headersSent) {
+                    res.setHeader('Content-Type', contentType);
+                    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+                    if (r.headers['content-length']) res.setHeader('Content-Length', r.headers['content-length']);
+                }
+                r.pipe(res);
+                r.on('end', resolve);
+                r.on('error', reject);
+            }).on('error', reject);
+        };
+        followRedirects(streamUrl, 0);
+    });
+}
+
+async function pipeFromInvidious(videoId, type, quality, titleHint, res) {
+    const result = await getInvidiousItag(videoId, type, quality);
+    if (!result) return false;
+    const { itag, title, instance } = result;
+    const ext = type === 'mp3' ? 'mp3' : 'mp4';
+    const contentType = type === 'mp3' ? 'audio/mpeg' : 'video/mp4';
+    const safeName = (title || titleHint || 'video').replace(/[\\/:*?"<>|]/g, '_').trim().slice(0, 120) + '.' + ext;
+    for (const inst of [instance, ...INVIDIOUS_INSTANCES.filter(i => i !== instance)]) {
+        if (res.headersSent) break;
+        try {
+            const streamUrl = `${inst}/latest_version?id=${encodeURIComponent(videoId)}&itag=${encodeURIComponent(String(itag))}&local=true`;
+            await pipeHttpStream(streamUrl, res, contentType, safeName);
+            return true;
+        } catch (e) {
+            console.warn(`[invidious-dl] ${inst}: ${e.message}`);
+        }
+    }
+    return false;
 }
 
 // POST /api/video/info — lấy tiêu đề, thumbnail, thời lượng
@@ -301,19 +448,17 @@ app.post('/api/video/info', (req, res) => {
         if (code !== 0) {
             const stderrText = stderrChunks.join('').trim();
             if (isYouTubeUrl(targetUrl)) {
-                const fallback = await fetchYouTubeOEmbed(targetUrl);
-                if (fallback) return send(fallback);
-                if (isBotCheckError(stderrText)) {
-                    const basicFallback = buildBasicYouTubeFallback(targetUrl);
-                    if (basicFallback) return send(basicFallback);
+                const videoId = extractYouTubeVideoId(targetUrl);
+                if (videoId) {
+                    const inv = await fetchInfoFromInvidious(videoId);
+                    if (inv) return send(inv);
                 }
+                const oEmbed = await fetchYouTubeOEmbed(targetUrl);
+                if (oEmbed) return send(oEmbed);
+                const basicFallback = buildBasicYouTubeFallback(targetUrl);
+                if (basicFallback) return send(basicFallback);
             }
             const shortErr = stderrText.split('\n').find(l => l.includes('ERROR')) || stderrText.split('\n').slice(-1)[0] || '';
-            if (isBotCheckError(stderrText)) {
-                return send(403, {
-                    error: 'YouTube yêu cầu cookie xác thực. Thiết lập biến môi trường YTDLP_COOKIES_PATH trỏ tới file cookies.txt rồi deploy lại.',
-                });
-            }
             return send(500, {
                 error: shortErr
                     ? `Không thể lấy thông tin video: ${shortErr}`
@@ -358,7 +503,7 @@ app.get('/api/video/download', async (req, res) => {
     const resolveTitle = () => new Promise((resolve) => {
         const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
         if (isYouTubeUrl(url)) {
-            titleArgs.push('--extractor-args', 'youtube:player_client=android,web');
+            titleArgs.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
         }
         appendYtDlpAuthArgs(titleArgs);
         titleArgs.push(url.trim());
@@ -427,12 +572,19 @@ app.get('/api/video/download', async (req, res) => {
     const child = spawn(YT_DLP, args, { env: spawnEnv });
     child.stderr.on('data', d => { stderrBuf.push(d.toString()); process.stdout.write(d); });
     child.on('error', err => sendError(err.message));
-    child.on('close', code => {
+    child.on('close', async (code) => {
         if (responded) return;
         if (code !== 0) {
             const stderrText = stderrBuf.join('');
-            if (isBotCheckError(stderrText)) {
-                return sendError('YouTube yêu cầu cookie xác thực để tải. Thiết lập biến môi trường YTDLP_COOKIES_PATH trỏ tới file cookies.txt rồi deploy lại.', 403);
+            if (isBotCheckError(stderrText) && isYouTubeUrl(url)) {
+                const videoId = extractYouTubeVideoId(url);
+                if (videoId) {
+                    responded = true;
+                    cleanup();
+                    const ok = await pipeFromInvidious(videoId, type, quality, videoTitle, res);
+                    if (!ok && !res.headersSent) res.status(503).json({ error: 'Không thể tải video. Thử lại sau.' });
+                    return;
+                }
             }
             const errLine = stderrText.split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
             return sendError(errLine);

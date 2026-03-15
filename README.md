@@ -182,7 +182,10 @@ src/
 - Some features require admin role
 - CSV/XLSX import files must follow the expected format
 - For Railway/cloud deployments, YouTube may require authenticated cookies for yt-dlp.
-- If you see a bot-check error, set env var `YTDLP_COOKIES_PATH` (or `YT_DLP_COOKIES_PATH`) to a valid `cookies.txt` path available on the server.
+- If you see a bot-check error, configure one of these env options:
+   - `YTDLP_COOKIES_PATH` (or `YT_DLP_COOKIES_PATH`): absolute path to `cookies.txt` on the server
+   - `YTDLP_COOKIES_CONTENT` (or `YT_DLP_COOKIES_CONTENT`): full cookies.txt content
+   - `YTDLP_COOKIES_B64` (or `YT_DLP_COOKIES_B64`): base64-encoded cookies.txt content
 
 ## 🤝 Contributing
 

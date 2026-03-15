@@ -9,10 +9,33 @@ const ALLOWED_VIDEO_HOSTS = new Set([
 ]);
 
 const YT_DLP_COOKIES_PATH = process.env.YTDLP_COOKIES_PATH || process.env.YT_DLP_COOKIES_PATH || '';
+const YT_DLP_COOKIES_B64 = process.env.YTDLP_COOKIES_B64 || process.env.YT_DLP_COOKIES_B64 || '';
+const YT_DLP_COOKIES_CONTENT = process.env.YTDLP_COOKIES_CONTENT || process.env.YT_DLP_COOKIES_CONTENT || '';
+
+let CACHED_COOKIES_FILE = null;
+function resolveCookiesFile() {
+    if (CACHED_COOKIES_FILE) return CACHED_COOKIES_FILE;
+
+    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
+        CACHED_COOKIES_FILE = YT_DLP_COOKIES_PATH;
+        return CACHED_COOKIES_FILE;
+    }
+
+    const cookieText = YT_DLP_COOKIES_CONTENT
+        ? YT_DLP_COOKIES_CONTENT
+        : (YT_DLP_COOKIES_B64 ? Buffer.from(YT_DLP_COOKIES_B64, 'base64').toString('utf8') : '');
+    if (!cookieText.trim()) return null;
+
+    const filePath = path.join(os.tmpdir(), 'yt-dlp-cookies.txt');
+    fs.writeFileSync(filePath, cookieText, { encoding: 'utf8' });
+    CACHED_COOKIES_FILE = filePath;
+    return CACHED_COOKIES_FILE;
+}
 
 function appendYtDlpAuthArgs(args) {
-    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
-        args.push('--cookies', YT_DLP_COOKIES_PATH);
+    const cookiesFile = resolveCookiesFile();
+    if (cookiesFile) {
+        args.push('--cookies', cookiesFile);
     }
     return args;
 }
@@ -29,7 +52,7 @@ function extractYouTubeVideoId(url) {
         return parsed.searchParams.get('v');
     } catch {
         return null;
-    }
+    }   
 }
 
 function buildBasicYouTubeFallback(url) {
@@ -80,7 +103,7 @@ function normalizeVideoUrl(url) {
 function buildInfoArgs(url) {
     const args = ['--no-playlist', '--dump-single-json', '--no-download', '--no-warnings'];
     if (isYouTubeUrl(url)) {
-        args.push('--extractor-args', 'youtube:player_client=android,web');
+        args.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
     }
     appendYtDlpAuthArgs(args);
     args.push(url);
@@ -106,6 +129,45 @@ async function fetchYouTubeOEmbed(url) {
     } catch {
         return null;
     }
+}
+
+// ─── Invidious fallback (no auth needed) ─────────────────────────────────────
+const INVIDIOUS_INSTANCES = [
+    'https://inv.nadeko.net',
+    'https://invidious.privacyredirect.com',
+    'https://yewtu.be',
+    'https://iv.ggtyler.dev',
+];
+
+async function fetchInfoFromInvidious(videoId) {
+    for (const instance of INVIDIOUS_INSTANCES) {
+        try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 8000);
+            const resp = await fetch(
+                `${instance}/api/v1/videos/${encodeURIComponent(videoId)}?fields=title,author,lengthSeconds,videoThumbnails,adaptiveFormats,formatStreams`,
+                { signal: ctrl.signal }
+            );
+            clearTimeout(timer);
+            if (!resp.ok) continue;
+            const data = await resp.json();
+            if (!data?.title) continue;
+            const qualitySet = new Set();
+            for (const f of (data.formatStreams || [])) {
+                const q = parseInt(f.qualityLabel); if (!isNaN(q) && q > 0) qualitySet.add(q);
+            }
+            for (const f of (data.adaptiveFormats || [])) {
+                if (!f.type?.startsWith('video/')) continue;
+                const q = parseInt(f.qualityLabel); if (!isNaN(q) && q > 0) qualitySet.add(q);
+            }
+            const availableQualities = [...qualitySet].sort((a, b) => b - a).slice(0, 6);
+            const thumbs = data.videoThumbnails || [];
+            const thumb = thumbs.find(t => t.quality === 'high') || thumbs.find(t => t.quality === 'medium') || thumbs[0];
+            const thumbnail = thumb ? (thumb.url.startsWith('http') ? thumb.url : `https://i.ytimg.com${thumb.url}`) : '';
+            return { title: data.title, thumbnail, duration: data.lengthSeconds || 0, uploader: data.author || '', availableQualities };
+        } catch { /* try next */ }
+    }
+    return null;
 }
 
 function resolveYtDlp() {
@@ -164,20 +226,17 @@ module.exports = function handler(req, res) {
         if (code !== 0) {
             const stderrText = stderrChunks.join('').trim();
             if (isYouTubeUrl(targetUrl)) {
-                const fallback = await fetchYouTubeOEmbed(targetUrl);
-                if (fallback) return send(fallback);
-                if (isBotCheckError(stderrText)) {
-                    const basicFallback = buildBasicYouTubeFallback(targetUrl);
-                    if (basicFallback) return send(basicFallback);
+                const videoId = extractYouTubeVideoId(targetUrl);
+                if (videoId) {
+                    const inv = await fetchInfoFromInvidious(videoId);
+                    if (inv) return send(inv);
                 }
+                const oEmbed = await fetchYouTubeOEmbed(targetUrl);
+                if (oEmbed) return send(oEmbed);
+                const basicFallback = buildBasicYouTubeFallback(targetUrl);
+                if (basicFallback) return send(basicFallback);
             }
-
             const shortErr = stderrText.split('\n').find(l => l.includes('ERROR')) || stderrText.split('\n').slice(-1)[0] || '';
-            if (isBotCheckError(stderrText)) {
-                return send(403, {
-                    error: 'YouTube requires authenticated cookies. Set env var YTDLP_COOKIES_PATH to your cookies.txt file and redeploy.',
-                });
-            }
             return send(500, {
                 error: shortErr
                     ? `Không thể lấy thông tin video: ${shortErr}`
