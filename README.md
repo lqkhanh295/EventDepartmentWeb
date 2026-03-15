@@ -1,135 +1,136 @@
 # Event Department Web
 
-Hệ thống quản lý thông tin Ban Event - Câu lạc bộ Truyền thông Cóc Sài Gòn (CSG)
+Information management system for the Event Department of Coc Sai Gon Media Club (CSG).
 
-## 📋 Mô tả
+## 📋 Overview
 
-Event Department Web là ứng dụng web quản lý toàn diện dành cho Ban Event của CLB Truyền thông Cóc Sài Gòn. Ứng dụng cung cấp các công cụ và tính năng hỗ trợ quản lý vendors, thành viên, kho vật phẩm, hướng dẫn sự kiện và các tiện ích khác.
+Event Department Web is a comprehensive web application for managing Event Department operations at CSG. It provides tools for vendor management, member management, inventory tracking, event guidance, and other internal utilities.
 
-## ✨ Tính năng chính
+## ✨ Key Features
 
-### 🔐 Xác thực và Phân quyền
-- Hệ thống đăng nhập với 2 loại tài khoản:
-  - **Admin**: Yêu cầu mật khẩu `eventleader`
-  - **Member**: Đăng nhập không cần mật khẩu
-- Bảo vệ route theo quyền người dùng
+### 🔐 Authentication and Authorization
+- Two login roles:
+  - **Admin**: requires password `eventleader`
+  - **Member**: no password required
+- Route protection based on user role
 
 ### 📊 Dashboard
-- Tổng quan hệ thống
-- Thống kê nhanh các thông tin quan trọng
+- System overview
+- Quick access to important stats and data
 
 ### 🏪 Vendor Management
-- Quản lý danh sách vendor
-- Thêm, sửa, xóa thông tin vendor
-- Tìm kiếm và lọc vendor
+- Manage vendor directory
+- Create, update, and delete vendor records
+- Search and filter vendors
 
 ### 👥 Members Management (Admin only)
-- Quản lý thành viên Ban Event
-- Import danh sách thành viên từ Excel
-- Quản lý điểm số thành viên theo học kỳ
-- Xem lịch sử và thống kê thành viên
+- Manage Event Department members
+- Import member lists from Excel
+- Track member scores by semester
+- View member history and statistics
 
-### 📦 Inventory Management (Kho vật phẩm)
-- Quản lý kho vật phẩm sự kiện
-- Import dữ liệu từ CSV/XLSX
-- Tìm kiếm và lọc theo Type, Item
-- Hiển thị số lượng tồn kho
-- CRUD vật phẩm (Admin only)
-- Đồng bộ với Firestore
+### 📦 Inventory Management
+- Manage event inventory
+- Import data from CSV/XLSX
+- Search and filter by type and item
+- Track available quantities
+- Inventory CRUD (Admin only)
+- Firestore synchronization
 
 ### 📚 Event Guide
-- Cẩm nang tổ chức sự kiện
-- Hướng dẫn cho các team: Planning, Event Production, Paperwork
-- Template và checklist
-- Liên kết tài liệu hướng dẫn
+- Event operations handbook
+- Guides for Planning, Event Production, and Paperwork teams
+- Templates and checklists
+- Linked documentation resources
 
-### 🔍 Tax Lookup (Tra cứu MST)
-- Tra cứu mã số thuế doanh nghiệp
-- Kiểm tra thông tin công ty
+### 🔍 Tax Lookup
+- Lookup business tax IDs
+- Validate company information
 
 ### 🖼️ Remove Background
-- Công cụ xóa nền ảnh
-- Xử lý hình ảnh nhanh chóng
+- Background removal tool for images
+- Fast image processing workflow
 
-## 🛠️ Công nghệ sử dụng
+## 🛠️ Tech Stack
 
 ### Frontend
-- **React 18.2.0** - UI Framework
+- **React 18.2.0** - UI framework
 - **Material-UI (MUI) 5.14.18** - Component library
-- **Ant Design 5.11.1** - Additional UI components
+- **Ant Design** - Additional UI components
 - **React Router 6.20.0** - Routing
 - **Framer Motion** - Animations
 - **XLSX** - Excel file processing
 
-### Backend & Services
-- **Firebase/Firestore** - Database và backend services
+### Backend and Services
+- **Firebase/Firestore** - Database and backend services
 - **@xenova/transformers** - AI/ML processing
-- **docxtemplater** - Word document processing
+- **docxtemplater** - Word document generation
 
 ### Development Tools
 - **React Scripts 5.0.1**
-- **ESLint** - Code linting
-- **Cross-env** - Cross-platform environment variables
+- **ESLint**
+- **cross-env**
+- **concurrently**
 
-## 📦 Cài đặt
+## 📦 Installation
 
-### Yêu cầu
-- Node.js (phiên bản 14 trở lên)
-- npm hoặc yarn
+### Requirements
+- Node.js 14+
+- npm or yarn
 
-### Bước cài đặt
+### Setup Steps
 
-1. **Clone repository**
+1. **Clone the repository**
    ```bash
    git clone <repository-url>
    cd EventDepartmentWeb
    ```
 
-2. **Cài đặt dependencies**
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Cấu hình Firebase**
-   - Xem file `FIREBASE_SETUP.md` để biết chi tiết cấu hình Firebase
-   - Tạo file `src/backend/firebase/config.js` với thông tin Firebase của bạn
+3. **Configure Firebase**
+   - See `FIREBASE_SETUP.md` for setup instructions
+   - Create `src/backend/firebase/config.js` with your Firebase project credentials
 
-4. **Chạy ứng dụng**
+4. **Run the application**
    ```bash
-   # Chạy cả frontend + backend cùng lúc (khuyến nghị)
+   # Run frontend + backend together (recommended)
    npm run dev
 
-   # Chỉ chạy frontend
+   # Run frontend only
    npm start
 
-   # Unix/Mac
+   # Unix/Mac frontend start
    npm run start:unix
    ```
 
-5. **Build cho production**
+5. **Build for production**
    ```bash
    npm run build
    ```
 
-## 🔑 Đăng nhập
+## 🔑 Login
 
 ### Admin
-- Nhấn nút **Admin** trên màn hình đăng nhập
-- Nhập mật khẩu: `eventleader`
-- Có quyền truy cập tất cả tính năng, bao gồm quản lý members
+- Select **Admin** on the login page
+- Enter password: `eventleader`
+- Full access to all features (including member management)
 
 ### Member
-- Nhấn nút **Member** trên màn hình đăng nhập
-- Không cần mật khẩu
-- Truy cập các tính năng công khai (không bao gồm quản lý members)
+- Select **Member** on the login page
+- No password required
+- Access to non-admin features only
 
-## 📁 Cấu trúc dự án
+## 📁 Project Structure
 
 ```
 src/
 ├── frontend/
 │   ├── components/      # React components
-│   │   ├── Common/      # Components dùng chung
+│   │   ├── Common/      # Shared components
 │   │   ├── Layout/      # Layout components
 │   │   ├── Vendor/      # Vendor-related components
 │   │   └── Weather/     # Weather widget
@@ -139,57 +140,51 @@ src/
 │   └── theme/           # Theme configuration
 ├── backend/
 │   ├── firebase/        # Firebase configuration
-│   └── services/        # Backend services
-│       ├── configService.js
-│       ├── guideService.js
-│       ├── inventoryService.js
-│       ├── memberService.js
-│       ├── removeBgService.js
-│       └── vendorService.js
+│   └── services/        # Service layer
 └── image/               # Static images
 ```
 
-## 📄 Các trang chính
+## 📄 Main Routes
 
-| Route | Trang | Quyền truy cập |
-|-------|-------|----------------|
-| `/` | Dashboard | Tất cả |
-| `/vendors` | Vendor Management | Tất cả |
-| `/inventory` | Kho vật phẩm | Tất cả |
+| Route | Page | Access |
+|-------|------|--------|
+| `/` | Dashboard | All users |
+| `/vendors` | Vendor Management | All users |
+| `/inventory` | Inventory | All users |
 | `/members` | Members Management | Admin only |
 | `/members/import` | Import Members | Admin only |
 | `/members/:semester` | Member Scores | Admin only |
-| `/event-guide` | Event Guide | Tất cả |
-| `/tax-lookup` | Tra cứu MST | Tất cả |
-| `/remove-bg` | Remove Background | Tất cả |
-| `/login` | Đăng nhập | Public |
+| `/event-guide` | Event Guide | All users |
+| `/tax-lookup` | Tax Lookup | All users |
+| `/remove-bg` | Remove Background | All users |
+| `/login` | Login | Public |
 
 ## 🔧 Scripts
 
-- `npm run dev` - Chạy đồng thời frontend (3000) và backend API (3002)
-- `npm start` - Chạy ứng dụng development server (Windows)
-- `npm run start:frontend` - Chạy frontend (tự động dùng lại instance đang chạy ở cổng 3000)
-- `npm run start:backend` - Chạy backend API server (tự động dùng lại instance đang chạy ở cổng 3002)
-- `npm run start:unix` - Chạy ứng dụng development server (Unix/Mac)
-- `npm run build` - Build ứng dụng cho production
-- `npm test` - Chạy tests
+- `npm run dev` - Run frontend (3000) and backend API (3002) together
+- `npm start` - Start frontend dev server (Windows)
+- `npm run start:frontend` - Start frontend (auto-reuses existing instance on port 3000)
+- `npm run start:backend` - Start backend API server (auto-reuses existing instance on port 3002)
+- `npm run start:unix` - Start frontend dev server (Unix/Mac)
+- `npm run build` - Build for production
+- `npm test` - Run tests
 
-## 🔐 Bảo mật
+## 🔐 Security Notes
 
-- Admin password được hardcode trong code (chỉ dùng cho development/demo)
-- Các route admin được bảo vệ bởi `AdminProtectedRoute`
-- Authentication state được quản lý bởi `AuthContext`
+- Admin password is hardcoded for development/demo use only
+- Admin routes are protected by `AdminProtectedRoute`
+- Auth state is managed by `AuthContext`
 
-## 📝 Lưu ý
+## 📝 Notes
 
-- Ứng dụng sử dụng Firebase Firestore làm database
-- Đảm bảo đã cấu hình Firebase trước khi chạy
-- Một số tính năng yêu cầu quyền admin
-- File CSV/XLSX import phải tuân theo format chuẩn
+- The app uses Firebase Firestore as its primary database
+- Firebase must be configured before running the app
+- Some features require admin role
+- CSV/XLSX import files must follow the expected format
 
-## 🤝 Đóng góp
+## 🤝 Contributing
 
-Dự án này thuộc về CLB Truyền thông Cóc Sài Gòn. Mọi đóng góp và đề xuất đều được chào đón.
+This project belongs to Coc Sai Gon Media Club (CSG). Suggestions and contributions are welcome.
 
 ## 📄 License
 
