@@ -115,7 +115,7 @@ const WeatherWidget = () => {
     // Sử dụng 7Timer API (miễn phí, không cần API key)
     // Documentation: https://www.7timer.info/doc.php?lang=en
     // Product: civillight (7-day forecast, day-to-day)
-    const API_URL = `http://www.7timer.info/bin/api.pl?lon=${HCM_LON}&lat=${HCM_LAT}&product=civillight&output=json`;
+    const API_URL = `https://www.7timer.info/bin/api.pl?lon=${HCM_LON}&lat=${HCM_LAT}&product=civillight&output=json`;
 
     fetch(API_URL)
       .then(res => {
