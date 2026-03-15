@@ -43,6 +43,48 @@ function resolveYtDlp() {
 }
 const YT_DLP = resolveYtDlp();
 console.log(YT_DLP ? `✅  yt-dlp found: ${YT_DLP}` : '⚠️  yt-dlp not found — video download will be unavailable');
+const YT_DLP_COOKIES_PATH = process.env.YTDLP_COOKIES_PATH || process.env.YT_DLP_COOKIES_PATH || '';
+if (YT_DLP_COOKIES_PATH) {
+    if (fs.existsSync(YT_DLP_COOKIES_PATH)) {
+        console.log(`✅  yt-dlp cookies loaded: ${YT_DLP_COOKIES_PATH}`);
+    } else {
+        console.warn(`⚠️  yt-dlp cookies path not found: ${YT_DLP_COOKIES_PATH}`);
+    }
+}
+
+function appendYtDlpAuthArgs(args) {
+    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
+        args.push('--cookies', YT_DLP_COOKIES_PATH);
+    }
+    return args;
+}
+
+function isBotCheckError(text) {
+    const raw = String(text || '').toLowerCase();
+    return raw.includes('sign in to confirm you\'re not a bot') || raw.includes('--cookies-from-browser') || raw.includes('--cookies');
+}
+
+function extractYouTubeVideoId(url) {
+    try {
+        const parsed = new URL(url);
+        if (parsed.hostname === 'youtu.be') return parsed.pathname.replace('/', '').trim() || null;
+        return parsed.searchParams.get('v');
+    } catch {
+        return null;
+    }
+}
+
+function buildBasicYouTubeFallback(url) {
+    const id = extractYouTubeVideoId(url);
+    if (!id) return null;
+    return {
+        title: `YouTube video (${id})`,
+        thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+        duration: 0,
+        uploader: '',
+        availableQualities: [],
+    };
+}
 
 function resolveFfmpeg() {
     // When ffmpeg is already in PATH, return null — no --ffmpeg-location injection needed.
@@ -204,6 +246,7 @@ function buildInfoArgs(url) {
     if (isYouTubeUrl(url)) {
         args.push('--extractor-args', 'youtube:player_client=android,web');
     }
+    appendYtDlpAuthArgs(args);
     args.push(url);
     return args;
 }
@@ -256,13 +299,21 @@ app.post('/api/video/info', (req, res) => {
         if (responded) return;
 
         if (code !== 0) {
+            const stderrText = stderrChunks.join('').trim();
             if (isYouTubeUrl(targetUrl)) {
                 const fallback = await fetchYouTubeOEmbed(targetUrl);
                 if (fallback) return send(fallback);
+                if (isBotCheckError(stderrText)) {
+                    const basicFallback = buildBasicYouTubeFallback(targetUrl);
+                    if (basicFallback) return send(basicFallback);
+                }
             }
-
-            const stderrText = stderrChunks.join('').trim();
             const shortErr = stderrText.split('\n').find(l => l.includes('ERROR')) || stderrText.split('\n').slice(-1)[0] || '';
+            if (isBotCheckError(stderrText)) {
+                return send(403, {
+                    error: 'YouTube yêu cầu cookie xác thực. Thiết lập biến môi trường YTDLP_COOKIES_PATH trỏ tới file cookies.txt rồi deploy lại.',
+                });
+            }
             return send(500, {
                 error: shortErr
                     ? `Không thể lấy thông tin video: ${shortErr}`
@@ -305,7 +356,13 @@ app.get('/api/video/download', async (req, res) => {
 
     // Resolve output filename: fetch title first, fallback to 'video'
     const resolveTitle = () => new Promise((resolve) => {
-        const child = spawn(YT_DLP, ['--no-playlist', '--print', 'title', '--no-warnings', url.trim()], {
+        const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
+        if (isYouTubeUrl(url)) {
+            titleArgs.push('--extractor-args', 'youtube:player_client=android,web');
+        }
+        appendYtDlpAuthArgs(titleArgs);
+        titleArgs.push(url.trim());
+        const child = spawn(YT_DLP, titleArgs, {
             env: { ...process.env, ...(FFMPEG_DIR ? { PATH: FFMPEG_DIR + path.delimiter + process.env.PATH } : {}) },
         });
         let out = '';
@@ -340,6 +397,7 @@ app.get('/api/video/download', async (req, res) => {
         // (YouTube often delivers Opus audio in WebM which is not supported by Windows)
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
     }
+    appendYtDlpAuthArgs(args);
     args.push(url);
 
     if (!YT_DLP) {
@@ -360,11 +418,11 @@ app.get('/api/video/download', async (req, res) => {
     const cleanup = () => fs.rmSync(tmpDir, { recursive: true, force: true });
     const stderrBuf = [];
     let responded = false;
-    const sendError = (msg) => {
+    const sendError = (msg, status = 500) => {
         if (responded) return;
         responded = true;
         cleanup();
-        res.status(500).json({ error: msg });
+        res.status(status).json({ error: msg });
     };
     const child = spawn(YT_DLP, args, { env: spawnEnv });
     child.stderr.on('data', d => { stderrBuf.push(d.toString()); process.stdout.write(d); });
@@ -372,7 +430,11 @@ app.get('/api/video/download', async (req, res) => {
     child.on('close', code => {
         if (responded) return;
         if (code !== 0) {
-            const errLine = stderrBuf.join('').split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
+            const stderrText = stderrBuf.join('');
+            if (isBotCheckError(stderrText)) {
+                return sendError('YouTube yêu cầu cookie xác thực để tải. Thiết lập biến môi trường YTDLP_COOKIES_PATH trỏ tới file cookies.txt rồi deploy lại.', 403);
+            }
+            const errLine = stderrText.split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
             return sendError(errLine);
         }
         let files;

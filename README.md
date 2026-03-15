@@ -181,6 +181,8 @@ src/
 - Firebase must be configured before running the app
 - Some features require admin role
 - CSV/XLSX import files must follow the expected format
+- For Railway/cloud deployments, YouTube may require authenticated cookies for yt-dlp.
+- If you see a bot-check error, set env var `YTDLP_COOKIES_PATH` (or `YT_DLP_COOKIES_PATH`) to a valid `cookies.txt` path available on the server.
 
 ## 🤝 Contributing
 

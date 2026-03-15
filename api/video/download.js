@@ -9,6 +9,29 @@ const ALLOWED_VIDEO_HOSTS = new Set([
     'facebook.com', 'www.facebook.com', 'm.facebook.com', 'fb.watch', 'web.facebook.com',
 ]);
 
+const YT_DLP_COOKIES_PATH = process.env.YTDLP_COOKIES_PATH || process.env.YT_DLP_COOKIES_PATH || '';
+
+function appendYtDlpAuthArgs(args) {
+    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
+        args.push('--cookies', YT_DLP_COOKIES_PATH);
+    }
+    return args;
+}
+
+function isBotCheckError(text) {
+    const raw = String(text || '').toLowerCase();
+    return raw.includes('sign in to confirm you\'re not a bot') || raw.includes('--cookies-from-browser') || raw.includes('--cookies');
+}
+
+function isYouTubeUrl(url) {
+    try {
+        const { hostname } = new URL(url);
+        return ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be', 'music.youtube.com'].includes(hostname);
+    } catch {
+        return false;
+    }
+}
+
 function isAllowedVideoUrl(url) {
     try {
         const { hostname } = new URL(url);
@@ -81,7 +104,13 @@ module.exports = async function handler(req, res) {
     fs.mkdirSync(tmpDir, { recursive: true });
 
     const resolveTitle = () => new Promise((resolve) => {
-        const child = spawn(YT_DLP, ['--no-playlist', '--print', 'title', '--no-warnings', url.trim()], {
+        const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
+        if (isYouTubeUrl(url)) {
+            titleArgs.push('--extractor-args', 'youtube:player_client=android,web');
+        }
+        appendYtDlpAuthArgs(titleArgs);
+        titleArgs.push(url.trim());
+        const child = spawn(YT_DLP, titleArgs, {
             env: { ...process.env, ...(FFMPEG_DIR ? { PATH: FFMPEG_DIR + path.delimiter + process.env.PATH } : {}) },
         });
         let out = '';
@@ -111,6 +140,7 @@ module.exports = async function handler(req, res) {
         args.push('--merge-output-format', 'mp4');
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
     }
+    appendYtDlpAuthArgs(args);
     args.push(url.trim());
 
     const spawnEnv = { ...process.env };
@@ -119,11 +149,11 @@ module.exports = async function handler(req, res) {
     const cleanup = () => fs.rmSync(tmpDir, { recursive: true, force: true });
     const stderrBuf = [];
     let responded = false;
-    const sendError = (msg) => {
+    const sendError = (msg, status = 500) => {
         if (responded) return;
         responded = true;
         cleanup();
-        res.status(500).json({ error: msg });
+        res.status(status).json({ error: msg });
     };
 
     const child = spawn(YT_DLP, args, { env: spawnEnv });
@@ -132,7 +162,11 @@ module.exports = async function handler(req, res) {
     child.on('close', code => {
         if (responded) return;
         if (code !== 0) {
-            const errLine = stderrBuf.join('').split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
+            const stderrText = stderrBuf.join('');
+            if (isBotCheckError(stderrText)) {
+                return sendError('YouTube requires authenticated cookies. Set env var YTDLP_COOKIES_PATH to your cookies.txt file and redeploy.', 403);
+            }
+            const errLine = stderrText.split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
             return sendError(errLine);
         }
         let files;

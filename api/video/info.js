@@ -8,6 +8,42 @@ const ALLOWED_VIDEO_HOSTS = new Set([
     'facebook.com', 'www.facebook.com', 'm.facebook.com', 'fb.watch', 'web.facebook.com',
 ]);
 
+const YT_DLP_COOKIES_PATH = process.env.YTDLP_COOKIES_PATH || process.env.YT_DLP_COOKIES_PATH || '';
+
+function appendYtDlpAuthArgs(args) {
+    if (YT_DLP_COOKIES_PATH && fs.existsSync(YT_DLP_COOKIES_PATH)) {
+        args.push('--cookies', YT_DLP_COOKIES_PATH);
+    }
+    return args;
+}
+
+function isBotCheckError(text) {
+    const raw = String(text || '').toLowerCase();
+    return raw.includes('sign in to confirm you\'re not a bot') || raw.includes('--cookies-from-browser') || raw.includes('--cookies');
+}
+
+function extractYouTubeVideoId(url) {
+    try {
+        const parsed = new URL(url);
+        if (parsed.hostname === 'youtu.be') return parsed.pathname.replace('/', '').trim() || null;
+        return parsed.searchParams.get('v');
+    } catch {
+        return null;
+    }
+}
+
+function buildBasicYouTubeFallback(url) {
+    const id = extractYouTubeVideoId(url);
+    if (!id) return null;
+    return {
+        title: `YouTube video (${id})`,
+        thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+        duration: 0,
+        uploader: '',
+        availableQualities: [],
+    };
+}
+
 function isAllowedVideoUrl(url) {
     try {
         const { hostname } = new URL(url);
@@ -46,6 +82,7 @@ function buildInfoArgs(url) {
     if (isYouTubeUrl(url)) {
         args.push('--extractor-args', 'youtube:player_client=android,web');
     }
+    appendYtDlpAuthArgs(args);
     args.push(url);
     return args;
 }
@@ -125,13 +162,22 @@ module.exports = function handler(req, res) {
         if (responded) return;
 
         if (code !== 0) {
+            const stderrText = stderrChunks.join('').trim();
             if (isYouTubeUrl(targetUrl)) {
                 const fallback = await fetchYouTubeOEmbed(targetUrl);
                 if (fallback) return send(fallback);
+                if (isBotCheckError(stderrText)) {
+                    const basicFallback = buildBasicYouTubeFallback(targetUrl);
+                    if (basicFallback) return send(basicFallback);
+                }
             }
 
-            const stderrText = stderrChunks.join('').trim();
             const shortErr = stderrText.split('\n').find(l => l.includes('ERROR')) || stderrText.split('\n').slice(-1)[0] || '';
+            if (isBotCheckError(stderrText)) {
+                return send(403, {
+                    error: 'YouTube requires authenticated cookies. Set env var YTDLP_COOKIES_PATH to your cookies.txt file and redeploy.',
+                });
+            }
             return send(500, {
                 error: shortErr
                     ? `Không thể lấy thông tin video: ${shortErr}`
