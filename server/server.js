@@ -484,8 +484,16 @@ function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extrac
         args.push('-f', '140/bestaudio[ext=m4a]/bestaudio/best');
         args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
     } else {
-        const h = quality && quality !== 'best' ? quality : '360';
-        args.push('-f', `18/best[height<=${h}][ext=mp4]/best[height<=${h}]/best`);
+        const h = quality && quality !== 'best' ? quality : null;
+        if (h) {
+            args.push('-f',
+                `bestvideo[height<=${h}]+bestaudio/` +
+                `bestvideo[height<=${h}]+bestaudio[ext=m4a]/` +
+                `bestvideo[height<=${h}]+bestaudio[ext=webm]/` +
+                `best[height<=${h}]/best`);
+        } else {
+            args.push('-f', 'bestvideo+bestaudio/bestvideo+bestaudio[ext=m4a]/best');
+        }
         args.push('--merge-output-format', 'mp4');
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
     }
@@ -660,8 +668,9 @@ app.get('/api/video/download', async (req, res) => {
     const firstAttempt = await runYtDlpDownloadOnce(YT_DLP, args, spawnEnv);
     if (firstAttempt.code !== 0) {
         let stderrText = firstAttempt.stderrText;
+        const shouldTryYoutubeFallback = isYouTubeUrl(url) && isRetriableYouTubeError(stderrText);
 
-        if (isYouTubeUrl(url) && isRetriableYouTubeError(stderrText)) {
+        if (shouldTryYoutubeFallback) {
             for (const extractorArgs of getRetryYouTubePlayerClients()) {
                 const retryArgs = buildRetryDownloadArgs({
                     tmpBase,
@@ -682,7 +691,7 @@ app.get('/api/video/download', async (req, res) => {
         }
 
         if (stderrText) {
-            if (isYouTubeUrl(url) && isRetriableYouTubeError(stderrText)) {
+            if (shouldTryYoutubeFallback) {
                 const videoId = extractYouTubeVideoId(url);
                 if (videoId) {
                     responded = true;
