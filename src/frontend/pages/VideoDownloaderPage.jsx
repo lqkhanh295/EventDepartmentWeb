@@ -367,7 +367,7 @@ const VideoDownloaderPage = () => {
                 }}
               >
                 {downloading
-                  ? (downloadProgress > 0 && downloadProgress < 100 ? `Đang tải... ${downloadProgress}%` : 'Đang xử lý...')
+                  ? (downloadProgress > 0 && downloadProgress < 100 ? `Hơi lâu xí hic.... ${downloadProgress}%` : 'Đang xử lý...')
                   : `Tải xuống ${type.toUpperCase()}`}
               </Button>
               {downloading && (

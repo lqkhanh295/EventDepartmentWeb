@@ -96,7 +96,8 @@ function isRetriableYouTubeError(text) {
     const raw = String(text || '').toLowerCase();
     return isBotCheckError(raw)
         || raw.includes('no longer supported in this application or device')
-        || raw.includes('unsupported in this application or device');
+        || raw.includes('unsupported in this application or device')
+        || raw.includes('requested format is not available');
 }
 
 function getDefaultYouTubePlayerClients() {
@@ -486,13 +487,9 @@ function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extrac
     } else {
         const h = quality && quality !== 'best' ? quality : null;
         if (h) {
-            args.push('-f',
-                `bestvideo[height<=${h}]+bestaudio/` +
-                `bestvideo[height<=${h}]+bestaudio[ext=m4a]/` +
-                `bestvideo[height<=${h}]+bestaudio[ext=webm]/` +
-                `best[height<=${h}]/best`);
+            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b`);
         } else {
-            args.push('-f', 'bestvideo+bestaudio/bestvideo+bestaudio[ext=m4a]/best');
+            args.push('-f', 'bv*+ba/b');
         }
         args.push('--merge-output-format', 'mp4');
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
@@ -623,16 +620,10 @@ app.get('/api/video/download', async (req, res) => {
         args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
     } else {
         const h = quality && quality !== 'best' ? quality : null;
-        // Format string: always merge best video + best audio → re-encode to mp4 via ffmpeg
-        // Fallback chain covers YouTube (webm/m4a), Facebook (mp4), and any other source
         if (h) {
-            args.push('-f',
-                `bestvideo[height<=${h}]+bestaudio/` +
-                `bestvideo[height<=${h}]+bestaudio[ext=m4a]/` +
-                `bestvideo[height<=${h}]+bestaudio[ext=webm]/` +
-                `best[height<=${h}]/best`);
+            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b`);
         } else {
-            args.push('-f', 'bestvideo+bestaudio/bestvideo+bestaudio[ext=m4a]/best');
+            args.push('-f', 'bv*+ba/b');
         }
         args.push('--merge-output-format', 'mp4');
         // Re-encode audio to AAC so Windows Media Player / browsers can play it
