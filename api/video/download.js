@@ -48,6 +48,25 @@ function isBotCheckError(text) {
     return raw.includes('sign in to confirm you\'re not a bot') || raw.includes('--cookies-from-browser') || raw.includes('--cookies');
 }
 
+function isRetriableYouTubeError(text) {
+    const raw = String(text || '').toLowerCase();
+    return isBotCheckError(raw)
+        || raw.includes('no longer supported in this application or device')
+        || raw.includes('unsupported in this application or device');
+}
+
+function getDefaultYouTubePlayerClients() {
+    return 'youtube:player_client=ios,mweb,web';
+}
+
+function getRetryYouTubePlayerClients() {
+    return [
+        'youtube:player_client=mweb,web',
+        'youtube:player_client=ios,web',
+        'youtube:player_client=web',
+    ];
+}
+
 function isYouTubeUrl(url) {
     try {
         const { hostname } = new URL(url);
@@ -242,6 +261,36 @@ async function pipeFromInvidious(videoId, type, quality, titleHint, res) {
     }
 }
 
+function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extractorArgs }) {
+    const args = ['--no-playlist', '--no-warnings', '-o', `${tmpBase}.%(ext)s`];
+    if (ffmpegDir) args.push('--ffmpeg-location', ffmpegDir);
+    if (extractorArgs) args.push('--extractor-args', extractorArgs);
+
+    if (type === 'mp3') {
+        args.push('-f', '140/bestaudio[ext=m4a]/bestaudio/best');
+        args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
+    } else {
+        const h = quality && quality !== 'best' ? quality : '360';
+        args.push('-f', `18/best[height<=${h}][ext=mp4]/best[height<=${h}]/best`);
+        args.push('--merge-output-format', 'mp4');
+        args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
+    }
+
+    appendYtDlpAuthArgs(args);
+    args.push(url);
+    return args;
+}
+
+function runYtDlpDownloadOnce(binary, args, env) {
+    return new Promise((resolve) => {
+        const stderrBuf = [];
+        const child = spawn(binary, args, { env });
+        child.stderr.on('data', d => { stderrBuf.push(d.toString()); });
+        child.on('error', err => resolve({ code: -1, stderrText: err.message }));
+        child.on('close', code => resolve({ code, stderrText: stderrBuf.join('') }));
+    });
+}
+
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -264,7 +313,7 @@ module.exports = async function handler(req, res) {
     const resolveTitle = () => new Promise((resolve) => {
         const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
         if (isYouTubeUrl(url)) {
-            titleArgs.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
+            titleArgs.push('--extractor-args', getDefaultYouTubePlayerClients());
         }
         appendYtDlpAuthArgs(titleArgs);
         titleArgs.push(url.trim());
@@ -283,7 +332,7 @@ module.exports = async function handler(req, res) {
     const args = ['--no-playlist', '--no-warnings', '-o', `${tmpBase}.%(ext)s`];
     if (FFMPEG_DIR) args.push('--ffmpeg-location', FFMPEG_DIR);
     if (isYouTubeUrl(url)) {
-        args.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
+        args.push('--extractor-args', getDefaultYouTubePlayerClients());
     }
     if (type === 'mp3') {
         args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
@@ -308,7 +357,6 @@ module.exports = async function handler(req, res) {
     if (FFMPEG_DIR) spawnEnv.PATH = FFMPEG_DIR + path.delimiter + (spawnEnv.PATH || '');
 
     const cleanup = () => fs.rmSync(tmpDir, { recursive: true, force: true });
-    const stderrBuf = [];
     let responded = false;
     const sendError = (msg, status = 500) => {
         if (responded) return;
@@ -317,14 +365,31 @@ module.exports = async function handler(req, res) {
         res.status(status).json({ error: msg });
     };
 
-    const child = spawn(YT_DLP, args, { env: spawnEnv });
-    child.stderr.on('data', d => { stderrBuf.push(d.toString()); });
-    child.on('error', err => sendError(err.message));
-    child.on('close', async (code) => {
-        if (responded) return;
-        if (code !== 0) {
-            const stderrText = stderrBuf.join('');
-            if (isBotCheckError(stderrText) && isYouTubeUrl(url)) {
+    const firstAttempt = await runYtDlpDownloadOnce(YT_DLP, args, spawnEnv);
+    if (firstAttempt.code !== 0) {
+        let stderrText = firstAttempt.stderrText;
+
+        if (isYouTubeUrl(url) && isRetriableYouTubeError(stderrText)) {
+            for (const extractorArgs of getRetryYouTubePlayerClients()) {
+                const retryArgs = buildRetryDownloadArgs({
+                    tmpBase,
+                    type,
+                    quality,
+                    url: url.trim(),
+                    ffmpegDir: FFMPEG_DIR,
+                    extractorArgs,
+                });
+                const retry = await runYtDlpDownloadOnce(YT_DLP, retryArgs, spawnEnv);
+                if (retry.code === 0) {
+                    stderrText = '';
+                    break;
+                }
+                stderrText = retry.stderrText || stderrText;
+            }
+        }
+
+        if (stderrText) {
+            if (isYouTubeUrl(url) && isRetriableYouTubeError(stderrText)) {
                 const videoId = extractYouTubeVideoId(url);
                 if (videoId) {
                     responded = true;
@@ -337,6 +402,9 @@ module.exports = async function handler(req, res) {
             const errLine = stderrText.split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
             return sendError(errLine);
         }
+    }
+
+    if (!responded) {
         let files;
         try { files = fs.readdirSync(tmpDir); } catch { return sendError('Không tìm thấy file đã tải'); }
         if (!files.length) return sendError('Không tìm thấy file đã tải');
@@ -357,5 +425,5 @@ module.exports = async function handler(req, res) {
         stream.pipe(res);
         stream.on('close', cleanup);
         stream.on('error', () => { cleanup(); res.destroy(); });
-    });
+    }
 };

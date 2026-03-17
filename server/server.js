@@ -36,6 +36,9 @@ function resolveYtDlp() {
         path.join(os.homedir(), 'scoop', 'shims', 'yt-dlp.exe'),
         'C:\\ProgramData\\chocolatey\\bin\\yt-dlp.exe',
         'C:\\yt-dlp\\yt-dlp.exe',
+        // pip install --user puts yt-dlp here on Linux
+        path.join(os.homedir(), '.local', 'bin', 'yt-dlp'),
+        '/root/.local/bin/yt-dlp',
         '/usr/local/bin/yt-dlp',
         '/usr/bin/yt-dlp',
         '/nix/var/nix/profiles/default/bin/yt-dlp',
@@ -87,6 +90,25 @@ function appendYtDlpAuthArgs(args) {
 function isBotCheckError(text) {
     const raw = String(text || '').toLowerCase();
     return raw.includes('sign in to confirm you\'re not a bot') || raw.includes('--cookies-from-browser') || raw.includes('--cookies');
+}
+
+function isRetriableYouTubeError(text) {
+    const raw = String(text || '').toLowerCase();
+    return isBotCheckError(raw)
+        || raw.includes('no longer supported in this application or device')
+        || raw.includes('unsupported in this application or device');
+}
+
+function getDefaultYouTubePlayerClients() {
+    return 'youtube:player_client=ios,mweb,web';
+}
+
+function getRetryYouTubePlayerClients() {
+    return [
+        'youtube:player_client=mweb,web',
+        'youtube:player_client=ios,web',
+        'youtube:player_client=web',
+    ];
 }
 
 function extractYouTubeVideoId(url) {
@@ -269,7 +291,7 @@ function normalizeVideoUrl(url) {
 function buildInfoArgs(url) {
     const args = ['--no-playlist', '--dump-single-json', '--no-download', '--no-warnings'];
     if (isYouTubeUrl(url)) {
-        args.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
+        args.push('--extractor-args', getDefaultYouTubePlayerClients());
     }
     appendYtDlpAuthArgs(args);
     args.push(url);
@@ -453,6 +475,36 @@ async function pipeFromInvidious(videoId, type, quality, titleHint, res) {
     }
 }
 
+function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extractorArgs }) {
+    const args = ['--no-playlist', '--no-warnings', '-o', `${tmpBase}.%(ext)s`];
+    if (ffmpegDir) args.push('--ffmpeg-location', ffmpegDir);
+    if (extractorArgs) args.push('--extractor-args', extractorArgs);
+
+    if (type === 'mp3') {
+        args.push('-f', '140/bestaudio[ext=m4a]/bestaudio/best');
+        args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
+    } else {
+        const h = quality && quality !== 'best' ? quality : '360';
+        args.push('-f', `18/best[height<=${h}][ext=mp4]/best[height<=${h}]/best`);
+        args.push('--merge-output-format', 'mp4');
+        args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
+    }
+
+    appendYtDlpAuthArgs(args);
+    args.push(url);
+    return args;
+}
+
+function runYtDlpDownloadOnce(binary, args, env) {
+    return new Promise((resolve) => {
+        const stderrBuf = [];
+        const child = spawn(binary, args, { env });
+        child.stderr.on('data', d => { stderrBuf.push(d.toString()); process.stdout.write(d); });
+        child.on('error', err => resolve({ code: -1, stderrText: err.message }));
+        child.on('close', code => resolve({ code, stderrText: stderrBuf.join('') }));
+    });
+}
+
 // POST /api/video/info — lấy tiêu đề, thumbnail, thời lượng
 app.post('/api/video/info', (req, res) => {
     const { url } = req.body || {};
@@ -537,7 +589,7 @@ app.get('/api/video/download', async (req, res) => {
     const resolveTitle = () => new Promise((resolve) => {
         const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
         if (isYouTubeUrl(url)) {
-            titleArgs.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
+            titleArgs.push('--extractor-args', getDefaultYouTubePlayerClients());
         }
         appendYtDlpAuthArgs(titleArgs);
         titleArgs.push(url.trim());
@@ -557,7 +609,7 @@ app.get('/api/video/download', async (req, res) => {
     // Pass ffmpeg location so yt-dlp can merge video+audio even if not in PATH
     if (FFMPEG_DIR) args.push('--ffmpeg-location', FFMPEG_DIR);
     if (isYouTubeUrl(url)) {
-        args.push('--extractor-args', 'youtube:player_client=tv_embedded,ios,mweb,web');
+        args.push('--extractor-args', getDefaultYouTubePlayerClients());
     }
     if (type === 'mp3') {
         args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
@@ -598,7 +650,6 @@ app.get('/api/video/download', async (req, res) => {
     console.log(`[download] args: ${args.join(' ')}`);
 
     const cleanup = () => fs.rmSync(tmpDir, { recursive: true, force: true });
-    const stderrBuf = [];
     let responded = false;
     const sendError = (msg, status = 500) => {
         if (responded) return;
@@ -606,14 +657,32 @@ app.get('/api/video/download', async (req, res) => {
         cleanup();
         res.status(status).json({ error: msg });
     };
-    const child = spawn(YT_DLP, args, { env: spawnEnv });
-    child.stderr.on('data', d => { stderrBuf.push(d.toString()); process.stdout.write(d); });
-    child.on('error', err => sendError(err.message));
-    child.on('close', async (code) => {
-        if (responded) return;
-        if (code !== 0) {
-            const stderrText = stderrBuf.join('');
-            if (isBotCheckError(stderrText) && isYouTubeUrl(url)) {
+    const firstAttempt = await runYtDlpDownloadOnce(YT_DLP, args, spawnEnv);
+    if (firstAttempt.code !== 0) {
+        let stderrText = firstAttempt.stderrText;
+
+        if (isYouTubeUrl(url) && isRetriableYouTubeError(stderrText)) {
+            for (const extractorArgs of getRetryYouTubePlayerClients()) {
+                const retryArgs = buildRetryDownloadArgs({
+                    tmpBase,
+                    type,
+                    quality,
+                    url,
+                    ffmpegDir: FFMPEG_DIR,
+                    extractorArgs,
+                });
+                console.log(`[download] retry args: ${retryArgs.join(' ')}`);
+                const retry = await runYtDlpDownloadOnce(YT_DLP, retryArgs, spawnEnv);
+                if (retry.code === 0) {
+                    stderrText = '';
+                    break;
+                }
+                stderrText = retry.stderrText || stderrText;
+            }
+        }
+
+        if (stderrText) {
+            if (isYouTubeUrl(url) && isRetriableYouTubeError(stderrText)) {
                 const videoId = extractYouTubeVideoId(url);
                 if (videoId) {
                     responded = true;
@@ -626,6 +695,9 @@ app.get('/api/video/download', async (req, res) => {
             const errLine = stderrText.split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
             return sendError(errLine);
         }
+    }
+
+    if (!responded) {
         let files;
         try { files = fs.readdirSync(tmpDir); } catch { return sendError('Không tìm thấy file đã tải'); }
         if (!files.length) return sendError('Không tìm thấy file đã tải');
@@ -649,7 +721,7 @@ app.get('/api/video/download', async (req, res) => {
         stream.pipe(res);
         stream.on('close', cleanup);
         stream.on('error', () => { cleanup(); res.destroy(); });
-    });
+    }
 });
 
 // ─── Serve React build in production (Railway) ───────────────────────────────

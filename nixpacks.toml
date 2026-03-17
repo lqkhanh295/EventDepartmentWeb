@@ -1,11 +1,14 @@
 # Nixpacks build configuration for Railway
-# Adds yt-dlp and ffmpeg so the video downloader works in production
+# ffmpeg from nixpkgs, yt-dlp installed via pip to always get latest version
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "yt-dlp", "ffmpeg"]
+nixPkgs = ["nodejs_20", "ffmpeg", "python312", "python312Packages.pip"]
 
 [phases.install]
-cmds = ["npm ci --prefer-offline"]
+cmds = [
+  "pip install -U yt-dlp",
+  "npm ci --prefer-offline"
+]
 
 [phases.build]
 cmds = [
