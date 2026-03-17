@@ -158,6 +158,10 @@ const VideoDownloaderPage = () => {
       }
       setDownloadProgress(100);
 
+      // Try to extract filename from Content-Disposition header
+      // Supports both "filename*=UTF-8''..." and "filename=..." formats
+      // If not found, fallback to "video.mp4" or "video.mp3"
+
       const disposition = resp.headers.get('Content-Disposition') || '';
       const fnMatch = disposition.match(/filename\*=UTF-8''(.+)/i) || disposition.match(/filename="?([^"]+)"?/i);
       const filename = fnMatch ? decodeURIComponent(fnMatch[1]) : `video.${type}`;
