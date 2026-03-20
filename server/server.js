@@ -51,6 +51,7 @@ console.log(YT_DLP ? `✅  yt-dlp found: ${YT_DLP}` : '⚠️  yt-dlp not found 
 const YT_DLP_COOKIES_PATH = process.env.YTDLP_COOKIES_PATH || process.env.YT_DLP_COOKIES_PATH || '';
 const YT_DLP_COOKIES_B64 = process.env.YTDLP_COOKIES_B64 || process.env.YT_DLP_COOKIES_B64 || '';
 const YT_DLP_COOKIES_CONTENT = process.env.YTDLP_COOKIES_CONTENT || process.env.YT_DLP_COOKIES_CONTENT || '';
+const YT_DLP_COOKIES_FROM_BROWSER = process.env.YTDLP_COOKIES_FROM_BROWSER || process.env.YT_DLP_COOKIES_FROM_BROWSER || '';
 
 let CACHED_COOKIES_FILE = null;
 function resolveCookiesFile() {
@@ -87,9 +88,45 @@ function appendYtDlpAuthArgs(args) {
     return args;
 }
 
+function hasExplicitCookiesConfig() {
+    return Boolean(YT_DLP_COOKIES_PATH || YT_DLP_COOKIES_B64 || YT_DLP_COOKIES_CONTENT);
+}
+
+function getCookieBrowserCandidates() {
+    if (hasExplicitCookiesConfig()) return [];
+
+    const configured = String(YT_DLP_COOKIES_FROM_BROWSER || '').trim();
+    if (configured) {
+        return configured
+            .split(',')
+            .map(v => v.trim())
+            .filter(Boolean);
+    }
+
+    if (process.platform === 'win32' || process.platform === 'darwin') {
+        return ['chrome', 'edge', 'firefox'];
+    }
+    return [];
+}
+
+function appendYtDlpBrowserCookiesArgs(args, browser) {
+    if (browser && typeof browser === 'string') {
+        args.push('--cookies-from-browser', browser);
+    }
+    return args;
+}
+
 function isBotCheckError(text) {
     const raw = String(text || '').toLowerCase();
     return raw.includes('sign in to confirm you\'re not a bot') || raw.includes('--cookies-from-browser') || raw.includes('--cookies');
+}
+
+function buildYouTubeAuthErrorMessage() {
+    return [
+        'YouTube đang yêu cầu xác thực cookie cho video này.',
+        'Hãy cấu hình một trong các biến môi trường: YTDLP_COOKIES_PATH, YTDLP_COOKIES_CONTENT, YTDLP_COOKIES_B64 hoặc YTDLP_COOKIES_FROM_BROWSER.',
+        'Sau đó khởi động lại backend và thử tải lại.',
+    ].join(' ');
 }
 
 function isRetriableYouTubeError(text) {
@@ -321,18 +358,11 @@ async function fetchYouTubeOEmbed(url) {
 }
 
 // ─── Invidious fallback (no auth needed) ─────────────────────────────────────
+// Updated 2026-03-20 — verified against https://api.invidious.io/instances.json
 const INVIDIOUS_INSTANCES = [
     'https://inv.nadeko.net',
-    'https://invidious.privacyredirect.com',
+    'https://invidious.nerdvpn.de',
     'https://yewtu.be',
-    'https://iv.ggtyler.dev',
-];
-
-const PIPED_INSTANCES = [
-    'https://pipedapi.kavin.rocks',
-    'https://pipedapi.adminforge.de',
-    'https://piped-api.garudalinux.org',
-    'https://pipedapi.in.projectsegfau.lt',
 ];
 
 async function fetchInfoFromInvidious(videoId) {
@@ -367,40 +397,6 @@ async function fetchInfoFromInvidious(videoId) {
 }
 
 async function getInvidiousStreamUrl(videoId, type, quality) {
-    // Try Piped API first (more reliable)
-    for (const instance of PIPED_INSTANCES) {
-        try {
-            const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 10000);
-            const resp = await fetch(
-                `${instance}/streams/${encodeURIComponent(videoId)}`,
-                { signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0' } }
-            );
-            clearTimeout(timer);
-            if (!resp.ok) continue;
-            const data = await resp.json();
-            if (!data?.title) continue;
-            const title = data.title || '';
-            if (type === 'mp3') {
-                const audioStreams = (data.audioStreams || [])
-                    .filter(f => f.url)
-                    .sort((a, b) => (parseInt(b.bitrate) || 0) - (parseInt(a.bitrate) || 0));
-                if (audioStreams[0]?.url) return { url: audioStreams[0].url, title, ext: 'm4a', contentType: 'audio/mp4' };
-            } else {
-                const h = quality && quality !== 'best' ? parseInt(quality) : 9999;
-                const videoStreams = (data.videoStreams || [])
-                    .filter(f => f.url && !f.videoOnly)
-                    .map(f => ({ ...f, _h: parseInt(f.quality) || 0 }))
-                    .filter(f => f._h > 0)
-                    .sort((a, b) => b._h - a._h);
-                const best = videoStreams.find(f => f._h <= h) || videoStreams[videoStreams.length - 1];
-                if (best?.url) return { url: best.url, title, ext: 'mp4', contentType: 'video/mp4' };
-            }
-        } catch (e) {
-            console.warn(`[piped] ${instance}: ${e.message}`);
-        }
-    }
-    // Fall back to Invidious
     for (const instance of INVIDIOUS_INSTANCES) {
         try {
             const ctrl = new AbortController();
@@ -476,10 +472,11 @@ async function pipeFromInvidious(videoId, type, quality, titleHint, res) {
     }
 }
 
-function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extractorArgs }) {
+function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extractorArgs, cookiesFromBrowser }) {
     const args = ['--no-playlist', '--no-warnings', '-o', `${tmpBase}.%(ext)s`];
     if (ffmpegDir) args.push('--ffmpeg-location', ffmpegDir);
     if (extractorArgs) args.push('--extractor-args', extractorArgs);
+    appendYtDlpBrowserCookiesArgs(args, cookiesFromBrowser);
 
     if (type === 'mp3') {
         args.push('-f', '140/bestaudio[ext=m4a]/bestaudio/best');
@@ -659,6 +656,7 @@ app.get('/api/video/download', async (req, res) => {
     const firstAttempt = await runYtDlpDownloadOnce(YT_DLP, args, spawnEnv);
     if (firstAttempt.code !== 0) {
         let stderrText = firstAttempt.stderrText;
+        const attemptedBrowserCookies = [];
         const shouldTryYoutubeFallback = isYouTubeUrl(url) && isRetriableYouTubeError(stderrText);
 
         if (shouldTryYoutubeFallback) {
@@ -679,6 +677,28 @@ app.get('/api/video/download', async (req, res) => {
                 }
                 stderrText = retry.stderrText || stderrText;
             }
+
+            if (stderrText && isBotCheckError(stderrText)) {
+                for (const browser of getCookieBrowserCandidates()) {
+                    attemptedBrowserCookies.push(browser);
+                    const retryWithBrowserCookies = buildRetryDownloadArgs({
+                        tmpBase,
+                        type,
+                        quality,
+                        url,
+                        ffmpegDir: FFMPEG_DIR,
+                        extractorArgs: getDefaultYouTubePlayerClients(),
+                        cookiesFromBrowser: browser,
+                    });
+                    console.log(`[download] retry with browser cookies: ${browser}`);
+                    const retry = await runYtDlpDownloadOnce(YT_DLP, retryWithBrowserCookies, spawnEnv);
+                    if (retry.code === 0) {
+                        stderrText = '';
+                        break;
+                    }
+                    stderrText = retry.stderrText || stderrText;
+                }
+            }
         }
 
         if (stderrText) {
@@ -688,9 +708,20 @@ app.get('/api/video/download', async (req, res) => {
                     responded = true;
                     cleanup();
                     const ok = await pipeFromInvidious(videoId, type, quality, videoTitle, res);
-                    if (!ok && !res.headersSent) res.status(503).json({ error: 'Không thể tải video. Thử lại sau.' });
+                    if (!ok && !res.headersSent) {
+                        const msg = isBotCheckError(stderrText)
+                            ? `${buildYouTubeAuthErrorMessage()}${attemptedBrowserCookies.length ? ` Da thu cookies tu browser: ${attemptedBrowserCookies.join(', ')}.` : ''}`
+                            : 'Không thể tải video. Thử lại sau.';
+                        res.status(503).json({ error: msg });
+                    }
                     return;
                 }
+            }
+            if (isBotCheckError(stderrText)) {
+                const attemptedSuffix = attemptedBrowserCookies.length
+                    ? ` Da thu cookies tu browser: ${attemptedBrowserCookies.join(', ')}.`
+                    : '';
+                return sendError(buildYouTubeAuthErrorMessage() + attemptedSuffix, 403);
             }
             const errLine = stderrText.split('\n').find(l => l.includes('ERROR')) || 'Tải thất bại';
             return sendError(errLine);

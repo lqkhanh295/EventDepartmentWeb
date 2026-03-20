@@ -186,6 +186,11 @@ src/
    - `YTDLP_COOKIES_PATH` (or `YT_DLP_COOKIES_PATH`): absolute path to `cookies.txt` on the server
    - `YTDLP_COOKIES_CONTENT` (or `YT_DLP_COOKIES_CONTENT`): full cookies.txt content
    - `YTDLP_COOKIES_B64` (or `YT_DLP_COOKIES_B64`): base64-encoded cookies.txt content
+   - `YTDLP_COOKIES_FROM_BROWSER` (or `YT_DLP_COOKIES_FROM_BROWSER`): browser names separated by commas, e.g. `chrome,edge,firefox`
+- Local quick setup:
+   - Copy `server/.env.example` to `server/.env.local`
+   - Keep `YTDLP_COOKIES_FROM_BROWSER=chrome,edge,firefox` or set your own value
+   - Run `npm run start:backend` (or `npm run dev`), backend auto-loads `server/.env.local`
 
 ## 🤝 Contributing
 
