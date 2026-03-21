@@ -51,6 +51,17 @@ Event Department Web is a comprehensive web application for managing Event Depar
 - Background removal tool for images
 - Fast image processing workflow
 
+### 🎬 Video Downloader
+- Download YouTube and Facebook videos as MP4 or MP3
+- Quality selection (up to 4K)
+- Fallback to Invidious API when yt-dlp fails
+- Supports cookie authentication for YouTube bot-check bypass
+
+### 💡 Lighting Designer
+- Stage lighting layout designer
+- Export to MagicQ and grandMA3 CSV formats
+- Push patch data to MagicQ via UDP
+
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -61,7 +72,13 @@ Event Department Web is a comprehensive web application for managing Event Depar
 - **Framer Motion** - Animations
 - **XLSX** - Excel file processing
 
-### Backend and Services
+### Backend Server (port 3002)
+- **Express.js** - API server
+- **yt-dlp** - YouTube/Facebook video downloading
+- **ffmpeg** - Audio/video merging and re-encoding
+- **MagicQ UDP** - Push lighting patch data to ChamSys MagicQ
+
+### Backend Services
 - **Firebase/Firestore** - Database and backend services
 - **@xenova/transformers** - AI/ML processing
 - **docxtemplater** - Word document generation
@@ -181,16 +198,30 @@ src/
 - Firebase must be configured before running the app
 - Some features require admin role
 - CSV/XLSX import files must follow the expected format
-- For Railway/cloud deployments, YouTube may require authenticated cookies for yt-dlp.
-- If you see a bot-check error, configure one of these env options:
-   - `YTDLP_COOKIES_PATH` (or `YT_DLP_COOKIES_PATH`): absolute path to `cookies.txt` on the server
-   - `YTDLP_COOKIES_CONTENT` (or `YT_DLP_COOKIES_CONTENT`): full cookies.txt content
-   - `YTDLP_COOKIES_B64` (or `YT_DLP_COOKIES_B64`): base64-encoded cookies.txt content
-   - `YTDLP_COOKIES_FROM_BROWSER` (or `YT_DLP_COOKIES_FROM_BROWSER`): browser names separated by commas, e.g. `chrome,edge,firefox`
-- Local quick setup:
-   - Copy `server/.env.example` to `server/.env.local`
-   - Keep `YTDLP_COOKIES_FROM_BROWSER=chrome,edge,firefox` or set your own value
-   - Run `npm run start:backend` (or `npm run dev`), backend auto-loads `server/.env.local`
+
+### 🎬 Video Downloader — Deployment Notes
+
+The backend uses **yt-dlp** + **ffmpeg** for video downloading. On cloud deployments (Railway, etc.), YouTube often blocks datacenter IPs with a bot-check. To bypass this:
+
+#### Cookie Authentication (required for cloud/Railway)
+Configure **one** of these environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `YTDLP_COOKIES_CONTENT` | Full `cookies.txt` content (Netscape format) |
+| `YTDLP_COOKIES_B64` | Base64-encoded `cookies.txt` content |
+| `YTDLP_COOKIES_PATH` | Absolute path to `cookies.txt` on the server |
+| `YTDLP_COOKIES_FROM_BROWSER` | Browser names, e.g. `chrome,edge,firefox` (local only) |
+
+> **How to get cookies:** Install [Get cookies.txt LOCALLY](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc), visit youtube.com while logged in, export cookies for `youtube.com` only, and paste the content into `YTDLP_COOKIES_CONTENT`.
+
+#### Invidious Fallback
+When yt-dlp fails, the server falls back to public [Invidious](https://invidious.io) instances for video info and streaming. The instance list is maintained in `server/server.js`.
+
+#### Local Development
+- Copy `server/.env.example` to `server/.env.local`
+- Keep `YTDLP_COOKIES_FROM_BROWSER=chrome,edge,firefox` or set your own value
+- Run `npm run dev`, backend auto-loads `server/.env.local`
 
 ## 🤝 Contributing
 
