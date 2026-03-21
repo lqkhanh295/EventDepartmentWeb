@@ -328,9 +328,6 @@ function normalizeVideoUrl(url) {
 
 function buildInfoArgs(url) {
     const args = ['--no-playlist', '--dump-single-json', '--no-download', '--no-warnings'];
-    if (isYouTubeUrl(url)) {
-        args.push('--extractor-args', getDefaultYouTubePlayerClients());
-    }
     appendYtDlpAuthArgs(args);
     args.push(url);
     return args;
@@ -484,9 +481,9 @@ function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extrac
     } else {
         const h = quality && quality !== 'best' ? quality : null;
         if (h) {
-            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b`);
+            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b/best`);
         } else {
-            args.push('-f', 'bv*+ba/b');
+            args.push('-f', 'bv*+ba/b/best');
         }
         args.push('--merge-output-format', 'mp4');
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
@@ -590,9 +587,6 @@ app.get('/api/video/download', async (req, res) => {
     // Resolve output filename: fetch title first, fallback to 'video'
     const resolveTitle = () => new Promise((resolve) => {
         const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
-        if (isYouTubeUrl(url)) {
-            titleArgs.push('--extractor-args', getDefaultYouTubePlayerClients());
-        }
         appendYtDlpAuthArgs(titleArgs);
         titleArgs.push(url.trim());
         const child = spawn(YT_DLP, titleArgs, {
@@ -610,17 +604,14 @@ app.get('/api/video/download', async (req, res) => {
     const args = ['--no-playlist', '--no-warnings', '-o', `${tmpBase}.%(ext)s`];
     // Pass ffmpeg location so yt-dlp can merge video+audio even if not in PATH
     if (FFMPEG_DIR) args.push('--ffmpeg-location', FFMPEG_DIR);
-    if (isYouTubeUrl(url)) {
-        args.push('--extractor-args', getDefaultYouTubePlayerClients());
-    }
     if (type === 'mp3') {
         args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
     } else {
         const h = quality && quality !== 'best' ? quality : null;
         if (h) {
-            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b`);
+            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b/best`);
         } else {
-            args.push('-f', 'bv*+ba/b');
+            args.push('-f', 'bv*+ba/b/best');
         }
         args.push('--merge-output-format', 'mp4');
         // Re-encode audio to AAC so Windows Media Player / browsers can play it
@@ -640,7 +631,7 @@ app.get('/api/video/download', async (req, res) => {
     if (FFMPEG_DIR) {
         spawnEnv.PATH = FFMPEG_DIR + path.delimiter + (spawnEnv.PATH || '');
         console.log(`[download] ffmpeg dir: ${FFMPEG_DIR}`);
-    } else {
+    } else if (!ffmpegAvailable) {
         console.warn('[download] ffmpeg not found — merge will likely fail');
     }
     console.log(`[download] args: ${args.join(' ')}`);
@@ -660,23 +651,6 @@ app.get('/api/video/download', async (req, res) => {
         const shouldTryYoutubeFallback = isYouTubeUrl(url) && isRetriableYouTubeError(stderrText);
 
         if (shouldTryYoutubeFallback) {
-            for (const extractorArgs of getRetryYouTubePlayerClients()) {
-                const retryArgs = buildRetryDownloadArgs({
-                    tmpBase,
-                    type,
-                    quality,
-                    url,
-                    ffmpegDir: FFMPEG_DIR,
-                    extractorArgs,
-                });
-                console.log(`[download] retry args: ${retryArgs.join(' ')}`);
-                const retry = await runYtDlpDownloadOnce(YT_DLP, retryArgs, spawnEnv);
-                if (retry.code === 0) {
-                    stderrText = '';
-                    break;
-                }
-                stderrText = retry.stderrText || stderrText;
-            }
 
             if (stderrText && isBotCheckError(stderrText)) {
                 for (const browser of getCookieBrowserCandidates()) {
