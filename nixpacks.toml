@@ -2,12 +2,13 @@
 # ffmpeg from nixpkgs, yt-dlp installed via pip to always get latest version
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "ffmpeg", "python312", "python312Packages.pip"]
+nixPkgs = ["nodejs_20", "ffmpeg", "python312", "python312Packages.pip", "deno"]
 
 [phases.install]
 cmds = [
   "pip install --user -U yt-dlp --break-system-packages",
   "$HOME/.local/bin/yt-dlp --version",
+  "$HOME/.local/bin/yt-dlp --rm-cache-dir || true",
   "npm ci --prefer-offline"
 ]
 

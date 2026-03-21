@@ -80,7 +80,15 @@ if (RESOLVED_COOKIES_FILE) {
     console.warn(`⚠️  yt-dlp cookies path not found: ${YT_DLP_COOKIES_PATH}`);
 }
 
-function appendYtDlpAuthArgs(args) {
+function appendYtDlpAuthArgs(args, isYouTube = false) {
+    if (isYouTube) {
+        // Essential for bypassing YouTube bot checks without cookies
+        // 1. Impersonate Chrome to pass TLS/HTTP fingerprint checks
+        args.push('--impersonate', 'chrome');
+        // 2. Force IPv4 to avoid datacenter IPv6 blanket bans
+        args.push('-4');
+    }
+
     const cookiesFile = resolveCookiesFile();
     if (cookiesFile) {
         args.push('--cookies', cookiesFile);
@@ -328,7 +336,7 @@ function normalizeVideoUrl(url) {
 
 function buildInfoArgs(url) {
     const args = ['--no-playlist', '--dump-single-json', '--no-download', '--no-warnings'];
-    appendYtDlpAuthArgs(args);
+    appendYtDlpAuthArgs(args, isYouTubeUrl(url));
     args.push(url);
     return args;
 }
@@ -489,7 +497,7 @@ function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extrac
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
     }
 
-    appendYtDlpAuthArgs(args);
+    appendYtDlpAuthArgs(args, isYouTubeUrl(url));
     args.push(url);
     return args;
 }
@@ -587,7 +595,7 @@ app.get('/api/video/download', async (req, res) => {
     // Resolve output filename: fetch title first, fallback to 'video'
     const resolveTitle = () => new Promise((resolve) => {
         const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
-        appendYtDlpAuthArgs(titleArgs);
+        appendYtDlpAuthArgs(titleArgs, isYouTubeUrl(url));
         titleArgs.push(url.trim());
         const child = spawn(YT_DLP, titleArgs, {
             env: { ...process.env, ...(FFMPEG_DIR ? { PATH: FFMPEG_DIR + path.delimiter + process.env.PATH } : {}) },
@@ -618,7 +626,7 @@ app.get('/api/video/download', async (req, res) => {
         // (YouTube often delivers Opus audio in WebM which is not supported by Windows)
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
     }
-    appendYtDlpAuthArgs(args);
+    appendYtDlpAuthArgs(args, isYouTubeUrl(url));
     args.push(url);
 
     if (!YT_DLP) {

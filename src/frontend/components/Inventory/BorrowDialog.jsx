@@ -37,8 +37,8 @@ const BorrowDialog = ({
                     </Typography>
                 </Box>
             </DialogTitle>
-            <DialogContent sx={{ pt: 3 }}>
-                <Alert severity="info" sx={{ mb: 3, background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.3)', color: '#FFE44D' }}>
+            <DialogContent sx={{ pt: 3, paddingTop: '1px' }}>
+                <Alert severity="info" sx={{ mb: 3, background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.3)', color: '#FFE44D', paddingTop: '10px', marginTop: '10px' }}>
                     <Typography variant="body2" sx={{ mb: 1 }}>
                         <strong>Hướng dẫn:</strong> Sau khi click "Gửi qua Messenger", hệ thống sẽ:
                     </Typography>
