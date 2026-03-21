@@ -1,6 +1,6 @@
 # Event Department Web
 
-Information management system for the Event Department of Coc Sai Gon Media Club (CSG).
+Information management system for the Event Department of Coc Sai Gon Communications Club (CSG).
 
 ## 📋 Overview
 
