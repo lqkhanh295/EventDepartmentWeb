@@ -26,7 +26,7 @@ import InventoryIcon from '@mui/icons-material/Inventory2';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import DescriptionIcon from '@mui/icons-material/Description';
-import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+// import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 // import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'; // Tạm ẩn
 
 const DRAWER_WIDTH = 240;
