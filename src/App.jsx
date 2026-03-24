@@ -28,9 +28,10 @@ const RemoveBgPage = lazy(() => import('./frontend/pages').then(module => ({ def
 const LoginPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.LoginPage })));
 const InventoryPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.InventoryPage })));
 const QRGeneratorPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.QRGeneratorPage })));
-const AgendaFormatterPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.AgendaFormatterPage })));
+// Tạm ẩn các tính năng
+// const AgendaFormatterPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.AgendaFormatterPage })));
 const ContractsPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.ContractsPage })));
-const VideoDownloaderPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.VideoDownloaderPage })));
+// const VideoDownloaderPage = lazy(() => import('./frontend/pages').then(module => ({ default: module.VideoDownloaderPage })));
 const LightingDesignerPage = lazy(() => import('./frontend/pages/LightingDesigner/LightingDesignerPage'));
 
 // App Routes
@@ -52,9 +53,9 @@ const AppRoutes = () => {
                   <Route path="/remove-bg" element={<RemoveBgPage />} />
                   <Route path="/inventory" element={<InventoryPage />} />
                   <Route path="/qr-generator" element={<QRGeneratorPage />} />
-                  <Route path="/agenda-formatter" element={<AgendaFormatterPage />} />
+                  {/* <Route path="/agenda-formatter" element={<AgendaFormatterPage />} /> */}
                   <Route path="/contracts" element={<ContractsPage />} />
-                  <Route path="/video-downloader" element={<VideoDownloaderPage />} />
+                  {/* <Route path="/video-downloader" element={<VideoDownloaderPage />} /> */}
                   <Route
                     path="/lighting"
                     element={

@@ -86,12 +86,13 @@ const menuItems = [
     icon: ImageIcon,
     path: '/remove-bg'
   },
-  {
-    id: 'video-downloader',
-    label: 'Tải Video',
-    icon: VideoLibraryIcon,
-    path: '/video-downloader'
-  },
+  // Tạm ẩn chức năng tải video
+  // {
+  //   id: 'video-downloader',
+  //   label: 'Tải Video',
+  //   icon: VideoLibraryIcon,
+  //   path: '/video-downloader'
+  // },
   {
     id: 'lighting',
     label: 'Lighting Designer',

@@ -6,7 +6,7 @@ nixPkgs = ["nodejs_20", "ffmpeg", "python312", "python312Packages.pip", "deno"]
 
 [phases.install]
 cmds = [
-  "pip install --user -U yt-dlp curl-cffi --break-system-packages",
+  "pip install --user -U yt-dlp curl-cffi bgutil-ytdlp-pot-provider --break-system-packages",
   "$HOME/.local/bin/yt-dlp --version",
   "$HOME/.local/bin/yt-dlp --rm-cache-dir || true",
   "npm ci --prefer-offline"
