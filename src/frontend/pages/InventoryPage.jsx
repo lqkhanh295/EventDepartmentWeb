@@ -19,7 +19,7 @@ import {
   BorrowDialog
 } from '../components/Inventory';
 import * as XLSX from 'xlsx';
-import { listInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, bulkImport, SearchInventoryItem, RemoveAccents } from '../../services/services/inventoryService';
+import { listInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, bulkImport, RemoveAccents } from '../../services/services/inventoryService';
 import { formatBorrowMessage, openFacebookMessenger } from '../../services/services/facebookMessengerService';
 import { listBorrowedItems, addBorrowedItem, returnBorrowedItem } from '../../services/services/borrowedItemsService';
 
