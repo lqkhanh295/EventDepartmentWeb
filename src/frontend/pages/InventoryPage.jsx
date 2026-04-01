@@ -19,7 +19,7 @@ import {
   BorrowDialog
 } from '../components/Inventory';
 import * as XLSX from 'xlsx';
-import { listInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, bulkImport } from '../../services/services/inventoryService';
+import { listInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, bulkImport, SearchInventoryItem, RemoveAccents } from '../../services/services/inventoryService';
 import { formatBorrowMessage, openFacebookMessenger } from '../../services/services/facebookMessengerService';
 import { listBorrowedItems, addBorrowedItem, returnBorrowedItem } from '../../services/services/borrowedItemsService';
 
@@ -120,13 +120,14 @@ const InventoryPage = () => {
       const qty = Number(qtyStr.replace(/[^\d.-]/g, ''));
       if (!showAll && (isNaN(qty) || qty <= 0)) return false;
       if (query) {
-        const q = query.toLowerCase();
-        const name = String(r['Item'] ?? r['Tên vật phẩm'] ?? '').toLowerCase();
+        const q = RemoveAccents(query).toLowerCase();
+        const name = RemoveAccents(String(r['Item'] ?? r['Tên vật phẩm'] ?? '')).toLowerCase();
         if (!name.includes(q)) return false;
       }
       if (typeFilter) {
-        const t = String(r['Type'] ?? r['Loại'] ?? '').toLowerCase();
-        if (t !== typeFilter.toLowerCase()) return false;
+        const t = RemoveAccents(String(r['Type'] ?? r['Loại'] ?? '')).toLowerCase();
+        const f = RemoveAccents(typeFilter).toLowerCase();
+        if (t !== f) return false;
       }
       return true;
     });

@@ -71,7 +71,7 @@ const LoginPage = () => {
           textAlign: 'center',
           background: '#121212',
           border: '1px solid rgba(236, 233, 9, 0.3)',
-          borderRadius: 10,
+          borderRadius: 30,
           p: 5,
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(220, 38, 38, 0.08)',
           zIndex: 1,
@@ -149,7 +149,7 @@ const LoginPage = () => {
         )}
 
         {/* Admin Password Input */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 3, borderRadius: 10 }}>
           <TextField
             fullWidth
             type={showPassword ? 'text' : 'password'}

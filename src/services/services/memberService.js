@@ -189,3 +189,14 @@ export const getProjectBySemester = async (semester) => {
     throw error;
   }
 };
+
+export const getMemberById = async (memberId) => {
+  try {
+    const memberRef = doc(db, MEMBERS_COLLECTION, memberId);
+    const snapshot = await getDoc(memberRef);
+    return { id: snapshot.id, ...snapshot.data() };
+  } catch (error) {
+    console.error('Error getting member:', error);
+    throw error;
+  }
+};

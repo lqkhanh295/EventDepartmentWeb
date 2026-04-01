@@ -26,7 +26,7 @@ html {
 }
 
 body {
-  font-family: 'Be Vietnam Pro', 'Roboto', 'Arial', sans-serif;
+  font-family: 'Be Vietnam Pro';
   background: var(--bg-dark);
   color: var(--text-primary);
   line-height: 1.6;
@@ -71,7 +71,12 @@ a:hover {
 }
 
 /* Headings */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-primary);
   margin-bottom: 1rem;
 }
@@ -108,6 +113,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -119,6 +125,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -126,9 +133,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
@@ -138,6 +148,7 @@ h1, h2, h3, h4, h5, h6 {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -277,17 +288,17 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--bg-paper) !important;
 }
 
-.ant-table-thead > tr > th {
+.ant-table-thead>tr>th {
   background: var(--bg-elevated) !important;
   color: var(--primary-gold) !important;
   border-bottom-color: rgba(255, 215, 0, 0.2) !important;
 }
 
-.ant-table-tbody > tr > td {
+.ant-table-tbody>tr>td {
   border-bottom-color: rgba(255, 215, 0, 0.1) !important;
 }
 
-.ant-table-tbody > tr:hover > td {
+.ant-table-tbody>tr:hover>td {
   background: rgba(255, 215, 0, 0.05) !important;
 }
 
@@ -381,12 +392,15 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(-30px) translateX(0) rotate(0deg);
     opacity: 0;
   }
+
   10% {
     opacity: 0.7;
   }
+
   90% {
     opacity: 0.5;
   }
+
   100% {
     transform: translateY(100vh) translateX(var(--tet-drift, 20px)) rotate(360deg);
     opacity: 0;
@@ -395,9 +409,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Floating lanterns */
 @keyframes tet-float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) rotate(-2deg);
   }
+
   50% {
     transform: translateY(-12px) rotate(2deg);
   }
@@ -405,10 +422,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Sparkling stars */
 @keyframes tet-sparkle {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(0.5);
     opacity: 0.2;
   }
+
   50% {
     transform: scale(1.2);
     opacity: 0.8;
@@ -423,4 +443,3 @@ h1, h2, h3, h4, h5, h6 {
   padding: 16px 24px;
   text-align: center;
 }
-

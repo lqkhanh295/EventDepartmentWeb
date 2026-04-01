@@ -36,7 +36,7 @@ export async function updateInventoryItem(id, updates) {
 }
 
 export async function deleteInventoryItem(id) {
-  const ref = doc(db, INVENTORY_COL, id); 
+  const ref = doc(db, INVENTORY_COL, id);
   await deleteDoc(ref);
 }
 
@@ -77,4 +77,19 @@ function normalizeItem(r, partial = false) {
     Object.keys(cleaned).forEach(k => cleaned[k] === undefined && delete cleaned[k]);
   }
   return cleaned;
+}
+
+export const SearchInventoryItem = async (searchTerm) => {
+  const colRef = collection(db, INVENTORY_COL);
+  const q = query(colRef, orderBy('item', 'asc'));
+  const snap = await getDocs(q);
+  const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  if (!searchTerm) return items;
+  const s = RemoveAccents(searchTerm).toLowerCase();
+  return items.filter(i => RemoveAccents(i.item || '').toLowerCase().includes(s));
+}
+
+export const RemoveAccents = (str) => {
+  if (!str) return '';
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
