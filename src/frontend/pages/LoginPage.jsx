@@ -70,8 +70,8 @@ const LoginPage = () => {
           width: '100%',
           textAlign: 'center',
           background: '#121212',
-          border: '1px solid rgba(220, 38, 38, 0.3)',
-          borderRadius: 3,
+          border: '1px solid rgba(236, 233, 9, 0.3)',
+          borderRadius: 10,
           p: 5,
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(220, 38, 38, 0.08)',
           zIndex: 1,
@@ -84,7 +84,7 @@ const LoginPage = () => {
           src={logoCsg}
           alt="CSG Logo"
           sx={{
-            width: 100,
+            width: 150,
             height: 'auto',
             mb: 3
           }}
@@ -141,7 +141,7 @@ const LoginPage = () => {
               color: '#ef4444',
               border: '1px solid rgba(239, 68, 68, 0.2)',
               '& .MuiAlert-icon': { color: '#ef4444' },
-              textAlign: 'left'
+              borderRadius: 10,
             }}
           >
             {passwordError}
@@ -214,7 +214,7 @@ const LoginPage = () => {
               fontWeight: 600,
               fontSize: '0.95rem',
               textTransform: 'none',
-              borderRadius: 2,
+              borderRadius: 10,
               '&:hover': {
                 borderColor: '#FFD700',
                 borderWidth: 2,
@@ -246,7 +246,7 @@ const LoginPage = () => {
               fontWeight: 600,
               fontSize: '0.95rem',
               textTransform: 'none',
-              borderRadius: 2,
+              borderRadius: 10,
               '&:hover': {
                 borderColor: '#FFD700',
                 borderWidth: 2,
