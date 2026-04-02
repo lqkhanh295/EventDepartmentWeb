@@ -60,7 +60,7 @@ const RemoveBgPage = () => {
   // Lưu API key vào Firebase (chỉ admin)
   const handleSaveApiKey = async () => {
     const trimmedKey = apiKeyInput.trim();
-    
+
     if (!trimmedKey) {
       setError('Vui lòng nhập API key');
       return;
@@ -76,11 +76,11 @@ const RemoveBgPage = () => {
       setSavingApiKey(true);
       setError('');
       setSuccess('');
-      
+
       await setRemoveBgApiKey(trimmedKey);
       setApiKey(trimmedKey);
       setSuccess('Lưu API key thành công! Vui lòng thử lại chức năng xóa background.');
-      
+
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(''), 5000);
     } catch (err) {
@@ -190,7 +190,7 @@ const RemoveBgPage = () => {
       <Stack spacing={3} sx={{ mt: 3 }}>
         {/* API Key Input - Chỉ hiển thị cho admin */}
         {isAdmin && (
-          <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 2 }}>
+          <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
             <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, fontWeight: 600 }}>
               Cấu hình API Key (Chỉ Admin)
             </Typography>
@@ -260,14 +260,14 @@ const RemoveBgPage = () => {
         {/* Thông báo nếu chưa có API key */}
         {!loadingApiKey && !apiKey && (
           <Alert severity="warning" sx={{ background: '#5f2120', color: '#fff', border: '1px solid #f44336' }}>
-            {isAdmin 
+            {isAdmin
               ? 'Chưa có API key. Vui lòng cấu hình API key ở trên để sử dụng chức năng này.'
               : 'Chức năng này chưa được cấu hình. Vui lòng liên hệ admin.'}
           </Alert>
         )}
 
         {/* Upload Section */}
-        <Paper sx={{ p: 3, background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2 }}>
+        <Paper sx={{ p: 3, background: '#1a1a1a', border: '1px solid #333333', borderRadius: 10 }}>
           <Typography variant="h6" sx={{ color: '#FFFFFF', mb: 2, fontWeight: 600 }}>
             Upload Ảnh
           </Typography>
@@ -276,7 +276,7 @@ const RemoveBgPage = () => {
             <Box
               sx={{
                 border: '2px dashed #333333',
-                borderRadius: 2,
+                borderRadius: 10,
                 p: 4,
                 textAlign: 'center',
                 cursor: 'pointer',
@@ -420,7 +420,7 @@ const RemoveBgPage = () => {
         )}
 
         {/* Info Card */}
-        <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(12, 12, 12, 0.2)', borderRadius: 2 }}>
+        <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(12, 12, 12, 0.2)', borderRadius: 10 }}>
           <Typography variant="h6" sx={{ color: '#FFD700', mb: 1, fontWeight: 600 }}>
             Hướng dẫn
           </Typography>

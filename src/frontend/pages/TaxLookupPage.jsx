@@ -39,9 +39,9 @@ const TaxLookupPage = () => {
       const response = await fetch(
         `https://api.vietqr.io/v2/business/${taxCode.trim()}`
       );
-      
+
       const data = await response.json();
-      
+
       if (data.code === '00' && data.data) {
         setResult(data.data);
         console.log('API Response:', data.data); // Debug để xem cấu trúc dữ liệu
@@ -84,7 +84,7 @@ const TaxLookupPage = () => {
           mb: 3,
           background: '#1a1a1a',
           border: '1px solid #333333',
-          borderRadius: 2,
+          borderRadius: 10,
           transition: 'all 0.3s ease',
           '&:hover': {
             borderColor: 'rgba(255, 215, 0, 0.3)'
@@ -113,7 +113,7 @@ const TaxLookupPage = () => {
                 '&.Mui-focused fieldset': { borderColor: '#FFD700', borderWidth: 2 }
               },
               '& .MuiInputLabel-root': { color: '#B3B3B3' },
-              '& .MuiInputBase-input': { 
+              '& .MuiInputBase-input': {
                 color: '#FFFFFF',
                 fontSize: '0.95rem',
                 padding: '14px 16px'
@@ -128,10 +128,10 @@ const TaxLookupPage = () => {
             sx={{
               px: 4,
               height: 56,
-              background: '#FFD700',
+              background: 'rgba(221, 245, 12, 0.93)',
               color: '#000000',
               fontWeight: 700,
-              borderRadius: 2,
+              borderRadius: 10,
               textTransform: 'none',
               fontSize: '0.95rem',
               letterSpacing: '0.5px',
@@ -167,7 +167,7 @@ const TaxLookupPage = () => {
             p: 3.5,
             background: '#1a1a1a',
             border: '1px solid #333333',
-            borderRadius: 2,
+            borderRadius: 10,
             transition: 'all 0.3s ease',
             '&:hover': {
               borderColor: 'rgba(255, 215, 0, 0.4)'
@@ -212,8 +212,8 @@ const TaxLookupPage = () => {
           {/* Còn hoạt động hay không */}
           <Box sx={{ display: 'flex', gap: 2, py: 1.5, alignItems: 'flex-start' }}>
             <Box sx={{ color: '#FFD700', mt: 0.3 }}>
-              {result.status === 'active' || result.active !== false ? 
-                <CheckCircleIcon sx={{ color: '#4CAF50' }} /> : 
+              {result.status === 'active' || result.active !== false ?
+                <CheckCircleIcon sx={{ color: '#4CAF50' }} /> :
                 <CancelIcon sx={{ color: '#f44336' }} />}
             </Box>
             <Box sx={{ flex: 1 }}>
@@ -221,11 +221,11 @@ const TaxLookupPage = () => {
                 Trạng thái hoạt động
               </Typography>
               <Typography variant="body1" sx={{ color: '#fff', fontWeight: 500, mt: 0.5 }}>
-                {result.status === 'active' || result.active !== false ? 
-                  'Đang hoạt động' : 
-                  result.status === 'inactive' || result.active === false ? 
-                  'Ngừng hoạt động' : 
-                  'Chưa xác định'}
+                {result.status === 'active' || result.active !== false ?
+                  'Đang hoạt động' :
+                  result.status === 'inactive' || result.active === false ?
+                    'Ngừng hoạt động' :
+                    'Chưa xác định'}
               </Typography>
             </Box>
           </Box>
@@ -239,22 +239,22 @@ const TaxLookupPage = () => {
               </Typography>
               {(() => {
                 // Kiểm tra nhiều field có thể có từ API
-                const businessInfo = result.businessLines || 
-                                    result.businessLine || 
-                                    result.industries || 
-                                    result.industry ||
-                                    result.businessType ||
-                                    result.businessTypes ||
-                                    result.nganhNghe ||
-                                    result.businessActivities ||
-                                    result.activities ||
-                                    result.description;
-                
+                const businessInfo = result.businessLines ||
+                  result.businessLine ||
+                  result.industries ||
+                  result.industry ||
+                  result.businessType ||
+                  result.businessTypes ||
+                  result.nganhNghe ||
+                  result.businessActivities ||
+                  result.activities ||
+                  result.description;
+
                 if (businessInfo) {
-                  const linesArray = Array.isArray(businessInfo) ? businessInfo : 
-                                   (typeof businessInfo === 'string' ? businessInfo.split(',').map(s => s.trim()) : [businessInfo]);
+                  const linesArray = Array.isArray(businessInfo) ? businessInfo :
+                    (typeof businessInfo === 'string' ? businessInfo.split(',').map(s => s.trim()) : [businessInfo]);
                   const filteredLines = linesArray.filter(Boolean);
-                  
+
                   if (filteredLines.length > 0) {
                     return (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -275,7 +275,7 @@ const TaxLookupPage = () => {
                     );
                   }
                 }
-                
+
                 return (
                   <Typography variant="body2" sx={{ color: '#666', fontStyle: 'italic' }}>
                     Chưa có thông tin
@@ -287,7 +287,7 @@ const TaxLookupPage = () => {
 
           <Box sx={{ mt: 3, p: 2, background: '#252525', borderRadius: 2 }}>
             <Typography variant="caption" sx={{ color: '#888' }}>
-              Lưu ý: Thông tin được tra cứu từ cơ sở dữ liệu công khai. 
+              Lưu ý: Thông tin được tra cứu từ cơ sở dữ liệu công khai.
               Vui lòng xác minh lại với nhà cung cấp trước khi giao dịch.
             </Typography>
           </Box>

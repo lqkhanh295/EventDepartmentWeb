@@ -37,6 +37,7 @@ import { PageHeader, Loading, EmptyState, VendorForm } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 import { useVendors } from '../hooks/useVendors';
 import { useSnackbar } from '../hooks/useSnackbar';
+import { RemoveAccents } from '../../services/services/vendorService';
 
 
 const VendorsPage = () => {
@@ -83,7 +84,7 @@ const VendorsPage = () => {
     let filtered = [...allVendors];
 
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+      const term = RemoveAccents(searchTerm).toLowerCase();
       filtered = filtered.filter(v =>
         (v.name || '').toLowerCase().includes(term) ||
         (v.category || '').toLowerCase().includes(term) ||
