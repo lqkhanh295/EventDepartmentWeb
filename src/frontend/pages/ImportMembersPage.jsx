@@ -291,7 +291,7 @@ const ImportMembersPage = () => {
       />
 
       {/* Hướng dẫn */}
-      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 2 }}>
+      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
         <Typography variant="h6" sx={{ color: '#FFD700', mb: 2 }}>📋 Định dạng file Excel của bạn</Typography>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
           <Chip label="A: STT" size="small" sx={{ background: '#333', color: '#666' }} />
@@ -308,7 +308,7 @@ const ImportMembersPage = () => {
       </Paper>
 
       {/* Chọn kỳ để import điểm */}
-      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 2 }}>
+      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography sx={{ color: '#b3b3b3' }}>Chọn kỳ để import điểm:</Typography>
           <Button
@@ -344,13 +344,13 @@ const ImportMembersPage = () => {
       </Paper>
 
       {/* Upload Area */}
-      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 2 }}>
+      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
         <Box
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           sx={{
             border: '2px dashed #444',
-            borderRadius: 2,
+            borderRadius: 10,
             p: 4,
             textAlign: 'center',
             cursor: importing ? 'default' : 'pointer',
@@ -387,7 +387,7 @@ const ImportMembersPage = () => {
 
       {/* Preview Table */}
       {data.length > 0 && (
-        <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 2 }}>
+        <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6" sx={{ color: '#FFD700' }}>
               Preview: {data.length} members
@@ -414,7 +414,7 @@ const ImportMembersPage = () => {
                 value={progress}
                 sx={{
                   height: 8,
-                  borderRadius: 2,
+                  borderRadius: 10,
                   background: '#333',
                   '& .MuiLinearProgress-bar': { background: '#4CAF50' }
                 }}

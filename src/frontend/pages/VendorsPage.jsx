@@ -270,7 +270,7 @@ const VendorsPage = () => {
             flex: 1,
             '& .MuiOutlinedInput-root': {
               background: '#1e1e1e',
-              borderRadius: 2,
+              borderRadius: 10,
               '& fieldset': { borderColor: 'rgba(255, 215, 0, 0.2)' },
               '&:hover fieldset': { borderColor: '#FFD700' },
               '&.Mui-focused fieldset': { borderColor: '#FFD700' }
@@ -290,7 +290,7 @@ const VendorsPage = () => {
             }
             sx={{
               background: '#1e1e1e',
-              borderRadius: 2,
+              borderRadius: 10,
               '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 215, 0, 0.2)' },
               '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#FFD700' },
               '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#FFD700' }
@@ -326,7 +326,7 @@ const VendorsPage = () => {
           sx={{
             background: '#1e1e1e',
             border: '1px solid rgba(255, 215, 0, 0.1)',
-            borderRadius: 2,
+            borderRadius: 10,
             overflow: 'hidden'
           }}
         >

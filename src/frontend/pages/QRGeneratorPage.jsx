@@ -87,7 +87,7 @@ const QRGeneratorPage = () => {
 
                 <Grid container spacing={3}>
                     <Grid item xs={12} lg={7}>
-                        <Card sx={{ background: '#1e1e1e', border: '1px solid #333', borderRadius: 2 }}>
+                        <Card sx={{ background: '#1e1e1e', border: '1px solid #333', borderRadius: 10 }}>
                             <CardHeader
                                 title={<Typography sx={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>Tùy chỉnh QR</Typography>}
                                 sx={{ borderBottom: '1px solid #333' }}
@@ -229,7 +229,7 @@ const QRGeneratorPage = () => {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 minHeight: 400,
-                                borderRadius: 2
+                                borderRadius: 10
                             }}
                         >
                             <Box

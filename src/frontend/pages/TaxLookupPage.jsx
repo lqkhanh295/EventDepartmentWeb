@@ -107,7 +107,7 @@ const TaxLookupPage = () => {
               minWidth: 250,
               '& .MuiOutlinedInput-root': {
                 background: '#121212',
-                borderRadius: 2,
+                borderRadius: 10,
                 '& fieldset': { borderColor: '#333333' },
                 '&:hover fieldset': { borderColor: 'rgba(255, 215, 0, 0.5)' },
                 '&.Mui-focused fieldset': { borderColor: '#FFD700', borderWidth: 2 }
@@ -285,7 +285,7 @@ const TaxLookupPage = () => {
             </Box>
           </Box>
 
-          <Box sx={{ mt: 3, p: 2, background: '#252525', borderRadius: 2 }}>
+          <Box sx={{ mt: 3, p: 2, background: '#252525', borderRadius: 10 }}>
             <Typography variant="caption" sx={{ color: '#888' }}>
               Lưu ý: Thông tin được tra cứu từ cơ sở dữ liệu công khai.
               Vui lòng xác minh lại với nhà cung cấp trước khi giao dịch.
@@ -301,7 +301,7 @@ const TaxLookupPage = () => {
             p: 3,
             background: '#1e1e1e',
             border: '1px solid rgba(255, 215, 0, 0.1)',
-            borderRadius: 2
+            borderRadius: 10
           }}
         >
           <Typography variant="h6" sx={{ color: '#FFD700', mb: 2 }}>
