@@ -32,7 +32,7 @@ const Header = ({ onMenuClick }) => {
           left: 0,
           right: 0,
           height: '3px',
-          background: 'linear-gradient(90deg, #DC2626, #F59E0B, #DC2626)',
+          background: 'linear-gradient(90deg, #e0f809ff, #F59E0B, #dff708ff)',
           zIndex: (theme) => theme.zIndex.drawer + 2,
         }}
       />
@@ -67,8 +67,8 @@ const Header = ({ onMenuClick }) => {
                 style={{ cursor: 'pointer' }}
                 alt="CSG Logo"
                 sx={{
-                  width: { xs: 28, sm: 36 },
-                  height: { xs: 28, sm: 36 },
+                  width: { xs: 36, sm: 48 },
+                  height: { xs: 36, sm: 48 },
                   borderRadius: 1,
                   objectFit: 'contain',
                   transition: 'transform 0.2s ease',
@@ -87,20 +87,7 @@ const Header = ({ onMenuClick }) => {
                   fontStyle: 'bold',
                 }}
               >
-                CSG Event {isAdminMode && '(Admin)'}
-                <Box
-                  component="span"
-                  sx={{
-                    display: 'inline-block',
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    background: '#DC2626',
-                    ml: 1,
-                    boxShadow: '0 0 6px rgba(220, 38, 38, 0.5)',
-                    animation: 'tet-sparkle 3s ease-in-out infinite'
-                  }}
-                />
+                Event Department {isAdminMode && '(Admin)'}
               </Typography>
             </Box>
           </Box>

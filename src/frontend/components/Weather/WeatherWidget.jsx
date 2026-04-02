@@ -13,6 +13,7 @@ import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import ThunderstormIcon from '@mui/icons-material/Thunderstorm';
 import BlurOnIcon from '@mui/icons-material/BlurOn';
+import { GetCurrentDate } from '../../../services/services/guideService';
 
 // Map 7Timer weather type to icon
 const getWeatherIcon = (weatherType) => {
@@ -47,8 +48,8 @@ const getWeatherDescription = (weatherType) => {
 
 // Format date từ timepoint và init time
 const formatDate = (timepoint, initTime, index) => {
-  let date = new Date();
-  
+  let date = GetCurrentDate();
+
   try {
     if (initTime && typeof initTime === 'string' && initTime.length >= 10) {
       // Parse init time từ format "YYYYMMDDHH" (ví dụ: "2025112812")
@@ -56,7 +57,7 @@ const formatDate = (timepoint, initTime, index) => {
       const month = parseInt(initTime.substring(4, 6), 10) - 1; // month is 0-indexed
       const day = parseInt(initTime.substring(6, 8), 10);
       const hour = parseInt(initTime.substring(8, 10), 10);
-      
+
       if (!isNaN(year) && !isNaN(month) && !isNaN(day) && !isNaN(hour)) {
         date = new Date(year, month, day, hour);
         // Với civillight, mỗi timepoint là số giờ từ init time
@@ -79,7 +80,7 @@ const formatDate = (timepoint, initTime, index) => {
     date = new Date();
     date.setDate(date.getDate() + (index || 0));
   }
-  
+
   const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
   const dayName = days[date.getDay()] || 'CN';
   const day = String(date.getDate()).padStart(2, '0');
@@ -90,7 +91,7 @@ const formatDate = (timepoint, initTime, index) => {
 // Tính phần trăm mưa từ prec_type và prec_amount
 const getRainChance = (precType, precAmount) => {
   if (precType === 'none' || !precType) return 0;
-  
+
   // prec_amount: 0=none, 1=0-0.25mm/hr, 2=0.25-1mm/hr, 3=1-4mm/hr, 4=4-10mm/hr, ...
   // Map sang phần trăm: 0=0%, 1-2=20%, 3-4=40%, 5-6=60%, 7-8=80%, 9=100%
   if (precAmount === 0) return 0;
@@ -105,7 +106,7 @@ const WeatherWidget = () => {
   const [weather, setWeather] = useState(null);
   const [initTime, setInitTime] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Coordinates cho Hồ Chí Minh
   const HCM_LAT = 10.8231;
   const HCM_LON = 106.6297;
@@ -141,8 +142,8 @@ const WeatherWidget = () => {
           // Đảm bảo temp2m là số, không phải object
           const processedData = data.dataseries.slice(0, 7).map(day => ({
             ...day,
-            temp2m: typeof day.temp2m === 'object' && day.temp2m !== null 
-              ? (day.temp2m.max || day.temp2m.min || day.temp2m) 
+            temp2m: typeof day.temp2m === 'object' && day.temp2m !== null
+              ? (day.temp2m.max || day.temp2m.min || day.temp2m)
               : day.temp2m
           }));
           setWeather({ dataseries: processedData });
@@ -186,10 +187,10 @@ const WeatherWidget = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
       >
-        <Paper sx={{ 
-          p: 3, 
-          background: '#1a1a1a', 
-          border: '1px solid #333333', 
+        <Paper sx={{
+          p: 3,
+          background: '#1a1a1a',
+          border: '1px solid #333333',
           borderRadius: 2,
           boxShadow: 'none'
         }}>
@@ -209,168 +210,168 @@ const WeatherWidget = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
     >
-      <Paper sx={{ 
-        p: 3, 
-        background: '#1a1a1a', 
-        border: '1px solid #333333', 
+      <Paper sx={{
+        p: 3,
+        background: '#1a1a1a',
+        border: '1px solid #333333',
         borderRadius: 2,
         boxShadow: 'none'
       }}>
-      <Typography 
-        variant="caption" 
-        sx={{ 
-          color: '#B3B3B3', 
-          mb: 2.5, 
-          display: 'block', 
-          fontSize: '0.8rem', 
-          fontWeight: 600,
-          letterSpacing: '0.5px',
-          textTransform: 'uppercase'
-        }}
-      >
-        Thời tiết 7 ngày tới - {CITY_NAME}
-      </Typography>
-      <Box sx={{ 
-        display: 'grid',
-        gridTemplateColumns: { xs: 'repeat(7, 1fr)' },
-        gap: { xs: 1, sm: 1.5, md: 2 },
-        width: '100%',
-        overflowX: { xs: 'auto', sm: 'visible' },
-        pb: 1,
-        '&::-webkit-scrollbar': { 
-          height: 6,
-          borderRadius: 2
-        },
-        '&::-webkit-scrollbar-track': {
-          background: '#121212',
-          borderRadius: 2
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: '#404040',
-          borderRadius: 2,
-          '&:hover': {
-            background: '#FFD700'
+        <Typography
+          variant="caption"
+          sx={{
+            color: '#B3B3B3',
+            mb: 2.5,
+            display: 'block',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            letterSpacing: '0.5px',
+            textTransform: 'uppercase'
+          }}
+        >
+          Thời tiết 7 ngày tới - {CITY_NAME}
+        </Typography>
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(7, 1fr)' },
+          gap: { xs: 1, sm: 1.5, md: 2 },
+          width: '100%',
+          overflowX: { xs: 'auto', sm: 'visible' },
+          pb: 1,
+          '&::-webkit-scrollbar': {
+            height: 6,
+            borderRadius: 2
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#121212',
+            borderRadius: 2
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#404040',
+            borderRadius: 2,
+            '&:hover': {
+              background: '#FFD700'
+            }
           }
-        }
-      }}>
-        {weather.dataseries.map((day, idx) => {
-          const rainChance = getRainChance(day.prec_type, day.prec_amount);
-          const temp = typeof day.temp2m === 'object' && day.temp2m !== null 
-            ? (day.temp2m.max || day.temp2m.min || 0) 
-            : (day.temp2m || 0);
-          
-          return (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ 
-                duration: 0.3, 
-                delay: idx * 0.05,
-                ease: [0.4, 0, 0.2, 1]
-              }}
-              whileHover={{ 
-                y: -4,
-                transition: { duration: 0.2 }
-              }}
-              style={{ width: '100%' }}
-            >
-              <Box
-                sx={{
-                  width: '100%',
-                  textAlign: 'center',
-                  p: { xs: 1.5, sm: 2 },
-                  borderRadius: 2,
-                  background: '#121212',
-                  border: '1px solid #2a2a2a',
-                  transition: 'border-color 0.3s ease, background 0.3s ease',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    borderColor: '#FFD700',
-                    background: '#1a1a1a',
-                    boxShadow: '0 4px 12px rgba(255, 215, 0, 0.15)'
-                  }
+        }}>
+          {weather.dataseries.map((day, idx) => {
+            const rainChance = getRainChance(day.prec_type, day.prec_amount);
+            const temp = typeof day.temp2m === 'object' && day.temp2m !== null
+              ? (day.temp2m.max || day.temp2m.min || 0)
+              : (day.temp2m || 0);
+
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  duration: 0.3,
+                  delay: idx * 0.05,
+                  ease: [0.4, 0, 0.2, 1]
                 }}
-              >
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#B3B3B3', 
-                  fontSize: '0.75rem', 
-                  display: 'block', 
-                  mb: 1.5, 
-                  fontWeight: 600,
-                  letterSpacing: '0.3px'
+                whileHover={{
+                  y: -4,
+                  transition: { duration: 0.2 }
                 }}
+                style={{ width: '100%' }}
               >
-                {formatDate(day.timepoint, initTime, idx)}
-              </Typography>
-              <Box sx={{ 
-                mb: 1.5, 
-                display: 'flex', 
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: 40
-              }}>
-                {getWeatherIcon(day.weather)}
-              </Box>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#FFD700', 
-                  fontSize: '1.5rem', 
-                  fontWeight: 700, 
-                  display: 'block', 
-                  mb: 1,
-                  lineHeight: 1.2
-                }}
-              >
-                {temp}°
-              </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#B3B3B3', 
-                  fontSize: '0.75rem', 
-                  display: 'block', 
-                  mb: 1.5, 
-                  lineHeight: 1.4,
-                  fontWeight: 500
-                }}
-              >
-                {getWeatherDescription(day.weather)}
-              </Typography>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                gap: 0.5,
-                mt: 1,
-                pt: 1,
-                borderTop: '1px solid #2a2a2a'
-              }}>
-                <WaterDropIcon sx={{ 
-                  fontSize: 14, 
-                  color: rainChance > 0 ? '#4A9EFF' : '#666666',
-                  opacity: rainChance > 0 ? 1 : 0.5
-                }} />
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: rainChance > 0 ? '#4A9EFF' : '#999999', 
-                    fontSize: '0.7rem', 
-                    fontWeight: 600
+                <Box
+                  sx={{
+                    width: '100%',
+                    textAlign: 'center',
+                    p: { xs: 1.5, sm: 2 },
+                    borderRadius: 2,
+                    background: '#121212',
+                    border: '1px solid #2a2a2a',
+                    transition: 'border-color 0.3s ease, background 0.3s ease',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      borderColor: '#FFD700',
+                      background: '#1a1a1a',
+                      boxShadow: '0 4px 12px rgba(255, 215, 0, 0.15)'
+                    }
                   }}
                 >
-                  {rainChance}%
-                </Typography>
-              </Box>
-            </Box>
-            </motion.div>
-          );
-        })}
-      </Box>
-    </Paper>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#B3B3B3',
+                      fontSize: '0.75rem',
+                      display: 'block',
+                      mb: 1.5,
+                      fontWeight: 600,
+                      letterSpacing: '0.3px'
+                    }}
+                  >
+                    {formatDate(day.timepoint, initTime, idx)}
+                  </Typography>
+                  <Box sx={{
+                    mb: 1.5,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: 40
+                  }}>
+                    {getWeatherIcon(day.weather)}
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: '#FFD700',
+                      fontSize: '1.5rem',
+                      fontWeight: 700,
+                      display: 'block',
+                      mb: 1,
+                      lineHeight: 1.2
+                    }}
+                  >
+                    {temp}°
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#B3B3B3',
+                      fontSize: '0.75rem',
+                      display: 'block',
+                      mb: 1.5,
+                      lineHeight: 1.4,
+                      fontWeight: 500
+                    }}
+                  >
+                    {getWeatherDescription(day.weather)}
+                  </Typography>
+                  <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.5,
+                    mt: 1,
+                    pt: 1,
+                    borderTop: '1px solid #2a2a2a'
+                  }}>
+                    <WaterDropIcon sx={{
+                      fontSize: 14,
+                      color: rainChance > 0 ? '#4A9EFF' : '#666666',
+                      opacity: rainChance > 0 ? 1 : 0.5
+                    }} />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: rainChance > 0 ? '#4A9EFF' : '#999999',
+                        fontSize: '0.7rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {rainChance}%
+                    </Typography>
+                  </Box>
+                </Box>
+              </motion.div>
+            );
+          })}
+        </Box>
+      </Paper>
     </motion.div>
   );
 };

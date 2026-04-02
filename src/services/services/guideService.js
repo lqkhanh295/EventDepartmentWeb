@@ -1,19 +1,19 @@
 // Guide Service - Quản lý Event Guide từ Firebase Storage
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL, 
-  deleteObject 
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
 } from 'firebase/storage';
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  deleteDoc, 
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
   doc,
   query,
   orderBy,
-  serverTimestamp 
+  serverTimestamp
 } from 'firebase/firestore';
 import { storage, db } from '../firebase/config';
 
@@ -26,7 +26,7 @@ export const getAllGuides = async () => {
     const guidesRef = collection(db, COLLECTION_NAME);
     const q = query(guidesRef, orderBy('order', 'asc'));
     const snapshot = await getDocs(q);
-    
+
     return snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -42,13 +42,13 @@ export const uploadGuideFile = async (file, metadata) => {
   try {
     const fileName = `${Date.now()}_${file.name}`;
     const storageRef = ref(storage, `${STORAGE_PATH}/${fileName}`);
-    
+
     // Upload file
     await uploadBytes(storageRef, file);
-    
+
     // Get download URL
     const downloadURL = await getDownloadURL(storageRef);
-    
+
     // Save metadata to Firestore
     const guidesRef = collection(db, COLLECTION_NAME);
     const docRef = await addDoc(guidesRef, {
@@ -60,7 +60,7 @@ export const uploadGuideFile = async (file, metadata) => {
       fileSize: file.size,
       createdAt: serverTimestamp()
     });
-    
+
     return {
       id: docRef.id,
       fileName,
@@ -81,11 +81,11 @@ export const deleteGuide = async (guideId, fileName) => {
       const storageRef = ref(storage, `${STORAGE_PATH}/${fileName}`);
       await deleteObject(storageRef);
     }
-    
+
     // Delete from Firestore
     const guideRef = doc(db, COLLECTION_NAME, guideId);
     await deleteDoc(guideRef);
-    
+
     return guideId;
   } catch (error) {
     console.error('Error deleting guide:', error);
@@ -111,7 +111,7 @@ export const convertDocxToHtml = async (file) => {
 export const getGuideContent = async (downloadURL, fileType) => {
   try {
     const response = await fetch(downloadURL);
-    
+
     if (fileType?.includes('document') || downloadURL.endsWith('.docx')) {
       const blob = await response.blob();
       const mammoth = await import('mammoth');
@@ -119,12 +119,20 @@ export const getGuideContent = async (downloadURL, fileType) => {
       const result = await mammoth.convertToHtml({ arrayBuffer });
       return result.value;
     }
-    
+
     // For text/html files
     return await response.text();
   } catch (error) {
     console.error('Error getting guide content:', error);
     throw error;
   }
+};
+
+export const GetCurrentDate = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}-${month}-${day}`;
 };
 
