@@ -125,17 +125,6 @@ export async function deleteBorrowedItem(borrowedItemId) {
   }
 }
 
-export async function updateBorrowedItem(borrowedItemId, updates) {
-  try {
-    if (!borrowedItemId) {
-      throw new Error('Borrowed item ID is required');
-    }
-    const ref = doc(db, BORROWED_ITEMS_COL, borrowedItemId);
-    await updateDoc(ref, updates);
-  } catch (error) {
-    console.error('Error updating borrowed item:', error);
-    throw error;
-  }
-}
+
 
 
