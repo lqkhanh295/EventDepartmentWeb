@@ -24,15 +24,15 @@ export async function listBorrowedItems(options = {}) {
   try {
     const colRef = collection(db, BORROWED_ITEMS_COL);
     let q = query(colRef, orderBy('borrowedAt', 'desc'));
-    
+
     // Có thể thêm filter theo status nếu cần
     if (options.status) {
       q = query(colRef, where('status', '==', options.status), orderBy('borrowedAt', 'desc'));
     }
-    
+
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ 
-      id: d.id, 
+    return snap.docs.map(d => ({
+      id: d.id,
       ...d.data(),
       borrowedAt: d.data().borrowedAt?.toDate?.() || new Date(d.data().borrowedAt || Date.now())
     }));
@@ -68,7 +68,7 @@ export async function addBorrowedItem(borrowData) {
       returnedAt: null,
       note: borrowData.note || ''
     };
-    
+
     const res = await addDoc(colRef, payload);
     return { id: res.id, ...payload };
   } catch (error) {
@@ -89,17 +89,17 @@ export async function returnBorrowedItem(borrowedItemId, inventoryId, quantity) 
     // 1. Xóa khỏi danh sách borrowed_items
     const borrowedRef = doc(db, BORROWED_ITEMS_COL, borrowedItemId);
     await deleteDoc(borrowedRef);
-    
+
     // 2. Cộng lại số lượng vào inventory
     // Lấy thông tin hiện tại của inventory item
     const { listInventory } = await import('./inventoryService');
     const items = await listInventory();
     const inventoryItem = items.find(i => i.id === inventoryId);
-    
+
     if (inventoryItem) {
       const currentQty = Number(inventoryItem.currentQty || 0);
       const newQty = currentQty + Number(quantity);
-      
+
       await updateInventoryItem(inventoryId, {
         'Current Quantity': String(newQty)
       });
@@ -121,6 +121,19 @@ export async function deleteBorrowedItem(borrowedItemId) {
     await deleteDoc(ref);
   } catch (error) {
     console.error('Error deleting borrowed item:', error);
+    throw error;
+  }
+}
+
+export async function updateBorrowedItem(borrowedItemId, updates) {
+  try {
+    if (!borrowedItemId) {
+      throw new Error('Borrowed item ID is required');
+    }
+    const ref = doc(db, BORROWED_ITEMS_COL, borrowedItemId);
+    await updateDoc(ref, updates);
+  } catch (error) {
+    console.error('Error updating borrowed item:', error);
     throw error;
   }
 }

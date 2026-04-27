@@ -65,7 +65,6 @@ export const useMembers = () => {
         try {
             await apiUpdateScore(memberId, projectKey, score, semester);
         } catch (err) {
-            console.error('Error updating score:', err);
             throw err;
         }
     };
@@ -74,8 +73,7 @@ export const useMembers = () => {
         try {
             await apiDeleteMember(id);
         } catch (err) {
-            console.error('Error deleting member:', err);
-            throw err;
+            throw err
         }
     };
 

@@ -378,13 +378,13 @@ h6 {
 }
 
 /* ===== TẾT (Lunar New Year) Theme ===== */
-:root {
+/* :root {
   --tet-red: #DC2626;
   --tet-red-dark: #991B1B;
   --tet-gold: #F59E0B;
   --tet-gold-light: #FBBF24;
   --tet-peach: #FDA4AF;
-}
+} */
 
 /* Falling petals */
 @keyframes tet-fall {
@@ -407,7 +407,7 @@ h6 {
   }
 }
 
-/* Floating lanterns */
+/* Floating lanterns
 @keyframes tet-float {
 
   0%,
@@ -418,9 +418,9 @@ h6 {
   50% {
     transform: translateY(-12px) rotate(2deg);
   }
-}
+} */
 
-/* Sparkling stars */
+/* Sparkling stars
 @keyframes tet-sparkle {
 
   0%,
@@ -433,13 +433,13 @@ h6 {
     transform: scale(1.2);
     opacity: 0.8;
   }
-}
+} */
 
-/* Tet banner gradient */
+/* Tet banner gradient
 .tet-banner {
   background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(245, 158, 11, 0.15));
   border: 1px solid rgba(220, 38, 38, 0.3);
   border-radius: 8px;
   padding: 16px 24px;
   text-align: center;
-}
+} */
