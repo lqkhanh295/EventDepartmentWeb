@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    Card,
     CardHeader,
     CardContent,
     Typography,
@@ -17,6 +16,7 @@ import { motion } from 'framer-motion';
 
 
 
+import { GlassCard } from '../../components';
 const SettingsPanel = ({ showSettings, settings, setSettings }) => {
     if (!showSettings) return null;
 
@@ -26,7 +26,7 @@ const SettingsPanel = ({ showSettings, settings, setSettings }) => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
         >
-            <Card
+            <GlassCard tilt={false}
                 sx={{
                     background: '#1e1e1e',
                     border: '1px solid #333',
@@ -208,7 +208,7 @@ const SettingsPanel = ({ showSettings, settings, setSettings }) => {
                         </Box>
                     </Box>
                 </CardContent>
-            </Card>
+            </GlassCard>
         </motion.div>
     );
 };

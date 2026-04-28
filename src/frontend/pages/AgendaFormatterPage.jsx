@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import {
     Button,
-    Card,
     Typography,
     Box,
     Tooltip,
@@ -28,6 +27,7 @@ import {
 
 
 
+import { GlassCard } from '../components';
 const AgendaFormatterPage = () => {
     const [fileList, setFileList] = useState([]);
     const [previewData, setPreviewData] = useState([]);
@@ -162,7 +162,7 @@ const AgendaFormatterPage = () => {
                     setSettings={setSettings}
                 />
 
-                <Card
+                <GlassCard tilt={false}
                     sx={{
                         background: '#1e1e1e',
                         border: '1px solid #333',
@@ -248,7 +248,7 @@ const AgendaFormatterPage = () => {
                             </Button>
                         </Box>
                     </Box>
-                </Card>
+                </GlassCard>
 
                 {/* Preview Table Component */}
                 <PreviewTable

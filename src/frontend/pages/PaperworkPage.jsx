@@ -27,6 +27,7 @@ import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 import { saveAs } from 'file-saver';
 
+import { GlassCard } from '../components';
 // Default fields cho hợp đồng
 const DEFAULT_FIELDS = [
   // Thông tin chung
@@ -192,7 +193,7 @@ const PaperworkPage = () => {
         {/* Left: Upload & Actions */}
         <Grid item xs={12} lg={4}>
           {/* Upload Files */}
-          <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 2 }}>
+          <GlassCard tilt={false} sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip label="1" size="small" sx={{ background: '#333', color: '#FFD700' }} />
               File Mẫu (Template)
@@ -267,10 +268,10 @@ const PaperworkPage = () => {
                 </IconButton>
               )}
             </Box>
-          </Paper>
+          </GlassCard>
 
           {/* Download Actions */}
-          <Paper sx={{ p: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
+          <GlassCard tilt={false} sx={{ p: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
             <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip label="3" size="small" sx={{ background: '#333', color: '#FFD700' }} />
               Xuất Tài Liệu
@@ -333,13 +334,13 @@ const PaperworkPage = () => {
             >
               Tải BB Nghiệm Thu
             </Button>
-          </Paper>
+          </GlassCard>
         </Grid>
 
         {/* Right: Form Fields */}
         <Grid item xs={12} lg={8}>
           {/* AI Section */}
-          <Paper sx={{ p: 3, mb: 3, background: '#1a1a1a', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 2 }}>
+          <GlassCard tilt={false} sx={{ p: 3, mb: 3, background: '#1a1a1a', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h6" sx={{ color: '#818cf8', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <AutoAwesomeIcon /> AI Tự Động Điền
@@ -384,10 +385,10 @@ const PaperworkPage = () => {
                 </Button>
               </Box>
             </Collapse>
-          </Paper>
+          </GlassCard>
 
           {/* Form Fields */}
-          <Paper sx={{ p: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
+          <GlassCard tilt={false} sx={{ p: 3, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
             <Typography variant="h6" sx={{ color: '#FFD700', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip label="2" size="small" sx={{ background: '#333', color: '#FFD700' }} />
               Nhập Thông Tin
@@ -449,7 +450,7 @@ const PaperworkPage = () => {
                 <Divider sx={{ borderColor: 'rgba(255,215,0,0.1)', mt: 2 }} />
               </Box>
             ))}
-          </Paper>
+          </GlassCard>
         </Grid>
       </Grid>
     </Box>

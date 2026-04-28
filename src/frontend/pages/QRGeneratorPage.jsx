@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import {
     Box,
-    Card,
     CardHeader,
     CardContent,
     Typography,
@@ -14,6 +13,7 @@ import {
     ToggleButtonGroup,
     InputAdornment
 } from '@mui/material';
+import { GlassCard } from '../components';
 import { Download as DownloadIcon, Link as LinkIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import QRCode from 'react-qr-code';
@@ -87,7 +87,7 @@ const QRGeneratorPage = () => {
 
                 <Grid container spacing={3}>
                     <Grid item xs={12} lg={7}>
-                        <Card sx={{ background: '#1e1e1e', border: '1px solid #333', borderRadius: 10 }}>
+                        <GlassCard style={{ borderRadius: '40px' }} tilt={false}>
                             <CardHeader
                                 title={<Typography sx={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>Tùy chỉnh QR</Typography>}
                                 sx={{ borderBottom: '1px solid #333' }}
@@ -215,21 +215,20 @@ const QRGeneratorPage = () => {
                                     </Grid>
                                 </Grid>
                             </CardContent>
-                        </Card>
+                        </GlassCard>
                     </Grid>
 
                     <Grid item xs={12} lg={5}>
-                        <Card
-                            sx={{
-                                background: '#1e1e1e',
-                                border: '1px solid #333',
+                        <GlassCard
+                            tilt={false}
+                            style={{
                                 height: '100%',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 minHeight: 400,
-                                borderRadius: 10
+                                borderRadius: '40px'
                             }}
                         >
                             <Box
@@ -293,7 +292,7 @@ const QRGeneratorPage = () => {
                                     Tải xuống PNG
                                 </Button>
                             </Box>
-                        </Card>
+                        </GlassCard>
                     </Grid>
                 </Grid>
             </motion.div>

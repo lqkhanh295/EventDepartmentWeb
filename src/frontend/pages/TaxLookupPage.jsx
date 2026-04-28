@@ -5,7 +5,6 @@ import {
   TextField,
   Button,
   Typography,
-  Paper,
   CircularProgress,
   Chip,
   Divider
@@ -18,6 +17,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CategoryIcon from '@mui/icons-material/Category';
 import { PageHeader } from '../components';
 
+import { GlassCard } from '../components';
 const TaxLookupPage = () => {
   const [taxCode, setTaxCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -78,7 +78,7 @@ const TaxLookupPage = () => {
       />
 
       {/* Search Box */}
-      <Paper
+      <GlassCard tilt={false}
         sx={{
           p: 3.5,
           mb: 3,
@@ -158,11 +158,11 @@ const TaxLookupPage = () => {
             {error}
           </Typography>
         )}
-      </Paper>
+      </GlassCard>
 
       {/* Result */}
       {result && (
-        <Paper
+        <GlassCard tilt={false}
           sx={{
             p: 3.5,
             background: '#1a1a1a',
@@ -291,12 +291,12 @@ const TaxLookupPage = () => {
               Vui lòng xác minh lại với nhà cung cấp trước khi giao dịch.
             </Typography>
           </Box>
-        </Paper>
+        </GlassCard>
       )}
 
       {/* Instructions */}
       {!result && !loading && (
-        <Paper
+        <GlassCard tilt={false}
           sx={{
             p: 3,
             background: '#1e1e1e',
@@ -313,7 +313,7 @@ const TaxLookupPage = () => {
             <li>Kết quả sẽ hiển thị thông tin đăng ký kinh doanh</li>
             <li>Sử dụng để xác minh thông tin nhà cung cấp trước khi hợp tác</li>
           </Box>
-        </Paper>
+        </GlassCard>
       )}
     </Box>
   );

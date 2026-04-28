@@ -1,10 +1,10 @@
 // ImportMembersPage - Import members từ Excel
 import React, { useState } from 'react';
+import { GlassCard } from '../components';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Typography,
-  Paper,
   Button,
   Alert,
   Snackbar,
@@ -291,7 +291,7 @@ const ImportMembersPage = () => {
       />
 
       {/* Hướng dẫn */}
-      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
+      <GlassCard tilt={false} sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
         <Typography variant="h6" sx={{ color: '#FFD700', mb: 2 }}>📋 Định dạng file Excel của bạn</Typography>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
           <Chip label="A: STT" size="small" sx={{ background: '#333', color: '#666' }} />
@@ -305,14 +305,15 @@ const ImportMembersPage = () => {
         <Typography variant="caption" sx={{ color: '#888' }}>
           Hệ thống sẽ tự động đọc tên project từ header và import điểm tương ứng.
         </Typography>
-      </Paper>
+      </GlassCard>
 
       {/* Chọn kỳ để import điểm */}
-      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
+      <GlassCard tilt={false} sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography sx={{ color: '#b3b3b3' }}>Chọn kỳ để import điểm:</Typography>
           <Button
             variant="outlined"
+
             color="error"
             size="small"
             onClick={handleClearData}
@@ -341,10 +342,10 @@ const ImportMembersPage = () => {
             />
           ))}
         </Box>
-      </Paper>
+      </GlassCard>
 
       {/* Upload Area */}
-      <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
+      <GlassCard tilt={false} sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
         <Box
           onDragOver={handleDragOver}
           onDrop={handleDrop}
@@ -383,11 +384,11 @@ const ImportMembersPage = () => {
             Hỗ trợ: .xlsx, .xls
           </Typography>
         </Box>
-      </Paper>
+      </GlassCard>
 
       {/* Preview Table */}
       {data.length > 0 && (
-        <Paper sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
+        <GlassCard tilt={false} sx={{ p: 3, mb: 3, background: '#1e1e1e', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6" sx={{ color: '#FFD700' }}>
               Preview: {data.length} members
@@ -473,7 +474,7 @@ const ImportMembersPage = () => {
               }
             }}
           />
-        </Paper>
+        </GlassCard>
       )}
 
       <Snackbar

@@ -4,100 +4,64 @@ import { motion } from 'framer-motion';
 import { useSpring, animated } from 'react-spring';
 import {
   Box,
-  Grid,
-  Card,
-  CardContent,
   Typography,
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
-import { Loading } from '../components';
+import { Loading, GlassCard, BentoGrid } from '../components';
 import WeatherWidget from '../components/Weather/WeatherWidget';
 import { getAllVendors } from '../../services/services/vendorService';
 import { getAllGuides } from '../../services/services/guideService';
 import logoCsg from '../../image/logocsg.png';
 
 const StatCard = ({ title, value, onClick, index = 0 }) => {
-  const [hovered, setHovered] = useState(false);
-  const springProps = useSpring({
-    transform: hovered && onClick ? 'translateY(-4px)' : 'translateY(0px)',
-    boxShadow: hovered && onClick
-      ? '0 8px 24px rgba(255, 215, 0, 0.15)'
-      : '0 0px 0px rgba(255, 215, 0, 0)',
-    config: { tension: 300, friction: 20 }
-  });
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
       transition={{
-        duration: 0.4,
-        delay: index * 0.08,
+        duration: 0.5,
+        delay: index * 0.1,
         ease: [0.4, 0, 0.2, 1]
       }}
-      style={{ height: '100%' }}
+      style={{ height: '100%', cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick}
     >
-      <animated.div style={springProps}>
-        <Card
-          onClick={onClick}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          component={motion.div}
-          whileTap={onClick ? { scale: 0.98 } : {}}
-          sx={{
-            cursor: onClick ? 'pointer' : 'default',
-            background: hovered && onClick ? '#1f1f1f' : '#1a1a1a',
-            border: '1px solid',
-            borderColor: hovered && onClick ? '#FFD700' : '#333333',
-            borderRadius: 2,
-            height: '100%',
-            transition: 'background 0.3s ease, border-color 0.3s ease'
-          }}
-        >
-          <CardContent sx={{ p: 3.5 }}>
-            <Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#B3B3B3',
-                  mb: 1.5,
-                  fontWeight: 500,
-                  fontSize: '0.8rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                {title}
-              </Typography>
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 700,
-                  color: '#FFFFFF',
-                  fontSize: { xs: '1.875rem', sm: '2.25rem' },
-                  lineHeight: 1.2
-                }}
-              >
-                {value}
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
-      </animated.div>
+      <GlassCard style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <Box>
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#B3B3B3',
+              mb: 1.5,
+              fontWeight: 500,
+              fontSize: '0.8rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}
+          >
+            {title}
+          </Typography>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              color: '#FFFFFF',
+              fontSize: { xs: '1.875rem', sm: '2.25rem' },
+              lineHeight: 1.2
+            }}
+          >
+            {value}
+          </Typography>
+        </Box>
+      </GlassCard>
     </motion.div>
   );
 };
 
 const QuickActionCard = ({ title, description, onClick, index = 0 }) => {
   const [hovered, setHovered] = useState(false);
-  const springProps = useSpring({
-    transform: hovered ? 'translateY(-6px)' : 'translateY(0px)',
-    boxShadow: hovered
-      ? '0 12px 32px rgba(255, 215, 0, 0.2)'
-      : '0 0px 0px rgba(255, 215, 0, 0)',
-    config: { tension: 300, friction: 20 }
-  });
 
   const arrowSpring = useSpring({
     transform: hovered ? 'translateX(6px)' : 'translateX(0px)',
@@ -108,65 +72,47 @@ const QuickActionCard = ({ title, description, onClick, index = 0 }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
       transition={{
-        duration: 0.4,
-        delay: index * 0.08,
+        duration: 0.5,
+        delay: index * 0.1,
         ease: [0.4, 0, 0.2, 1]
       }}
-      style={{ height: '100%' }}
+      style={{ height: '100%', cursor: 'pointer' }}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      <animated.div style={springProps}>
-        <Card
-          onClick={onClick}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          component={motion.div}
-          whileTap={{ scale: 0.98 }}
+      <GlassCard style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Typography
+            variant="body1"
+            sx={{
+              fontWeight: 600,
+              color: '#FFFFFF',
+              fontSize: '1.1rem',
+              letterSpacing: '0.2px',
+              flex: 1
+            }}
+          >
+            {title}
+          </Typography>
+          <animated.div style={arrowSpring}>
+            <ArrowForwardIcon sx={{ fontSize: 20, ml: 1 }} />
+          </animated.div>
+        </Box>
+        <Typography
+          variant="body2"
           sx={{
-            cursor: 'pointer',
-            background: hovered ? '#1f1f1f' : '#1a1a1a',
-            border: '1px solid',
-            borderColor: hovered ? '#FFD700' : '#333333',
-            borderRadius: 2,
-            height: '100%',
-            transition: 'background 0.3s ease, border-color 0.3s ease'
+            color: '#B3B3B3',
+            fontSize: '0.875rem',
+            lineHeight: 1.5
           }}
         >
-          <CardContent sx={{ p: 3.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 600,
-                  color: '#FFFFFF',
-                  fontSize: '1.1rem',
-                  letterSpacing: '0.2px',
-                  flex: 1
-                }}
-              >
-                {title}
-              </Typography>
-              <animated.div style={arrowSpring}>
-                <ArrowForwardIcon
-                  className="arrow-icon"
-                  sx={{ fontSize: 20, ml: 1 }}
-                />
-              </animated.div>
-            </Box>
-            <Typography
-              variant="body2"
-              sx={{
-                color: '#B3B3B3',
-                fontSize: '0.875rem',
-                lineHeight: 1.5
-              }}
-            >
-              {description}
-            </Typography>
-          </CardContent>
-        </Card>
-      </animated.div>
+          {description}
+        </Typography>
+      </GlassCard>
     </motion.div>
   );
 };
@@ -284,40 +230,32 @@ const Dashboard = () => {
       >
         Thống kê
       </Typography>
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={6} md={3}>
-          <StatCard
-            title="Vendor"
-            value={stats.vendors}
-            onClick={() => navigate('/vendors')}
-            index={0}
-          />
-        </Grid>
-        <Grid item xs={6} md={3}>
-          <StatCard
-            title="Nhân sự"
-            value="130"
-            index={1}
-          />
-        </Grid>
-        <Grid item xs={6} md={3}>
-          <StatCard
-            title="Số dự án còn lại trong kỳ"
-            value="3"
-            index={2}
-          />
-        </Grid>
-        <Grid item xs={6} md={3}>
-          <StatCard
-            title="Contact"
-            value="Minh Trung"
-            onClick={() => window.open('https://www.facebook.com/vmtrung20', '_blank')}
-            index={3}
-          />
-        </Grid>
-      </Grid>
+      <BentoGrid sx={{ mb: 4 }}>
+        <StatCard
+          title="Vendor"
+          value={stats.vendors}
+          onClick={() => navigate('/vendors')}
+          index={0}
+        />
+        <StatCard
+          title="Nhân sự"
+          value="130"
+          index={1}
+        />
+        <StatCard
+          title="Số dự án còn lại"
+          value="3"
+          index={2}
+        />
+        <StatCard
+          title="Contact"
+          value="Minh Trung"
+          onClick={() => window.open('https://www.facebook.com/vmtrung20', '_blank')}
+          index={3}
+        />
+      </BentoGrid>
 
-      {/* Weather Widget */}
+      {/* Weather Widget (Wait: If it is not a card, we can wrap it in GlassCard maybe inside Weather component) */}
       <Box sx={{ mb: 4 }}>
         <WeatherWidget />
       </Box>
@@ -336,32 +274,26 @@ const Dashboard = () => {
       >
         Truy cập nhanh
       </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={4}>
-          <QuickActionCard
-            title="Danh sách Vendor"
-            description="Quản lý thông tin vendor"
-            onClick={() => navigate('/vendors')}
-            index={0}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <QuickActionCard
-            title="Event Guide"
-            description="Hướng dẫn tổ chức sự kiện"
-            onClick={() => navigate('/event-guide')}
-            index={1}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <QuickActionCard
-            title="Tra cứu MST"
-            description="Tra cứu mã số thuế doanh nghiệp"
-            onClick={() => navigate('/tax-lookup')}
-            index={2}
-          />
-        </Grid>
-      </Grid>
+      <BentoGrid>
+        <QuickActionCard
+          title="Danh sách Vendor"
+          description="Quản lý thông tin vendor"
+          onClick={() => navigate('/vendors')}
+          index={0}
+        />
+        <QuickActionCard
+          title="Event Guide"
+          description="Hướng dẫn tổ chức sự kiện"
+          onClick={() => navigate('/event-guide')}
+          index={1}
+        />
+        <QuickActionCard
+          title="Tra cứu MST"
+          description="Tra cứu mã số thuế doanh nghiệp"
+          onClick={() => navigate('/tax-lookup')}
+          index={2}
+        />
+      </BentoGrid>
     </Box>
   );
 };

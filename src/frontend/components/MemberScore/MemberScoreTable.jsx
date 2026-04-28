@@ -4,7 +4,6 @@ import {
     Box,
     Chip,
     IconButton,
-    Paper,
     Table,
     TableBody,
     TableCell,
@@ -26,6 +25,7 @@ import {
     calculateTotal
 } from './scoreUtils';
 
+import { GlassCard } from '../../components';
 const MemberScoreTable = ({
     members,
     projects,
@@ -273,7 +273,7 @@ const MemberScoreTable = ({
     };
 
     return (
-        <Paper sx={{ background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2, overflow: 'hidden' }}>
+        <GlassCard tilt={false} sx={{ background: '#1a1a1a', border: '1px solid #333333', borderRadius: 2, overflow: 'hidden' }}>
             <TableContainer sx={{ maxHeight: 'calc(100vh - 400px)' }}>
                 <Table stickyHeader size="small" style={{ background: '#1a1a1a' }}>
                     <TableHead>
@@ -347,7 +347,7 @@ const MemberScoreTable = ({
                     }
                 }}
             />
-        </Paper>
+        </GlassCard>
     );
 };
 

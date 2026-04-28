@@ -1,7 +1,7 @@
 // ContractsPage - Trang tạo Hợp đồng & Biên bản nghiệm thu tự động
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  Box, Typography, Paper, Button, TextField, Grid, IconButton, Chip,
+  Box, Typography, Button, TextField, Grid, IconButton, Chip,
   LinearProgress, Tabs, Tab, Autocomplete,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination,
   MenuItem, Select, FormControl, InputLabel, InputAdornment, Tooltip, Collapse,
@@ -46,6 +46,7 @@ import {
   saveContractTemplate
 } from '../../services/services/contractService';
 
+import { GlassCard } from '../components';
 // ─── DEFAULT FIELDS ────────────────────────────────────────────────────────────
 
 const DEFAULT_FIELDS = [
@@ -863,7 +864,7 @@ const ContractsPage = () => {
           <Grid item xs={12} lg={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {/* Templates */}
-              <Paper sx={{ ...cardSx, p: 2.5 }}>
+              <GlassCard tilt={false} sx={{ ...cardSx, p: 2.5 }}>
                 <Typography sx={{ fontWeight: 700, color: '#fff', mb: 2, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box sx={{ bgcolor: 'rgba(255,215,0,0.15)', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#FFD700', fontWeight: 700 }}>1</Box>
                   File Mẫu (.docx)
@@ -878,10 +879,10 @@ const ContractsPage = () => {
                   customFile={customAcceptanceFile}
                   onUploadCustom={(f) => handleFileUpload(f, 'acceptance')}
                   onClearCustom={() => setCustomAcceptanceFile(null)} />
-              </Paper>
+              </GlassCard>
 
               {/* Export */}
-              <Paper sx={{ ...cardSx, p: 2.5 }}>
+              <GlassCard tilt={false} sx={{ ...cardSx, p: 2.5 }}>
                 <Typography sx={{ fontWeight: 700, color: '#fff', mb: 2, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box sx={{ bgcolor: 'rgba(255,215,0,0.15)', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#FFD700', fontWeight: 700 }}>3</Box>
                   Xuất Tài Liệu
@@ -913,10 +914,10 @@ const ContractsPage = () => {
                     Tải BB Nghiệm Thu (.docx)
                   </Button>
                 </Box>
-              </Paper>
+              </GlassCard>
 
               {/* ID Card Images */}
-              <Paper sx={{ ...cardSx, p: 2.5 }}>
+              <GlassCard tilt={false} sx={{ ...cardSx, p: 2.5 }}>
                 <Typography sx={{ fontWeight: 700, color: '#fff', mb: 1.5, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 1 }}>
                   <ImageIcon sx={{ fontSize: 18, color: '#888' }} />
                   Ảnh CCCD / VNeID
@@ -938,7 +939,7 @@ const ContractsPage = () => {
                       onUpload={handleVneid} onRemove={() => { setVneidImage(null); setVneidPreview(null); }} />
                   </Grid>
                 </Grid>
-              </Paper>
+              </GlassCard>
 
               {/* Active profile indicator */}
               {activeProfileId && (
@@ -954,7 +955,7 @@ const ContractsPage = () => {
           <Grid item xs={12} lg={8}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {/* AI Section */}
-              <Paper sx={{ ...cardSx, p: 2.5, background: 'linear-gradient(135deg, rgba(99,50,240,0.05) 0%, rgba(78,205,196,0.05) 100%)' }}>
+              <GlassCard tilt={false} sx={{ ...cardSx, p: 2.5, background: 'linear-gradient(135deg, rgba(99,50,240,0.05) 0%, rgba(78,205,196,0.05) 100%)' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 1 }}>
                     <AutoAwesomeIcon sx={{ color: '#a78bfa', fontSize: 20 }} />
@@ -981,10 +982,10 @@ const ContractsPage = () => {
                     </Box>
                   </Box>
                 </Collapse>
-              </Paper>
+              </GlassCard>
 
               {/* Fields */}
-              <Paper sx={cardSx}>
+              <GlassCard tilt={false} sx={cardSx}>
                 <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
                   <Typography sx={{ fontWeight: 700, color: '#fff', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box sx={{ bgcolor: 'rgba(255,215,0,0.15)', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#FFD700', fontWeight: 700 }}>2</Box>
@@ -1056,7 +1057,7 @@ const ContractsPage = () => {
                     );
                   })}
                 </Box>
-              </Paper>
+              </GlassCard>
             </Box>
           </Grid>
         </Grid>
@@ -1095,7 +1096,7 @@ const ContractsPage = () => {
               </Typography>
             </Box>
           ) : (
-            <Paper sx={{ ...cardSx, overflow: 'hidden' }}>
+            <GlassCard tilt={false} sx={{ ...cardSx, overflow: 'hidden' }}>
               <TableContainer>
                 <Table size="small">
                   <TableHead sx={{ background: 'rgba(0,0,0,0.2)' }}>
@@ -1123,7 +1124,7 @@ const ContractsPage = () => {
                   sx={{ color: '#888', '& .MuiTablePagination-select': { color: '#888' }, '& .MuiSvgIcon-root': { color: '#888' } }}
                 />
               )}
-            </Paper>
+            </GlassCard>
           )}
         </Box>
       )}

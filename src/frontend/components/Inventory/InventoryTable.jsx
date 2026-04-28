@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    Paper, Box, Typography, CircularProgress, TableContainer, Table,
+     Box, Typography, CircularProgress, TableContainer, Table,
     TableHead, TableRow, TableCell, TableBody, Checkbox, TextField,
     Chip, IconButton
 } from '@mui/material';
@@ -8,6 +8,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
+import { GlassCard } from '../../components';
 // Màu cho các loại Type
 const getTypeColor = (type) => {
     const typeColors = {
@@ -36,7 +37,7 @@ const InventoryTable = ({
     setEditingIndex
 }) => {
     return (
-        <Paper sx={{ flex: 1, p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+        <GlassCard tilt={false} sx={{ flex: 1, p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6" sx={{ color: '#FFD700', fontSize: { xs: '1.1rem', sm: '1.25rem' }, fontWeight: 600 }}>
                     Danh sách vật phẩm còn lại
@@ -316,7 +317,7 @@ const InventoryTable = ({
                     </TableBody>
                 </Table>
             </TableContainer>
-        </Paper>
+        </GlassCard>
     );
 };
 

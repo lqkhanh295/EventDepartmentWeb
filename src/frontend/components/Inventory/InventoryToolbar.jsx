@@ -1,6 +1,6 @@
 
 import {
-    Paper, Grid, TextField, FormControl, Select, MenuItem,
+    Grid, TextField, FormControl, Select, MenuItem,
     Box, Button, Typography, IconButton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -9,6 +9,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
+import { GlassCard } from '../../components';
 const InventoryToolbar = ({
     isAdmin,
     query,
@@ -28,7 +29,7 @@ const InventoryToolbar = ({
     remainingRows
 }) => {
     return (
-        <Paper sx={{ p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+        <GlassCard tilt={false} sx={{ p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={6} md={4}>
                     <TextField
@@ -213,7 +214,7 @@ const InventoryToolbar = ({
                     </Typography>
                 </Box>
             )}
-        </Paper>
+        </GlassCard>
     );
 };
 

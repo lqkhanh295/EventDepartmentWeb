@@ -10,7 +10,6 @@ import {
   Typography,
   Snackbar,
   Alert,
-  Paper,
   Chip,
   Button,
   Table,
@@ -21,6 +20,7 @@ import {
   TableRow,
   TablePagination
 } from '@mui/material';
+import { GlassCard } from '../components';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -322,7 +322,7 @@ const VendorsPage = () => {
           onAction={!searchTerm && selectedEvent === 'all' ? () => setFormOpen(true) : undefined}
         />
       ) : (
-        <Paper
+        <GlassCard
           sx={{
             background: '#1e1e1e',
             border: '1px solid rgba(255, 215, 0, 0.1)',
@@ -482,7 +482,7 @@ const VendorsPage = () => {
               }
             }}
           />
-        </Paper>
+        </GlassCard>
       )}
 
       {/* Vendor Form Dialog */}

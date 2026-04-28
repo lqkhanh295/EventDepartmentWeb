@@ -2,7 +2,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box,
-  Paper,
   Alert,
   Snackbar,
   Tabs,
@@ -23,6 +22,7 @@ import { listInventory, addInventoryItem, updateInventoryItem, deleteInventoryIt
 import { formatBorrowMessage, openFacebookMessenger } from '../../services/services/facebookMessengerService';
 import { listBorrowedItems, addBorrowedItem, returnBorrowedItem } from '../../services/services/borrowedItemsService';
 
+import { GlassCard } from '../components';
 // Expected CSV headers: Type,Item,Current Quantity,Total Quantity,Unit,Unit Price,P.I.C,Note
 // Minimal CSV parser (no quoted commas support). Recommend exporting simple CSV from sheet.
 function parseCSV(text) {
@@ -537,7 +537,7 @@ const InventoryPage = () => {
 
       {/* Tabs cho admin */}
       {isAdmin && (
-        <Paper sx={{ background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
+        <GlassCard tilt={false} sx={{ background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3 }}>
           <Tabs
             value={showBorrowedTab ? 1 : 0}
             onChange={(e, newValue) => setShowBorrowedTab(newValue === 1)}
@@ -567,7 +567,7 @@ const InventoryPage = () => {
               label={`Vật phẩm đã mượn (${borrowedItemsList.length})`}
             />
           </Tabs>
-        </Paper>
+        </GlassCard>
       )}
 
       {/* Nội dung chính */}

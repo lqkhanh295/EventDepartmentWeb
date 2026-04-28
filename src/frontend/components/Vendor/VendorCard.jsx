@@ -1,7 +1,6 @@
 // VendorCard Component
 import React from 'react';
 import {
-  Card,
   CardContent,
   Typography,
   Box,
@@ -16,6 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
 
+import { GlassCard } from '../../components';
 const VendorCard = ({ vendor, onEdit, onDelete }) => {
   const {
     name,
@@ -44,7 +44,7 @@ const VendorCard = ({ vendor, onEdit, onDelete }) => {
   };
 
   return (
-    <Card
+    <GlassCard tilt={false}
       sx={{
         height: '100%',
         display: 'flex',
@@ -262,7 +262,7 @@ const VendorCard = ({ vendor, onEdit, onDelete }) => {
           </IconButton>
         </Tooltip>
       </Box>
-    </Card>
+    </GlassCard>
   );
 };
 

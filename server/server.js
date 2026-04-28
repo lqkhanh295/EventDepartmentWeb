@@ -80,15 +80,7 @@ if (RESOLVED_COOKIES_FILE) {
     console.warn(`⚠️  yt-dlp cookies path not found: ${YT_DLP_COOKIES_PATH}`);
 }
 
-function appendYtDlpAuthArgs(args, isYouTube = false) {
-    if (isYouTube) {
-        // Essential for bypassing YouTube bot checks without cookies
-        // 1. Impersonate Chrome to pass TLS/HTTP fingerprint checks
-        args.push('--impersonate', 'chrome');
-        // 2. Force IPv4 to avoid datacenter IPv6 blanket bans
-        args.push('-4');
-    }
-
+function appendYtDlpAuthArgs(args) {
     const cookiesFile = resolveCookiesFile();
     if (cookiesFile) {
         args.push('--cookies', cookiesFile);
@@ -336,7 +328,10 @@ function normalizeVideoUrl(url) {
 
 function buildInfoArgs(url) {
     const args = ['--no-playlist', '--dump-single-json', '--no-download', '--no-warnings'];
-    appendYtDlpAuthArgs(args, isYouTubeUrl(url));
+    if (isYouTubeUrl(url)) {
+        args.push('--extractor-args', getDefaultYouTubePlayerClients());
+    }
+    appendYtDlpAuthArgs(args);
     args.push(url);
     return args;
 }
@@ -363,11 +358,18 @@ async function fetchYouTubeOEmbed(url) {
 }
 
 // ─── Invidious fallback (no auth needed) ─────────────────────────────────────
-// Updated 2026-03-20 — verified against https://api.invidious.io/instances.json
 const INVIDIOUS_INSTANCES = [
     'https://inv.nadeko.net',
-    'https://invidious.nerdvpn.de',
+    'https://invidious.privacyredirect.com',
     'https://yewtu.be',
+    'https://iv.ggtyler.dev',
+];
+
+const PIPED_INSTANCES = [
+    'https://pipedapi.kavin.rocks',
+    'https://pipedapi.adminforge.de',
+    'https://piped-api.garudalinux.org',
+    'https://pipedapi.in.projectsegfau.lt',
 ];
 
 async function fetchInfoFromInvidious(videoId) {
@@ -402,6 +404,40 @@ async function fetchInfoFromInvidious(videoId) {
 }
 
 async function getInvidiousStreamUrl(videoId, type, quality) {
+    // Try Piped API first (more reliable)
+    for (const instance of PIPED_INSTANCES) {
+        try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 10000);
+            const resp = await fetch(
+                `${instance}/streams/${encodeURIComponent(videoId)}`,
+                { signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0' } }
+            );
+            clearTimeout(timer);
+            if (!resp.ok) continue;
+            const data = await resp.json();
+            if (!data?.title) continue;
+            const title = data.title || '';
+            if (type === 'mp3') {
+                const audioStreams = (data.audioStreams || [])
+                    .filter(f => f.url)
+                    .sort((a, b) => (parseInt(b.bitrate) || 0) - (parseInt(a.bitrate) || 0));
+                if (audioStreams[0]?.url) return { url: audioStreams[0].url, title, ext: 'm4a', contentType: 'audio/mp4' };
+            } else {
+                const h = quality && quality !== 'best' ? parseInt(quality) : 9999;
+                const videoStreams = (data.videoStreams || [])
+                    .filter(f => f.url && !f.videoOnly)
+                    .map(f => ({ ...f, _h: parseInt(f.quality) || 0 }))
+                    .filter(f => f._h > 0)
+                    .sort((a, b) => b._h - a._h);
+                const best = videoStreams.find(f => f._h <= h) || videoStreams[videoStreams.length - 1];
+                if (best?.url) return { url: best.url, title, ext: 'mp4', contentType: 'video/mp4' };
+            }
+        } catch (e) {
+            console.warn(`[piped] ${instance}: ${e.message}`);
+        }
+    }
+    // Fall back to Invidious
     for (const instance of INVIDIOUS_INSTANCES) {
         try {
             const ctrl = new AbortController();
@@ -489,15 +525,15 @@ function buildRetryDownloadArgs({ tmpBase, type, quality, url, ffmpegDir, extrac
     } else {
         const h = quality && quality !== 'best' ? quality : null;
         if (h) {
-            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b/best`);
+            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b`);
         } else {
-            args.push('-f', 'bv*+ba/b/best');
+            args.push('-f', 'bv*+ba/b');
         }
         args.push('--merge-output-format', 'mp4');
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
     }
 
-    appendYtDlpAuthArgs(args, isYouTubeUrl(url));
+    appendYtDlpAuthArgs(args);
     args.push(url);
     return args;
 }
@@ -595,7 +631,10 @@ app.get('/api/video/download', async (req, res) => {
     // Resolve output filename: fetch title first, fallback to 'video'
     const resolveTitle = () => new Promise((resolve) => {
         const titleArgs = ['--no-playlist', '--print', 'title', '--no-warnings'];
-        appendYtDlpAuthArgs(titleArgs, isYouTubeUrl(url));
+        if (isYouTubeUrl(url)) {
+            titleArgs.push('--extractor-args', getDefaultYouTubePlayerClients());
+        }
+        appendYtDlpAuthArgs(titleArgs);
         titleArgs.push(url.trim());
         const child = spawn(YT_DLP, titleArgs, {
             env: { ...process.env, ...(FFMPEG_DIR ? { PATH: FFMPEG_DIR + path.delimiter + process.env.PATH } : {}) },
@@ -612,21 +651,24 @@ app.get('/api/video/download', async (req, res) => {
     const args = ['--no-playlist', '--no-warnings', '-o', `${tmpBase}.%(ext)s`];
     // Pass ffmpeg location so yt-dlp can merge video+audio even if not in PATH
     if (FFMPEG_DIR) args.push('--ffmpeg-location', FFMPEG_DIR);
+    if (isYouTubeUrl(url)) {
+        args.push('--extractor-args', getDefaultYouTubePlayerClients());
+    }
     if (type === 'mp3') {
         args.push('-x', '--audio-format', 'mp3', '--audio-quality', '0');
     } else {
         const h = quality && quality !== 'best' ? quality : null;
         if (h) {
-            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b/best`);
+            args.push('-f', `bv*[height<=${h}]+ba/b[height<=${h}]/bv*+ba/b`);
         } else {
-            args.push('-f', 'bv*+ba/b/best');
+            args.push('-f', 'bv*+ba/b');
         }
         args.push('--merge-output-format', 'mp4');
         // Re-encode audio to AAC so Windows Media Player / browsers can play it
         // (YouTube often delivers Opus audio in WebM which is not supported by Windows)
         args.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k');
     }
-    appendYtDlpAuthArgs(args, isYouTubeUrl(url));
+    appendYtDlpAuthArgs(args);
     args.push(url);
 
     if (!YT_DLP) {
@@ -639,7 +681,7 @@ app.get('/api/video/download', async (req, res) => {
     if (FFMPEG_DIR) {
         spawnEnv.PATH = FFMPEG_DIR + path.delimiter + (spawnEnv.PATH || '');
         console.log(`[download] ffmpeg dir: ${FFMPEG_DIR}`);
-    } else if (!ffmpegAvailable) {
+    } else {
         console.warn('[download] ffmpeg not found — merge will likely fail');
     }
     console.log(`[download] args: ${args.join(' ')}`);
@@ -659,6 +701,23 @@ app.get('/api/video/download', async (req, res) => {
         const shouldTryYoutubeFallback = isYouTubeUrl(url) && isRetriableYouTubeError(stderrText);
 
         if (shouldTryYoutubeFallback) {
+            for (const extractorArgs of getRetryYouTubePlayerClients()) {
+                const retryArgs = buildRetryDownloadArgs({
+                    tmpBase,
+                    type,
+                    quality,
+                    url,
+                    ffmpegDir: FFMPEG_DIR,
+                    extractorArgs,
+                });
+                console.log(`[download] retry args: ${retryArgs.join(' ')}`);
+                const retry = await runYtDlpDownloadOnce(YT_DLP, retryArgs, spawnEnv);
+                if (retry.code === 0) {
+                    stderrText = '';
+                    break;
+                }
+                stderrText = retry.stderrText || stderrText;
+            }
 
             if (stderrText && isBotCheckError(stderrText)) {
                 for (const browser of getCookieBrowserCandidates()) {

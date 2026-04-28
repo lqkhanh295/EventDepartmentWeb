@@ -1,9 +1,9 @@
 // Video Downloader - Tải video từ YouTube & Facebook
+import { GlassCard } from '../components';
 import React, { useState, useCallback } from 'react';
 import {
   Box,
   Typography,
-  Paper,
   Button,
   TextField,
   Alert,
@@ -191,7 +191,7 @@ const VideoDownloaderPage = () => {
       />
 
       {/* Single unified card */}
-      <Paper sx={{ background: '#161616', border: '1px solid #2a2a2a', borderRadius: 3, overflow: 'hidden' }}>
+      <GlassCard tilt={false} sx={{ background: '#161616', border: '1px solid #2a2a2a', borderRadius: 3, overflow: 'hidden' }}>
 
         {/* ── URL Input section ── */}
         <Box sx={{ p: 3, borderBottom: videoInfo ? '1px solid #2a2a2a' : 'none' }}>
@@ -367,7 +367,7 @@ const VideoDownloaderPage = () => {
                 }}
               >
                 {downloading
-                  ? (downloadProgress > 0 && downloadProgress < 100 ? `Hơi lâu xí hic.... ${downloadProgress}%` : 'Đang xử lý...')
+                  ? (downloadProgress > 0 && downloadProgress < 100 ? `Hơi lâu xí hic.... ${downloadProgress}%` : 'Đơi tí nhaaaaaaaa')
                   : `Tải xuống ${type.toUpperCase()}`}
               </Button>
               {downloading && (
@@ -388,7 +388,7 @@ const VideoDownloaderPage = () => {
             </Box>
           </>
         )}
-      </Paper>
+      </GlassCard>
     </Box>
   );
 };

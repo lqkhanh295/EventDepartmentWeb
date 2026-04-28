@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import {
     Box,
     Typography,
-    Paper,
     Badge,
     Button,
     Dialog,
@@ -16,6 +15,7 @@ import {
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import { FIXTURE_TYPES, CATEGORIES } from './fixtureConfig';
 
+import { GlassCard } from '../../components';
 // Simple SVG icon for each category
 const FixtureIcon = ({ type, color, size = 28 }) => {
     const config = FIXTURE_TYPES[type];
@@ -115,7 +115,7 @@ const FixturePalette = ({ fixtures, onClearAll }) => {
                             const count = getCount(item.key);
                             return (
                                 <Tooltip key={item.key} title={`${item.name} — ${item.dmxChannels} DMX channels`} placement="right" arrow>
-                                    <Paper
+                                    <GlassCard tilt={false}
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, item.key)}
                                         sx={{
@@ -168,7 +168,7 @@ const FixturePalette = ({ fixtures, onClearAll }) => {
                                                 }}
                                             />
                                         )}
-                                    </Paper>
+                                    </GlassCard>
                                 </Tooltip>
                             );
                         })}

@@ -1,17 +1,18 @@
 import React from 'react';
 import {
-    Box, Paper, Typography, CircularProgress, TableContainer,
+    Box, Typography, CircularProgress, TableContainer,
     Table, TableHead, TableRow, TableCell, TableBody, Chip, Button
 } from '@mui/material';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
 
+import { GlassCard } from '../../components';
 const BorrowedItemsTable = ({
     borrowedItemsList,
     borrowedItemsLoading,
     handleReturnItem
 }) => {
     return (
-        <Paper sx={{ flex: 1, p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+        <GlassCard tilt={false} sx={{ flex: 1, p: { xs: 2, sm: 3 }, background: '#1e1e1e', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6" sx={{ color: '#FFD700', fontSize: { xs: '1.1rem', sm: '1.25rem' }, fontWeight: 600 }}>
                     Danh sách vật phẩm đã mượn
@@ -116,7 +117,7 @@ const BorrowedItemsTable = ({
                     </TableBody>
                 </Table>
             </TableContainer>
-        </Paper>
+        </GlassCard>
     );
 };
 

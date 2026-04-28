@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    Card,
     CardHeader,
     CardContent,
     Table,
@@ -12,11 +11,12 @@ import {
     Box
 } from '@mui/material';
 
+import { GlassCard } from '../../components';
 const PreviewTable = ({ previewData, columns }) => {
     if (previewData.length === 0) return null;
 
     return (
-        <Card
+        <GlassCard tilt={false}
             sx={{
                 background: '#1e1e1e',
                 border: '1px solid #333',
@@ -85,7 +85,7 @@ const PreviewTable = ({ previewData, columns }) => {
                     </Table>
                 </TableContainer>
             </CardContent>
-        </Card>
+        </GlassCard>
     );
 };
 

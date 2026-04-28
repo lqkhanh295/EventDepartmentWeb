@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Paper,
   CircularProgress
 } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -15,6 +14,7 @@ import ThunderstormIcon from '@mui/icons-material/Thunderstorm';
 import BlurOnIcon from '@mui/icons-material/BlurOn';
 import { GetCurrentDate } from '../../../services/services/guideService';
 
+import { GlassCard } from '../../components';
 // Map 7Timer weather type to icon
 const getWeatherIcon = (weatherType) => {
   const weather = weatherType?.toLowerCase() || '';
@@ -187,7 +187,7 @@ const WeatherWidget = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
       >
-        <Paper sx={{
+        <GlassCard tilt={false} sx={{
           p: 3,
           background: '#1a1a1a',
           border: '1px solid #333333',
@@ -197,7 +197,7 @@ const WeatherWidget = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
             <CircularProgress size={24} sx={{ color: '#FFD700' }} />
           </Box>
-        </Paper>
+        </GlassCard>
       </motion.div>
     );
   }
@@ -210,7 +210,7 @@ const WeatherWidget = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
     >
-      <Paper sx={{
+      <GlassCard tilt={false} sx={{
         p: 3,
         background: '#1a1a1a',
         border: '1px solid #333333',
@@ -371,7 +371,7 @@ const WeatherWidget = () => {
             );
           })}
         </Box>
-      </Paper>
+      </GlassCard>
     </motion.div>
   );
 };

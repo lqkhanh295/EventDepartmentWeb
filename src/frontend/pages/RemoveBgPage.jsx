@@ -3,13 +3,11 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Paper,
   Button,
   TextField,
   Alert,
   CircularProgress,
   Stack,
-  Card,
   CardContent,
   Divider
 } from '@mui/material';
@@ -23,6 +21,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { removeBackground, downloadImage, blobToUrl } from '../../services/services/removeBgService';
 import { getRemoveBgApiKey, setRemoveBgApiKey } from '../../services/services/configService';
 
+import { GlassCard } from '../components';
 const RemoveBgPage = () => {
   const { isAdmin } = useAuth();
   const [apiKey, setApiKey] = useState('');
@@ -190,7 +189,7 @@ const RemoveBgPage = () => {
       <Stack spacing={3} sx={{ mt: 3 }}>
         {/* API Key Input - Chỉ hiển thị cho admin */}
         {isAdmin && (
-          <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
+          <GlassCard tilt={false} sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(255, 215, 0, 0.2)', borderRadius: 10 }}>
             <Typography variant="h6" sx={{ color: '#FFD700', mb: 2, fontWeight: 600 }}>
               Cấu hình API Key (Chỉ Admin)
             </Typography>
@@ -254,7 +253,7 @@ const RemoveBgPage = () => {
                 )}
               </Stack>
             )}
-          </Paper>
+          </GlassCard>
         )}
 
         {/* Thông báo nếu chưa có API key */}
@@ -267,7 +266,7 @@ const RemoveBgPage = () => {
         )}
 
         {/* Upload Section */}
-        <Paper sx={{ p: 3, background: '#1a1a1a', border: '1px solid #333333', borderRadius: 10 }}>
+        <GlassCard tilt={false} sx={{ p: 3, background: '#1a1a1a', border: '1px solid #333333', borderRadius: 10 }}>
           <Typography variant="h6" sx={{ color: '#FFFFFF', mb: 2, fontWeight: 600 }}>
             Upload Ảnh
           </Typography>
@@ -306,7 +305,7 @@ const RemoveBgPage = () => {
           ) : (
             <Box>
               <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <Card sx={{ flex: 1, background: '#121212', border: '1px solid #333333' }}>
+                <GlassCard tilt={false} sx={{ flex: 1, background: '#121212', border: '1px solid #333333' }}>
                   <CardContent>
                     <Typography variant="subtitle2" sx={{ color: '#FFD700', mb: 1 }}>
                       Ảnh gốc
@@ -326,12 +325,12 @@ const RemoveBgPage = () => {
                       {selectedFile?.name} ({(selectedFile?.size / 1024 / 1024).toFixed(2)} MB)
                     </Typography>
                   </CardContent>
-                </Card>
+                </GlassCard>
 
                 {resultUrl && (
                   <>
                     <Divider orientation="vertical" flexItem sx={{ borderColor: '#333333' }} />
-                    <Card sx={{ flex: 1, background: '#121212', border: '1px solid #333333' }}>
+                    <GlassCard tilt={false} sx={{ flex: 1, background: '#121212', border: '1px solid #333333' }}>
                       <CardContent>
                         <Typography variant="subtitle2" sx={{ color: '#4ECDC4', mb: 1 }}>
                           Ảnh đã xóa background
@@ -349,7 +348,7 @@ const RemoveBgPage = () => {
                           }}
                         />
                       </CardContent>
-                    </Card>
+                    </GlassCard>
                   </>
                 )}
               </Box>
@@ -404,7 +403,7 @@ const RemoveBgPage = () => {
               </Stack>
             </Box>
           )}
-        </Paper>
+        </GlassCard>
 
         {/* Messages */}
         {error && (
@@ -420,7 +419,7 @@ const RemoveBgPage = () => {
         )}
 
         {/* Info Card */}
-        <Paper sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(12, 12, 12, 0.2)', borderRadius: 10 }}>
+        <GlassCard tilt={false} sx={{ p: 3, background: '#1a1a0a', border: '1px solid rgba(12, 12, 12, 0.2)', borderRadius: 10 }}>
           <Typography variant="h6" sx={{ color: '#FFD700', mb: 1, fontWeight: 600 }}>
             Hướng dẫn
           </Typography>
@@ -451,7 +450,7 @@ const RemoveBgPage = () => {
               </>
             )}
           </Typography>
-        </Paper>
+        </GlassCard>
       </Stack>
     </Box>
   );
