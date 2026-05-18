@@ -163,7 +163,7 @@ const Dashboard = () => {
       </Grid>
 
       {/* Weather Widget */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4, borderRadius: 50 }}>
         <WeatherWidget />
       </Box>
 

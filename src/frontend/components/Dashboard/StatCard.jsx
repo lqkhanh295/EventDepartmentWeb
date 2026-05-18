@@ -24,7 +24,7 @@ const StatCard = ({ title, value, onClick, index = 0 }) => {
       }}
       style={{ height: '100%' }}
     >
-      <animated.div style={springProps} style={{ height: '100%' }}>
+      <animated.div style={{ ...springProps, height: '100%' }}>
         <Card
           onClick={onClick}
           onMouseEnter={() => setHovered(true)}
