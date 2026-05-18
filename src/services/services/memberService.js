@@ -202,18 +202,3 @@ export const getMemberById = async (memberId) => {
   }
 };
 
-
-export const getMemberByName = async (name) => {
-  try {
-    const memberRef = collection(db, MEMBERS_COLLECTION);
-    const q = query(memberRef, where("name", "==", name));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-  } catch (error) {
-    console.error('Error getting member by name:', error);
-    throw error;
-  }
-}
